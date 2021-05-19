@@ -329,7 +329,7 @@ class QueryBuilder implements QueryBuilderInterface
      * @param int|null offset
      * @return QueryResultInterface|object|array of objects
      */
-    public function query(int $limit = null, int $offset = null)
+    public function query(int $limit = null, int $offset = null): object
     {
         if ($limit > 0) $this->limit($limit);
         if ($offset > 0) $this->offset($offset);
