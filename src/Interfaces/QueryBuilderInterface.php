@@ -162,7 +162,7 @@ interface QueryBuilderInterface
      * Получение одной записи.
      * @return QueryResultInterface
      */
-    public function one(): QueryResultInterface;
+    public function one(): object;
 
     /**
      * Получение записей.
@@ -170,5 +170,5 @@ interface QueryBuilderInterface
      * @param int|null offset
      * @return QueryResultInterface
      */
-    public function query(int $limit = null, int $offset = null): QueryResultInterface;
+    public function query(int $limit = null, int $offset = null): object;
 }
