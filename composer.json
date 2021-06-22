@@ -1,7 +1,7 @@
 {
     "name": "evas-php/evas-db",
-    "description": "Database module (Connection, Schemas, Builders, Result fetching) ",
-    "keywords": ["db", "database", "connection", "schema", "builders", "queries" "evas-php"],
+    "description": "Database module (Connection, Schemas, Builders, Result fetching)",
+    "keywords": ["db", "database", "connection", "schema", "builders", "queries", "evas-php"],
     "version": "1.0",
     "type": "library",
     "license": "CC-BY-4.0",
