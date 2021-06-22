@@ -6,7 +6,7 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Base\PhpHelper;
+use Evas\Base\Help\PhpHelp;
 use Evas\Db\Base\QueryResult;
 use Evas\Db\Builders\QueryValuesTrait;
 use Evas\Db\Exceptions\InsertBuilderException;
@@ -57,7 +57,7 @@ class InsertBuilder
     {
         assert(is_array($row) || is_object($row));
         if (is_object($row)) $row = get_object_vars($row);
-        if (PhpHelper::isAssoc($row)) {
+        if (PhpHelp::isAssoc($row)) {
             if (empty($this->keys)) $this->keys(array_keys($row));
             foreach ($this->keys as &$key) {
                 $this->bindValue($row[$key] ?? null);
