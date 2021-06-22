@@ -92,7 +92,7 @@ class TableSchema
      * Получение имени таблицы вместе с именем базы.
      * @return string
      */
-    public function getFullName(): string
+    public function fullName(): string
     {
         return "`$this->db->dbname`.`$this->name`";
     }
@@ -110,7 +110,7 @@ class TableSchema
             $this->primaryKey = $row['Column_name'];
         }
         if (empty($this->primaryKey)) {
-            $table = $this->getFullName();
+            $table = $this->fullName();
             throw new TableSchemaException("Primary key does not exist in table `$table`");
             
         }
@@ -152,7 +152,7 @@ class TableSchema
             $this->columnSchemas(true);
         }
         if (empty($this->columnSchemas[$column])) {
-            $table = $this->getFullName();
+            $table = $this->fullName();
             throw new TableSchemaException("Not found column `$column` in table $table");
         }
         return $this->columnSchemas[$column];
