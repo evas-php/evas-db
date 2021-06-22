@@ -41,10 +41,10 @@ trait DatabaseBuildersTrait
      * @param array|null столбцы записи
      * @return QueryResultInterface
      */
-    public function batchInsert(string $tbl, array $rows, array $columns): QueryResultInterface
+    public function batchInsert(string $tbl, array $columns, array $rows = null): QueryResultInterface
     {
         $ib = $this->insert($tbl);
-        if (!empty($columns)) $ib->keys($columns);
+        if (!empty($rows)) $ib->keys($columns);
         return $ib->rows($rows)->query();
     }
 
