@@ -134,14 +134,14 @@ class SchemaCache
         $path = $this->getFilepath();
         if (!is_file($path)) {
             if (defined('EVAS_DEBUG') && true == EVAS_DEBUG) {
-                echo "Database schema cache for ($this->dbInfo) has already been deleted"
+                echo "Database schema cache for ($this->dbInfo) has already been cleaned"
                     . ('cli' == PHP_SAPI ? "\n" : '<br>');
             }
             return;
         }
         unlink($path);
         if (defined('EVAS_DEBUG') && true == EVAS_DEBUG) {
-            echo "Deleted database schema cache for ($this->dbInfo)"
+            echo "Clean database schema cache for ($this->dbInfo)"
                 . ('cli' == PHP_SAPI ? "\n" : '<br>');
         }
     }
