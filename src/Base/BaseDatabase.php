@@ -42,7 +42,11 @@ if (!defined('EVAS_DB_QUERY_RESULT_CLASS')) {
 class BaseDatabase implements DatabaseInterface
 {
     /** @static array доступные функции экранирования объектов */
-    const QUOTE_OBJECTS_FUNCS = ['\'NULL\'; intval', '\serialize', '\json_encode'];
+    const QUOTE_OBJECTS_FUNCS = [
+        'null' => '\'NULL\'; intval', 
+        'json' => '\json_encode',
+        'serialize' => '\serialize', 
+    ];
 
     /** @var string драйвер */
     public $driver = EVAS_DB_DRIVER;
@@ -74,7 +78,7 @@ class BaseDatabase implements DatabaseInterface
     protected $lastStmt;
 
     /** @var string имя функции для экранирования объектов и массивов */
-    protected $quoteObjectsFunc = self::QUOTE_OBJECTS_FUNCS[0];
+    protected $quoteObjectsFunc = self::QUOTE_OBJECTS_FUNCS['null'];
 
 
     /**
@@ -159,7 +163,7 @@ class BaseDatabase implements DatabaseInterface
      */
     public function inTransaction(): bool
     {
-        return $this->getPdo()->inTransaction() ? true : false;
+        return $this->getPdo()->inTransaction();
     }
 
     /**
@@ -328,13 +332,35 @@ class BaseDatabase implements DatabaseInterface
     }
 
     /**
+     * Выполнение нескольких запросов.
+     * @param string sql-запросы разделённые ;
+     * @param array|null экранируемые параметры запроса
+     * @return array of QueryResultInterface
+     * @throws DatabaseQueryException
+     */
+    public function batchQuery(string $batchSql, array $props = null): array
+    {
+        $sqls = explode(';', trim($batchSql));
+        if (empty($sqls[count($sqls) - 1])) array_pop($sqls);
+        $result = [];
+        $this->beginTransaction();
+        foreach ($sqls as &$sql) {
+            $result[] = $this->query($sql, $props);
+        }
+        $this->commit();
+        return $result;
+    }
+
+
+    /**
      * Установка функции экранирования объектов и массивов.
      * @param string строковая команда
      */
-    public function setQuoteObjectsFunc(string $command)
+    public function setQuoteObjectsFunc(string $type = 'null')
     {
-        if (!in_array($command, self::QUOTE_OBJECTS_FUNCS)) {
-            $command = self::QUOTE_OBJECTS_FUNCS[0];
+        $command = self::QUOTE_OBJECTS_FUNCS[$type] ?? null;
+        if (!$command) {
+            $command = self::QUOTE_OBJECTS_FUNCS['null'];
         }
         $this->quoteObjectsFunc = $command;
         return $this;
