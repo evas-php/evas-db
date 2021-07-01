@@ -105,9 +105,8 @@ class QueryBuilder implements QueryBuilderInterface
         } else {
             $upd = $row;
         }
-        $this->values = array_merge($this->values, $vals);
         $this->tbl = trim($tbl, '`');
-        return $this->from("UPDATE `$this->tbl` SET $upd");
+        return $this->from("UPDATE `$this->tbl` SET $upd", $vals);
     }
 
 
