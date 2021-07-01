@@ -44,7 +44,7 @@ trait QueryValuesTrait
      * Получение значений.
      * @return array
      */
-    public function values(): array
+    public function getValues(): array
     {
         return $this->values;
     }
