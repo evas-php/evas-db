@@ -8,6 +8,7 @@ namespace Evas\Db\Base;
 
 use \PDO;
 use \PDOStatement;
+use Evas\Db\Exceptions\DbException;
 use Evas\Db\Interfaces\DatabaseInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
 
@@ -67,6 +68,40 @@ class QueryResult implements QueryResultInterface
         return $this->stmt->rowCount();
     }
 
+    /**
+     * Обертка метода fetch.
+     * @return mixed|null данные записи
+     * @throws DbException
+     */
+    protected function fetch(int $mode = null)
+    {
+        if ($this->rowCount() > 0) {
+            $result = $this->stmt->fetch($mode);
+            if (false === $result) {
+                if (strpos($this->stmt->queryString, 'INSERT') !== false) 
+                    throw new DbException("Insert query returns no rows");
+                else 
+                    throw new DbException('Failed to get data from previous sql query due to buffer overwriting');
+            }
+        }
+        return $result ?? null;
+    }
+
+    /**
+     * Обертка метода fetchAll.
+     * @return array массив данных записей
+     */
+    protected function fetchAll(int $mode = null): array
+    {
+        if ($this->rowCount() > 0) {
+            $result = $this->stmt->fetchAll($mode);
+            if (empty($result)) {
+                throw new DbException('Failed to get data from previous sql query due to buffer overwriting');
+            }
+        }
+        return $result ?? [];
+    }
+
 
     // Получение записи/записей в разном виде.
 
@@ -76,7 +111,7 @@ class QueryResult implements QueryResultInterface
      */
     public function numericArray(): ?array
     {
-        $row = $this->rowCount() > 0 ? $this->stmt->fetch(PDO::FETCH_NUM) : null;
+        return $this->fetch(PDO::FETCH_NUM);
     }
 
     /**
@@ -85,7 +120,7 @@ class QueryResult implements QueryResultInterface
      */
     public function numericArrayAll(): array
     {
-        return $this->rowCount() > 0 ? $this->stmt->fetchAll(PDO::FETCH_NUM) : [];
+        return $this->fetchAll(PDO::FETCH_NUM);
     }
 
     /**
@@ -94,7 +129,7 @@ class QueryResult implements QueryResultInterface
      */
     public function assocArray(): ?array
     {
-        return $this->rowCount() > 0 ? $this->stmt->fetch(PDO::FETCH_ASSOC) : null;
+        return $this->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -103,7 +138,7 @@ class QueryResult implements QueryResultInterface
      */
     public function assocArrayAll(): array
     {
-        return $this->rowCount() > 0 ? $this->stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        return $this->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -112,7 +147,7 @@ class QueryResult implements QueryResultInterface
      */
     public function anonymObject(): ?object
     {
-        $row = $this->rowCount() > 0 ? $this->stmt->fetch(PDO::FETCH_OBJ) : null;
+        $row = $this->fetch(PDO::FETCH_OBJ);
         return $this->objectHook($row);
     }
 
@@ -122,7 +157,7 @@ class QueryResult implements QueryResultInterface
      */
     public function anonymObjectAll(): array
     {
-        $rows = $this->rowCount() > 0 ? $this->stmt->fetchAll(PDO::FETCH_OBJ) : [];
+        $rows = $this->fetchAll(PDO::FETCH_OBJ);
         return $this->objectsHook($rows);
     }
 
@@ -135,7 +170,7 @@ class QueryResult implements QueryResultInterface
     {
         if (0 === $this->rowCount()) return null;
         $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
-        $row = $this->stmt->fetch();
+        $row = $this->fetch();
         return $this->objectHook($row);
     }
 
@@ -148,7 +183,7 @@ class QueryResult implements QueryResultInterface
     {
         if (0 === $this->rowCount()) return [];
         $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
-        $rows = $this->stmt->fetchAll();
+        $rows = $this->fetchAll();
         return $this->objectsHook($rows);
     }
 
@@ -161,7 +196,7 @@ class QueryResult implements QueryResultInterface
     {
         if (0 === $this->rowCount()) return $object;
         $this->stmt->setFetchMode(PDO::FETCH_INTO, $object);
-        $this->stmt->fetch();
+        $this->fetch();
         return $this->objectHook($object);
     }
 
@@ -236,8 +271,7 @@ class QueryResult implements QueryResultInterface
     public function identityMapUpdate(object &$object)
     {
         if ($this->canIdentityMapUpdate()) {
-            $table = $this->tableName();
-            $primaryKey = $this->db->table($table)->primaryKey();
+            $primaryKey = $this->db->table($this->tableName())->primaryKey();
             $object = $this->db->identityMapUpdate($object, $primaryKey);
         }
     }
