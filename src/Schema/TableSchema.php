@@ -62,6 +62,15 @@ class TableSchema
     }
 
     /**
+     * Получение первичного ключа из кэша, если включен.
+     * @return string|null
+     */
+    public function primaryKeyFromCache(): ?string
+    {
+        return $this->schemaFromCache()['primaryKey'];
+    }
+
+    /**
      * Получение схем столбцов из кэша, если включен.
      * @return array|null
      */
@@ -106,6 +115,9 @@ class TableSchema
     public function primaryKey(bool $reload = false): string
     {
         if (empty($this->primaryKey) || true === $reload) {
+            if (false === $reload) {
+                $this->primaryKey = $this->primaryKeyFromCache();
+            }
             $row = $this->db->query("SHOW KEYS FROM `$this->name` WHERE Key_name = 'PRIMARY'")->assocArray();
             $this->primaryKey = $row['Column_name'];
         }
