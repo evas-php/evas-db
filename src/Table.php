@@ -67,14 +67,24 @@ class Table extends TableSchema
 
     /**
      * Получение id последней вставленной записи.
-     * @return int|null
+     * @return int
      */
-    public function lastInsertId(): ?int
+    public function lastInsertId(): int
     {
         $lastInsertId = $this->db->lastInsertId($this->name);
-        if (intval($lastInsertId) > intval($this->lastInsertId)) {
+        if ($lastInsertId > intval($this->lastInsertId)) {
             $this->lastInsertId = $lastInsertId;
         }
         return $this->lastInsertId;
+    }
+
+    /**
+     * Получение максимального id записи.
+     * @return int
+     */
+    public function maxId(): int
+    {
+        $primaryKey = $this->primaryKey();
+        return intval($this->db->query("SELECT MAX(`$primaryKey`) FROM `$this->name`")->numericArray()[0]);
     }
 }
