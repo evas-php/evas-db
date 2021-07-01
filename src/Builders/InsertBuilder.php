@@ -108,6 +108,6 @@ class InsertBuilder
      */
     public function query(): QueryResult
     {
-        return $this->db->query($this->getSql(), $this->values());
+        return $this->db->query($this->getSql(), $this->getValues());
     }
 }
