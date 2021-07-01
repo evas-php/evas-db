@@ -395,10 +395,10 @@ class BaseDatabase implements DatabaseInterface
     /**
      * Получение id последней вставленной записи.
      * @param string|null имя таблицы
-     * @return int|null
+     * @return int
      */
-    public function lastInsertId(string $tbl = null): ?int
+    public function lastInsertId(string $tbl = null): int
     {
-        return $this->getPdo()->lastInsertId($tbl);
+        return intval($this->getPdo()->lastInsertId($tbl));
     }
 }
