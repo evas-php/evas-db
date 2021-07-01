@@ -8,7 +8,8 @@ namespace Evas\Db\Builders;
 
 use Evas\Db\Builders\QueryBuilder;
 use Evas\Db\Builders\QueryValuesTrait;
-use Evas\Db\Interfaces\JoinBuilderInterface
+use Evas\Db\Interfaces\JoinBuilderInterface;
+use Evas\Db\Interfaces\QueryBuilderInterface;
 
 class JoinBuilder implements JoinBuilderInterface
 {
@@ -35,11 +36,11 @@ class JoinBuilder implements JoinBuilderInterface
 
     /**
      * Конструктор.
-     * @param QueryBuilder
+     * @param QueryBuilderInterface
      * @param string|null тип склейки INNER | LEFT | RIGHT | OUTER
      * @param string|null таблица склейки
      */
-    public function __construct(QueryBuilder $queryBuilder, string $type = null, string $tbl = null)
+    public function __construct(QueryBuilderInterface $queryBuilder, string $type = null, string $tbl = null)
     {
         $this->queryBuilder = $queryBuilder;
         $this->type = $type;
@@ -52,7 +53,7 @@ class JoinBuilder implements JoinBuilderInterface
      * @param array|null значения для экранирования\
      * @return self
      */
-    public function from(string $from, array $values = []): JoinBuilder
+    public function from(string $from, array $values = []): JoinBuilderInterface
     {
         $this->from = $from;
         return $this->bindValues($values);
@@ -63,7 +64,7 @@ class JoinBuilder implements JoinBuilderInterface
      * @param string псевдоним
      * @return self
      */
-    public function as(string $as): JoinBuilder
+    public function as(string $as): JoinBuilderInterface
     {
         $this->as = $as;
         return $this;
@@ -75,7 +76,7 @@ class JoinBuilder implements JoinBuilderInterface
      * @param string значения для экранирования
      * @return QueryBuilder
      */
-    public function on(string $on, array $values = []): QueryBuilder
+    public function on(string $on, array $values = []): QueryBuilderInterface
     {
         $this->on = $on;
         return $this->bindValues($values)->endJoin();
@@ -86,7 +87,7 @@ class JoinBuilder implements JoinBuilderInterface
      * @param string столбец
      * @return QueryBuilder
      */
-    public function using(string $column): QueryBuilder
+    public function using(string $column): QueryBuilderInterface
     {
         $this->using = $column;
         return $this->endJoin();
@@ -117,8 +118,8 @@ class JoinBuilder implements JoinBuilderInterface
      * Сборка join-части запроса и его установка в сборщик запроса.
      * @return QueryBuilder
      */
-    public function endJoin(): QueryBuilder
+    public function endJoin(): QueryBuilderInterface
     {
-        return $this->queryBuilder->setJoin($this->getSql(), $this->values());
+        return $this->queryBuilder->setJoin($this->getSql(), $this->getValues());
     }
 }
