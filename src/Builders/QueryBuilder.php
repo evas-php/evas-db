@@ -332,7 +332,7 @@ class QueryBuilder implements QueryBuilderInterface
     {
         if ($limit > 0) $this->limit($limit);
         if ($offset > 0) $this->offset($offset);
-        $result = $this->db->query($this->getSql(), $this->values());
+        $result = $this->db->query($this->getSql(), $this->getValues());
 
         // пытаемся достать класс модели
         if ($this->model) {
