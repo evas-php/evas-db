@@ -62,4 +62,14 @@ trait DatabaseTableTrait
         }
         return $this->tablesList;
     }
+
+    /**
+     * Получение максимального id записи.
+     * @param string имя таблицы
+     * @return int
+     */
+    public function maxId(string $table): int
+    {
+        return $this->table($table)->maxId();
+    }
 }
