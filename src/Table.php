@@ -12,9 +12,6 @@ use Evas\Db\Interfaces\QueryResultInterface;
 
 class Table extends TableSchema
 {
-    /** @var int|null id последней вставленной записи */
-    protected $lastInsertId;
-
     /**
      * Начало сборки INSERT-запроса.
      * @param array|object|null значения записи для сохранения с автосборкой
@@ -71,11 +68,7 @@ class Table extends TableSchema
      */
     public function lastInsertId(): int
     {
-        $lastInsertId = $this->db->lastInsertId($this->name);
-        if ($lastInsertId > intval($this->lastInsertId)) {
-            $this->lastInsertId = $lastInsertId;
-        }
-        return $this->lastInsertId;
+        return $this->db->lastInsertId($this->name);
     }
 
     /**
