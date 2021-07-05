@@ -53,4 +53,12 @@ class ColumnSchema
     {
         return !empty($this->key) ? true : false;
     }
+
+    /**
+     * Приведение к строке.
+     */
+    public function __toString()
+    {
+        return json_encode($this);
+    }
 }
