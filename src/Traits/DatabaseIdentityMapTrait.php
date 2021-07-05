@@ -13,6 +13,38 @@ trait DatabaseIdentityMapTrait
     /** @var IdentityMap */
     protected $identityMap;
 
+    /** @var bool строго проверять значение первичного ключа */
+    protected $strictPrimary = true;
+
+    /**
+     * Установка строгой проверки значения первичного ключа.
+     * @return self
+     */
+    public function strictPrimary()
+    {
+        $this->strictPrimary = true;
+        return $this;
+    }
+
+    /**
+     * Установка не строгой проверки значения первичного ключа.
+     * @return self
+     */
+    public function notStrictPrimary()
+    {
+        $this->strictPrimary = false;
+        return $this;
+    }
+
+    /**
+     * Проверка строгости проверки значения первичного ключа.
+     * @return bool
+     */
+    public function isStrictPrimary(): bool
+    {
+        return $this->strictPrimary;
+    }
+
     /**
      * Получение маппинга идентичности сущностей.
      * @return IdentityMap
