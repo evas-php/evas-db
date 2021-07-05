@@ -27,9 +27,6 @@ class TableSchema
     /** @var array массив столбцов таблицы */
     protected $columns;
 
-    /** @var bool все ли схемы были столбцов получены */
-    protected $allColumnSchemasFetched = false;
-
     /** @var array внешние ключи таблицы */
     protected $foreignKeys;
 
@@ -132,21 +129,21 @@ class TableSchema
     /**
      * Получение схемы столбцов.
      * @param bool|null сделать ли перезапрос схемы
-     * @return ColumnSchema[]
+     * @return array[]
      */
     public function columnSchemas(bool $reload = false): array
     {
-        if (null === $this->columnSchemas || true === $reload) {
+        if (empty($this->columnSchemas) || true === $reload) {
             if (false === $reload) {
                 $this->columnSchemas = $this->columnSchemasFromCache();
             }
-            if (null === $this->columnSchemas) {
-                $rows = $this->db->query("SHOW COLUMNS FROM `{$this->db->dbname}`.`$this->name`")->assocArrayAll();
+            if (empty($this->columnSchemas)) {
+                $from = $this->fullName();
+                $rows = $this->db->query("SHOW COLUMNS FROM $from")->assocArrayAll();
                 $this->columnSchemas = [];
                 if ($rows) foreach ($rows as &$row) {
-                    $this->columnSchemas[$row['Field']] = new ColumnSchema($row);
+                    $this->columnSchemas[$row['Field']] = (array) new ColumnSchema($row);
                 }
-                $this->allColumnSchemasFetched = true;
             }
         }
         return $this->columnSchemas;
@@ -155,19 +152,20 @@ class TableSchema
     /**
      * Получение схемы колонки.
      * @param string имя колонки
+     * @param bool|null сделать ли перезапрос схемы
      * @return ColumnSchema
      * @throws TableSchemaException
      */
-    public function columnSchema(string $column): ColumnSchema
+    public function columnSchema(string $column, bool $reload = false): ColumnSchema
     {
-        if (empty($this->columnSchemas[$column])) {
-            $this->columnSchemas(true);
+        if (empty($this->columnSchemas[$column]) || true === $reload) {
+            $this->columnSchemas($reload);
         }
         if (empty($this->columnSchemas[$column])) {
             $table = $this->fullName();
             throw new TableSchemaException("Not found column `$column` in table $table");
         }
-        return $this->columnSchemas[$column];
+        return new ColumnSchema($this->columnSchemas[$column]);
     }
 
     /**
@@ -177,16 +175,8 @@ class TableSchema
      */
     public function columns(bool $reload = false): array
     {
-        if (null === $this->columns || true === $reload) {
-            if (true === $this->allColumnSchemasFetched) {
-                $this->columns = array_keys($this->columnSchemas);
-            } else {
-                $rows = $this->db->query("SHOW COLUMNS FROM `{$this->db->dbname}`.`$this->name`")->assocArrayAll();
-                $this->columns = [];
-                if ($rows) foreach ($rows as &$row) {
-                    $this->columns[] = $row['Field'];
-                }
-            }
+        if (empty($this->columns) || true === $reload) {
+            $this->columns = array_keys($this->columnSchemas($reload));
         }
         return $this->columns;
     }
@@ -198,11 +188,11 @@ class TableSchema
      */
     public function foreignKeys(bool $reload = false): array
     {
-        if (null === $this->foreignKeys || true === $reload) {
+        if (empty($this->foreignKeys) || true === $reload) {
             if (false === $reload) {
                 $this->foreignKeys = $this->foreignKeysFromCache();
             }
-            if (null === $this->foreignKeys) {
+            if (empty($this->foreignKeys)) {
                 $sql = 'SELECT * FROM information_schema.KEY_COLUMN_USAGE 
                     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? 
                     AND CONSTRAINT_NAME <>"PRIMARY" 
