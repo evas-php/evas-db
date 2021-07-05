@@ -10,6 +10,7 @@ use \PDO;
 use \PDOStatement;
 use Evas\Db\Exceptions\DbException;
 use Evas\Db\Interfaces\DatabaseInterface;
+use Evas\Db\Exceptions\IdentityMapException;
 use Evas\Db\Interfaces\QueryResultInterface;
 
 class QueryResult implements QueryResultInterface
@@ -272,7 +273,12 @@ class QueryResult implements QueryResultInterface
     {
         if ($this->canIdentityMapUpdate()) {
             $primaryKey = $this->db->table($this->tableName())->primaryKey();
-            $object = $this->db->identityMapUpdate($object, $primaryKey);
+            try {
+                $object = $this->db->identityMapUpdate($object, $primaryKey);
+            } catch (IdentityMapException $e) {
+                if ($this->db->isStrictPrimary()) throw $e;
+                else return;
+            }
         }
     }
 }
