@@ -39,7 +39,6 @@ class IdentityMap
         $primary = $object->$primaryKey ?? null;
         if (empty($primary)) {
             throw new IdentityMapException('IdentityMap not found entity primary value');
-            
         }
         return [get_class($object), $primary];
     }
