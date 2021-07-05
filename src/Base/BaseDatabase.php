@@ -172,7 +172,7 @@ class BaseDatabase implements DatabaseInterface
      */
     public function beginTransaction(): DatabaseInterface
     {
-        if (false === $this->inTransaction()) $this->getPdo()->beginTransaction();
+        $this->rollBack()->getPdo()->beginTransaction();
         return $this;
     }
 
