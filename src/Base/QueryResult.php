@@ -71,18 +71,25 @@ class QueryResult implements QueryResultInterface
 
     /**
      * Обертка метода fetch.
+     * @param int|null модификатор
+     * @param mixed|null уточнение модификатора
      * @return mixed|null данные записи
      * @throws DbException
      */
-    protected function fetch(int $mode = null)
+    protected function fetch(int $mode = null, $modeMore = null)
     {
         if ($this->rowCount() > 0) {
+            if (!empty($modeMore) && !empty($mode)) {
+                $this->stmt->setFetchMode($mode, $modeMore);
+                $mode = null;
+            }
             $result = $this->stmt->fetch($mode);
             if (false === $result) {
-                if (strpos($this->stmt->queryString, 'INSERT') !== false) 
-                    throw new DbException("Insert query returns no rows");
-                else 
-                    throw new DbException('Failed to get data from previous sql query due to buffer overwriting');
+                throw new DbException(
+                    strpos($this->stmt->queryString, 'INSERT') !== false
+                    ? 'Insert query returns no rows'
+                    : 'Failed to get data from previous sql query due to buffer overwriting'
+                );
             }
         }
         return $result ?? null;
@@ -90,14 +97,25 @@ class QueryResult implements QueryResultInterface
 
     /**
      * Обертка метода fetchAll.
+     * @param int|null модификатор
+     * @param mixed|null уточнение модификатора
      * @return array массив данных записей
+     * @throws DbException
      */
-    protected function fetchAll(int $mode = null): array
+    protected function fetchAll(int $mode = null, $modeMore = null): array
     {
         if ($this->rowCount() > 0) {
+            if (!empty($modeMore) && !empty($mode)) {
+                $this->stmt->setFetchMode($mode, $modeMore);
+                $mode = null;
+            }
             $result = $this->stmt->fetchAll($mode);
             if (empty($result)) {
-                throw new DbException('Failed to get data from previous sql query due to buffer overwriting');
+                throw new DbException(
+                    strpos($this->stmt->queryString, 'INSERT') !== false
+                    ? 'Insert query returns no rows'
+                    : 'Failed to get data from previous sql query due to buffer overwriting'
+                );
             }
         }
         return $result ?? [];
@@ -170,8 +188,7 @@ class QueryResult implements QueryResultInterface
     public function classObject(string $className): ?object
     {
         if (0 === $this->rowCount()) return null;
-        $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
-        $row = $this->fetch();
+        $row = $this->fetch(PDO::FETCH_CLASS, $className);
         return $this->objectHook($row);
     }
 
@@ -183,8 +200,7 @@ class QueryResult implements QueryResultInterface
     public function classObjectAll(string $className): array
     {
         if (0 === $this->rowCount()) return [];
-        $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
-        $rows = $this->fetchAll();
+        $rows = $this->fetchAll(PDO::FETCH_CLASS, $className);
         return $this->objectsHook($rows);
     }
 
@@ -196,8 +212,7 @@ class QueryResult implements QueryResultInterface
     public function intoObject(object &$object): object
     {
         if (0 === $this->rowCount()) return $object;
-        $this->stmt->setFetchMode(PDO::FETCH_INTO, $object);
-        $this->fetch();
+        $this->fetch(PDO::FETCH_INTO, $object);
         return $this->objectHook($object);
     }
 
