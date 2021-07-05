@@ -103,7 +103,7 @@ class TableSchema
      */
     public function fullName(): string
     {
-        return "`$this->db->dbname`.`$this->name`";
+        return "`{$this->db->dbname}`.`$this->name`";
     }
 
     /**
