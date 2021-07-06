@@ -1,11 +1,12 @@
 <?php
 /**
- * Сборщик запроса SELECT/UPDATE/DELETE.
+ * Сборщик запросов SELECT/UPDATE/DELETE.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
 namespace Evas\Db\Builders;
 
+use Evas\Db\Exceptions\QueryBuilderException;
 use Evas\Db\Builders\JoinBuilder;
 use Evas\Db\Builders\QueryValuesTrait;
 use Evas\Db\Interfaces\DatabaseInterface;
@@ -259,10 +260,14 @@ class QueryBuilder implements QueryBuilderInterface
      * Установка OFFSET.
      * @param int сдвиг
      * @return self
+     * @throws QueryBuilderException
      */
     public function offset(int $offset): QueryBuilderInterface
     {
         $this->offset = $offset;
+        if ($offset < 1) {
+            throw new QueryBuilderException('Query offset must be more than 0');
+        }
         return $this;
     }
 
@@ -271,10 +276,14 @@ class QueryBuilder implements QueryBuilderInterface
      * @param int лимит
      * @param int|null сдвиг
      * @return self
+     * @throws QueryBuilderException
      */
     public function limit(int $limit, int $offset = null): QueryBuilderInterface
     {
         $this->limit = $limit;
+        if ($limit < 1) {
+            throw new QueryBuilderException('Query limit must be more than 0');
+        }
         return $offset !== null ? $this->offset($offset) : $this;
     }
 
@@ -282,6 +291,7 @@ class QueryBuilder implements QueryBuilderInterface
     /**
      * Получение sql.
      * @return string
+     * @throws QueryBuilderException
      */
     public function getSql(): string
     {
@@ -308,6 +318,9 @@ class QueryBuilder implements QueryBuilderInterface
             $sql .= ' LIMIT ' . $this->limit; 
         }
         if (!empty($this->offset)) {
+            if (empty($this->limit)) {
+                throw new QueryBuilderException('Query offset must be used with limit');
+            }
             $sql .= ' OFFSET ' . $this->offset;
         }
         return $sql;
