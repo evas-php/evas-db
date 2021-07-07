@@ -15,7 +15,7 @@ trait DatabaseBuildersTrait
 {
     /**
      * Вызов сборщика запросов QueryBuilder для SELECT/UPDATE/DELETE-запросов.
-     * @return QueryBulder
+     * @return QueryBuilderInterface
      */
     public function buildQuery(): QueryBuilderInterface
     {
@@ -52,7 +52,7 @@ trait DatabaseBuildersTrait
      * Начало сборки SELECT-запроса.
      * @param string имя таблицы
      * @param string|null столбцы
-     * @return QueryBuilder
+     * @return QueryBuilderInterface
      */
     public function select(string $tbl, string $columns = null): QueryBuilderInterface
     {
@@ -63,7 +63,7 @@ trait DatabaseBuildersTrait
      * Начало сборки UPDATE-запроса.
      * @param string имя таблицы
      * @param array|object значения записи
-     * @return QueryBuilder
+     * @return QueryBuilderInterface
      */
     public function update(string $tbl, $row): QueryBuilderInterface
     {
@@ -73,7 +73,7 @@ trait DatabaseBuildersTrait
     /**
      * Начало сборки DELETE-запроса.
      * @param string имя таблицы
-     * @return QueryBuilder
+     * @return QueryBuilderInterface
      */
     public function delete(string $tbl): QueryBuilderInterface
     {
