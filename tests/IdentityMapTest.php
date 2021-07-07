@@ -59,19 +59,38 @@ class IdentityMapTest extends DatabaseTestUnit
      */
     public function testIdentityMap()
     {
-        // Make IdentityMap
-        $db = $this->db();
-        $identityMap = new IdentityMap($db);
+        // data
         $state0 = array_merge(static::TEST_USER_DATA, ['id' => 1]);
         $user0 = (object) $state0;
+
+        // make IdentityMap
+        $db = $this->db();
+        $identityMap = new IdentityMap($db);
         $this->assertEmpty($identityMap->getState($user0, 'id'));
+
+        // check IdentityMap getStates() & clearStates()
+        $this->assertEmpty($identityMap->getStates());
+        $identityMap->set($user0, 'id');
+        $this->assertNotEmpty($identityMap->getState($user0, 'id'));
+        $this->assertEquals($state0, $identityMap->getState($user0, 'id'));
+        $expectedStates = [
+            \stdClass::class => [
+                1 => [
+                    'object' => $user0,
+                    'state' => $state0,
+                ]
+            ]
+        ];
+        $this->assertEquals($expectedStates, $identityMap->getStates());
+        $identityMap->clearStates();
+        $this->assertEmpty($identityMap->getStates());
         
-        // Set $user0 to IdentityMap
+        // set $user0 to IdentityMap
         $identityMap->set($user0, 'id');
         $this->assertNotEmpty($identityMap->getState($user0, 'id'));
         $this->assertEquals($state0, $identityMap->getState($user0, 'id'));
 
-        // Update $user0 in IdentityMap
+        // update $user0 in IdentityMap
         $state1 = array_merge(static::UPDATED_USER_DATA, ['id' => 1]);
         $user1 = (object) $state1;
         $identityMap->update($user1, 'id');
@@ -81,9 +100,14 @@ class IdentityMapTest extends DatabaseTestUnit
         $this->assertEquals($state1, $identityMap->getState($user1, 'id'));
         $this->assertEquals($user0, $user1);
 
-        // Unset $user0 from IdentityMap
+        // unset $user0 from IdentityMap
         $identityMap->unset($user0, 'id');
         $this->assertEmpty($identityMap->getState($user0, 'id'));
+
+        $expectedStates = [
+            \stdClass::class => []
+        ];
+        $this->assertEquals($expectedStates, $identityMap->getStates());
     }
 
     protected function getUser()
