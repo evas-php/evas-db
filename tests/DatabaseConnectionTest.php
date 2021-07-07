@@ -9,6 +9,7 @@ namespace Evas\Db\tests;
 use Codeception\Util\Autoload;
 use Evas\Db\Database;
 use Evas\Db\Exceptions\DatabaseConnectionException;
+use Evas\Db\Interfaces\DatabaseInterface;
 use Evas\Db\tests\help\DatabaseTestUnit;
 
 Autoload::addNamespace('Evas\\Db', 'vendor/evas-php/evas-db/src');
@@ -20,7 +21,7 @@ class DatabaseConnectionTest extends DatabaseTestUnit
 
     protected $db;
 
-    public function db(): Database
+    public function db(): DatabaseInterface
     {
         if (!$this->db) $this->db = new Database(static::config());
         return $this->db;
