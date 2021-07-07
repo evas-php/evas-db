@@ -90,10 +90,10 @@ trait DatabaseIdentityMapTrait
     }
 
     /**
-     * Очистка IdentityMap.
+     * Очистка записей в IdentityMap.
      */
     public function identityMapClear()
     {
-        unset($this->identityMap);
+        $this->identityMap()->clearStates();
     }
 }
