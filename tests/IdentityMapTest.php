@@ -142,7 +142,7 @@ class IdentityMapTest extends DatabaseTestUnit
         $this->assertNotEquals($hash0, $hash2 = $user2->hash());
         $this->assertEquals($hash1, $hash2);
 
-        // Update
+        // update
         $updatedCount = $this->db()->update('users', static::UPDATED_USER_DATA)->where('id = ?', [1])->one()->rowCount();
         $this->assertEquals(1, $updatedCount);
         $user3 = $this->getUser();
