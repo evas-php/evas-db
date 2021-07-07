@@ -117,4 +117,20 @@ class IdentityMap
         list($className, $primary) = static::getKey($object, $primaryKey);
         unset($this->states[$className][$primary]);
     }
+
+    /**
+     * Получение всего маппинга объектов с состояниями.
+     */
+    public function getStates(): array
+    {
+        return $this->states;
+    }
+
+    /**
+     * Очистка всего маппинга объектов с состояниями.
+     */
+    public function clearStates()
+    {
+        return $this->states = [];
+    }
 }
