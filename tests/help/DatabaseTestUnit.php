@@ -16,7 +16,7 @@ class DatabaseTestUnit extends \Codeception\Test\Unit
 {
     const TEST_USER_DATA = [
         'name' => 'Egor',
-        'email' => 'e.vasyakin@itevas.ru',
+        'email' => 'egor@evas-php.com',
     ];
 
     public static function config()
