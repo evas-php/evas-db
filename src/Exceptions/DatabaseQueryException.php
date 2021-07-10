@@ -10,6 +10,12 @@ use Evas\Db\Exceptions\DbException;
 
 class DatabaseQueryException extends DbException
 {
+    /**
+     * Выбрасывание исключения sql-запроса с информацией.
+     * @param array информация о падении запроса
+     * @param string sql-запрос
+     * @param array|null параметры sql-запроса для экранирования
+     */
     public static function fromErrorInfo(array $errInfo, string $sql, array $props = null)
     {
         list($sqlState, $code, $message) = $errInfo;
