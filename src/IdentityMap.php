@@ -37,10 +37,14 @@ class IdentityMap
     public static function getKey(object &$object, string $primaryKey): array
     {
         $primary = $object->$primaryKey ?? null;
+        $className = get_class($object);
         if (empty($primary)) {
-            throw new IdentityMapException('IdentityMap not found entity primary value');
+            throw IdentityMapException::withInfo(
+                'IdentityMap not found entity primary value', 
+                compact('className', 'primaryKey')
+            );
         }
-        return [get_class($object), $primary];
+        return [$className, $primary];
     }
 
     /**
@@ -63,7 +67,10 @@ class IdentityMap
     {
         list($className, $primary) = static::getKey($object, $primaryKey);
         if (isset($this->states[$className][$primary])) {
-            throw new IdentityMapException('IndentityMap entity already has');
+            throw IdentityMapException::withInfo(
+                'IdentityMap entity already has', 
+                compact('className', 'primaryKey'), $primary
+            );
         }
         $this->states[$className][$primary] = [
             'object' => &$object,
