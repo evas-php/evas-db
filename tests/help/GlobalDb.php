@@ -10,7 +10,7 @@ use Evas\Db\Database;
 
 class GlobalDb
 {
-    const CONFIG_PATH = __DIR__ . '/../_data/db_tests_config.php';
+    const CONFIG_PATH = __DIR__ . '/../_config/db_tests_config.php';
     public static function config()
     {
         static $config = null;
