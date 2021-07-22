@@ -10,7 +10,7 @@ use Codeception\Util\Autoload;
 use Evas\Db\tests\help\DatabaseTestUnit;
 
 Autoload::addNamespace('Evas\\Db', 'vendor/evas-php/evas-db/src');
-Autoload::addNamespace('Evas\\Db\\tests\\help', 'vendor/evas-php/evas-db/src/tests/help');
+Autoload::addNamespace('Evas\\Db\\tests', 'vendor/evas-php/evas-db/src/tests');
 
 class DatabaseTransactionsTest extends DatabaseTestUnit
 {

@@ -14,7 +14,7 @@ use Evas\Db\Base\QueryResult;
 use Evas\Db\tests\help\DatabaseTestUnit;
 
 Autoload::addNamespace('Evas\\Db', 'vendor/evas-php/evas-db/src');
-Autoload::addNamespace('Evas\\Db\\tests\\help', 'vendor/evas-php/evas-db/src/tests/help');
+Autoload::addNamespace('Evas\\Db\\tests', 'vendor/evas-php/evas-db/src/tests');
 
 use Evas\Db\tests\QueryResultTest\User;
 
