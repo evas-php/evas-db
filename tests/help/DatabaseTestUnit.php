@@ -1,17 +1,14 @@
 <?php
 /**
- * Обёртка unit-тестов класса Database.
+ * Обёртка тестов модуля evas-db.
  * @package evas-php/evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
 namespace Evas\Db\tests\help;
 
-use Codeception\Util\Autoload;
 use Evas\Db\Database;
 use Evas\Db\Interfaces\DatabaseInterface;
 use Evas\Db\tests\help\GlobalDb;
-
-Autoload::addNamespace('Evas\\Db\\tests\\help', 'vendor/evas-php/evas-db/src/tests/help');
 
 class DatabaseTestUnit extends \Codeception\Test\Unit
 {
