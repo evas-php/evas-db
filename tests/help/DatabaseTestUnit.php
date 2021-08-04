@@ -63,7 +63,9 @@ class DatabaseTestUnit extends \Codeception\Test\Unit
         $this->assertFalse($this->db()->inTransaction());
         // сбрасываем автоинкремент
         // $this->db()->query('ALTER TABLE users AUTO_INCREMENT=1');
-        $this->db()->query('ALTER TABLE users AUTO_INCREMENT='.$this->db()->maxId('users'));
+        $ai = $this->db()->maxId('users');
+        if (!$ai) $ai = 1;
+        $this->db()->query("ALTER TABLE users AUTO_INCREMENT=$ai");
     }
 
     /**
