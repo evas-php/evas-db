@@ -214,10 +214,11 @@ class QueryBuilderTest extends DatabaseTestUnit
      */
     public function testGroupBy()
     {
-        $qb = $this->db()->select('users', 'name, email')->groupBy('name');
+        $qb = $this->db()->select('users', 'name')->groupBy('name');
         $this->assertTrue($qb instanceof QueryBuilder);
         $this->assertEquals('name', $qb->groupBy);
-        $this->assertEquals(static::TEST_USER_DATA, $qb->query()->assocArray());
+        $expected = [static::TEST_USER_DATA['name']];
+        $this->assertEquals($expected, $qb->query()->assocArray());
     }
 
     /**
