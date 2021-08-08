@@ -64,7 +64,7 @@ class TableSchema
      */
     public function primaryKeyFromCache(): ?string
     {
-        return $this->schemaFromCache()['primaryKey'];
+        return $this->schemaFromCache()['primaryKey'] ?? null;
     }
 
     /**
@@ -73,7 +73,7 @@ class TableSchema
      */
     public function columnSchemasFromCache(): ?array
     {
-        return $this->schemaFromCache()['columns'];
+        return $this->schemaFromCache()['columns'] ?? null;
     }
 
     /**
@@ -82,7 +82,7 @@ class TableSchema
      */
     public function foreignKeysFromCache(): ?array
     {
-        return $this->schemaFromCache()['foreignKeys'];
+        return $this->schemaFromCache()['foreignKeys'] ?? null;
     }
 
     /**
