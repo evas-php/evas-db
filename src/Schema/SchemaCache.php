@@ -66,7 +66,7 @@ class SchemaCache
     }
 
     /**
-     * Обвноление файла схемы базы данных.
+     * Обновление файла схемы базы данных.
      * @return array
      */
     public function updateCache()
