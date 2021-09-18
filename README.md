@@ -1,2 +1,2 @@
 # evas-db
-Database module (Connection, Schemas, Builders, Result fetching) 
+🗃 Database module (Connection, table & column schemas, query builders, result fetching, identity map) 
