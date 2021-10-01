@@ -17,14 +17,14 @@ trait QueryValuesTrait
      * @param string|numeric|null значение или null
      * @return self
      */
-    public function bindValue($name, $value = null)
+    public function bindValue($alias, $value = null)
     {
-        assert(is_string($name) || is_numeric($name));
+        assert(is_string($alias) || is_numeric($alias));
         if (!empty($value)) {
             assert(is_string($value) || is_numeric($value));
-            $this->values[$name] = $value;
+            $this->values[$alias] = $value;
         } else {
-            $this->values[] = $name;
+            $this->values[] = $alias;
         }
         return $this;
     }
