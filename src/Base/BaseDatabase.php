@@ -10,6 +10,7 @@ use \PDO;
 use \PDOException;
 use \PDOStatement;
 use \UnexpectedValueException;
+use Evas\Base\Help\PhpHelp;
 use Evas\Db\Exceptions\DatabaseConnectionException;
 use Evas\Db\Exceptions\DatabaseQueryException;
 use Evas\Db\Base\QueryResult;
@@ -79,6 +80,10 @@ class BaseDatabase implements DatabaseInterface
 
     /** @var string имя функции для экранирования объектов и массивов */
     protected $quoteObjectsFunc = self::QUOTE_OBJECTS_FUNCS['null'];
+
+
+    /** @var bool делать ли дебаг sql-запросов */
+    public $debugSql = false;
 
 
     /**
@@ -242,6 +247,7 @@ class BaseDatabase implements DatabaseInterface
     public function execute(PDOStatement &$stmt, array $props = null): QueryResultInterface
     {
         try {
+            $this->debugSql($stmt->queryString, $props);
             if (false === $stmt->execute($props)) {
                 $errorInfo = $stmt->errorInfo();
                 $sql = $stmt->queryString;
@@ -282,6 +288,7 @@ class BaseDatabase implements DatabaseInterface
      */
     public function pdoQuery(string $sql): QueryResultInterface
     {
+        $this->debugSql($sql);
         // закрываем буффер последнего statement запроса
         if (!empty($this->lastStmt)) $this->lastStmt->closeCursor();
         try {
@@ -400,5 +407,19 @@ class BaseDatabase implements DatabaseInterface
     public function lastInsertId(string $tbl = null): int
     {
         return intval($this->getPdo()->lastInsertId($tbl));
+    }
+
+    /**
+     * Дебаг запросов в базу.
+     * @param string sql
+     * @param array|null параметры запроса
+     */
+    public function debugSql(string $sql, array $props = null)
+    {
+        if ($this->debugSql) {
+            echo json_encode([
+                "query to `$this->host`:`$this->dbname`" => compact('sql', 'props')
+            ], JSON_UNESCAPED_UNICODE) . PhpHelp::eol();
+        }
     }
 }
