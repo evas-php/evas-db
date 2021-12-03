@@ -88,7 +88,7 @@ class SchemaCache
             foreach ($columns as $name => &$column) {
                 $lines .= "            '$name' => [\n";
                 foreach ($column as $key => &$value) {
-                    if (is_string($value)) $value = "'$value'";
+                    if (is_string($value)) $value = "'" . addslashes($value) . "'";
                     if (empty($value)) $value = 'null';
                     $lines .= "                '$key' => $value,\n"; 
                 }
