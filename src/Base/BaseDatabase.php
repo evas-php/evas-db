@@ -82,10 +82,6 @@ class BaseDatabase implements DatabaseInterface
     protected $quoteObjectsFunc = self::QUOTE_OBJECTS_FUNCS['null'];
 
 
-    /** @var bool делать ли дебаг sql-запросов */
-    public $debugSql = false;
-
-
     /**
      * Конструктор.
      * @param array|null параметры
@@ -256,7 +252,7 @@ class BaseDatabase implements DatabaseInterface
             }
         } catch (PDOException $e) {
             $sql = $stmt->queryString;
-            throw DatabaseQueryException::fromErrorInfo($this->errorInfo(), $sql, $props);
+            throw DatabaseQueryException::fromErrorInfo($stmt->errorInfo(), $sql, $props);
         }
         return $this->getQueryResult($stmt);
     }
@@ -416,10 +412,8 @@ class BaseDatabase implements DatabaseInterface
      */
     public function debugSql(string $sql, array $props = null)
     {
-        if ($this->debugSql) {
-            echo json_encode([
-                "query to `$this->host`:`$this->dbname`" => compact('sql', 'props')
-            ], JSON_UNESCAPED_UNICODE) . PhpHelp::eol();
-        }
+        evasDebug([
+            "query to `$this->host`:`$this->dbname`" => compact('sql', 'props')
+        ]);
     }
 }
