@@ -1,10 +1,10 @@
 <?php
 /**
- * Трейт для работы с bindings.
+ * Трейт-хелпер для Query и Join сборки.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
-namespace Evas\Db\Builders;
+namespace Evas\Db\Builders\Traits;
 
 
 trait ForQueryAndJoinBuildersTrait
