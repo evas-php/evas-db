@@ -38,7 +38,7 @@ class TableSchema
     public function __construct(DatabaseInterface &$db, string $name)
     {
         $this->db = &$db;
-        $this->name = $name;
+        $this->name = $db->grammar()->unwrap($name);
         $tableSchema = $this->schemaFromCache();
         if (!empty($tableSchema)) {
             $this->primaryKey = $tableSchema['primaryKey'];
@@ -86,24 +86,6 @@ class TableSchema
     }
 
     /**
-     * Получение имени таблицы.
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * Получение имени таблицы вместе с именем базы.
-     * @return string
-     */
-    public function fullName(): string
-    {
-        return "`{$this->db->dbname}`.`$this->name`";
-    }
-
-    /**
      * Получение первичного ключа таблицы.
      * @param bool|null сделать ли перезапрос схемы
      * @return string
@@ -112,16 +94,18 @@ class TableSchema
     public function primaryKey(bool $reload = false): string
     {
         if (empty($this->primaryKey) || true === $reload) {
-            if (false === $reload) {
+            if (true === $reload) {
+                $this->primaryKey = $this->db->grammar()->getTablePrimaryKey($this->name);
+            } else {
                 $this->primaryKey = $this->primaryKeyFromCache();
+                if (empty($this->primaryKey)) {
+                    $this->db->updateSchemaCache();
+                    $this->primaryKey = $this->primaryKeyFromCache();
+                }
             }
-            $row = $this->db->query("SHOW KEYS FROM `$this->name` WHERE Key_name = 'PRIMARY'")->assocArray();
-            $this->primaryKey = $row['Column_name'];
         }
         if (empty($this->primaryKey)) {
-            $table = $this->fullName();
-            throw new TableSchemaException("Primary key does not exist in table `$table`");
-            
+            throw new TableSchemaException("Primary key does not exist in table: $this->name");
         }
         return $this->primaryKey;
     }
@@ -129,20 +113,22 @@ class TableSchema
     /**
      * Получение схемы столбцов.
      * @param bool|null сделать ли перезапрос схемы
-     * @return array[]
+     * @return ColumnSchema[]
      */
     public function columnSchemas(bool $reload = false): array
     {
         if (empty($this->columnSchemas) || true === $reload) {
-            if (false === $reload) {
-                $this->columnSchemas = $this->columnSchemasFromCache();
-            }
-            if (empty($this->columnSchemas)) {
-                $from = $this->fullName();
-                $rows = $this->db->query("SHOW COLUMNS FROM $from")->assocArrayAll();
+            if (true === $reload) {
+                $rows = $this->db->grammar()->getTableColumns($this->name);
                 $this->columnSchemas = [];
                 if ($rows) foreach ($rows as &$row) {
-                    $this->columnSchemas[$row['Field']] = (array) new ColumnSchema($row);
+                    $this->columnSchemas[$row['Field']] = new ColumnSchema($row);
+                }
+            } else {
+                $this->columnSchemas = $this->columnSchemasFromCache();
+                if (empty($this->columnSchemas)) {
+                    $this->db->updateSchemaCache();
+                    $this->columnSchemas = $this->columnSchemasFromCache();
                 }
             }
         }
@@ -162,8 +148,7 @@ class TableSchema
             $this->columnSchemas($reload);
         }
         if (empty($this->columnSchemas[$column])) {
-            $table = $this->fullName();
-            throw new TableSchemaException("Not found column `$column` in table $table");
+            throw new TableSchemaException("Not found column `$column` in table: $this->name");
         }
         return new ColumnSchema($this->columnSchemas[$column]);
     }
@@ -189,23 +174,13 @@ class TableSchema
     public function foreignKeys(bool $reload = false): array
     {
         if (empty($this->foreignKeys) || true === $reload) {
-            if (false === $reload) {
+            if (true === $reload) {
+                $this->foreignKeys = $this->db->grammar()->getForeignKeys($this->name) ?? [];
+            } else {
                 $this->foreignKeys = $this->foreignKeysFromCache();
-            }
-            if (empty($this->foreignKeys)) {
-                $sql = 'SELECT * FROM information_schema.KEY_COLUMN_USAGE 
-                    WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? 
-                    AND CONSTRAINT_NAME <>"PRIMARY" 
-                    AND REFERENCED_TABLE_NAME IS NOT NULL';
-                $values = [$this->db->dbname, $this->name];
-                $rows = $this->db->query($sql, $values)->assocArrayAll();
-                $this->foreignKeys = [];
-                if ($rows) foreach ($rows as &$row) {
-                    $this->foreignKeys[$row['COLUMN_NAME']] = [
-                        $row['REFERENCED_TABLE_SCHEMA'], 
-                        $row['REFERENCED_TABLE_NAME'], 
-                        $row['REFERENCED_COLUMN_NAME']
-                    ];
+                if (is_null($this->foreignKeys)) {
+                    $this->db->updateSchemaCache();
+                    $this->foreignKeys = $this->foreignKeysFromCache();
                 }
             }
         }
