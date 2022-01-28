@@ -9,7 +9,6 @@ namespace Evas\Db\Base;
 use \PDO;
 use \PDOException;
 use \PDOStatement;
-use \UnexpectedValueException;
 use Evas\Base\Help\PhpHelp;
 use Evas\Db\Exceptions\DatabaseConnectionException;
 use Evas\Db\Exceptions\DatabaseQueryException;
@@ -18,7 +17,7 @@ use Evas\Db\Interfaces\DatabaseInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
 
 /**
- * Константы для класса по умолчанию.
+ * Константы свойств класса по умолчанию.
  */
 if (!defined('EVAS_DB_OPTIONS')) {
     define('EVAS_DB_OPTIONS', [
@@ -66,7 +65,7 @@ class BaseDatabase implements DatabaseInterface
     /** @var string кодировка */
     public $charset = EVAS_DB_CHARSET;
 
-    /** @var string класс ответов */
+    /** @var string класс результатов */
     public $queryResultClass = EVAS_DB_QUERY_RESULT_CLASS;
 
     /** @var pdo */
@@ -79,7 +78,7 @@ class BaseDatabase implements DatabaseInterface
     protected $lastStmt;
 
     /** @var string имя функции для экранирования объектов и массивов */
-    protected $quoteObjectsFunc = self::QUOTE_OBJECTS_FUNCS['null'];
+    protected $quoteObjectsFunc = self::QUOTE_OBJECTS_FUNCS['json'];
 
 
     /**
@@ -91,6 +90,7 @@ class BaseDatabase implements DatabaseInterface
         if ($params) foreach ($params as $name => $value) {
             $this->$name = $value;
         }
+        $this->driver = strtolower($this->driver);
     }
 
     // Работа с соединением
@@ -104,12 +104,13 @@ class BaseDatabase implements DatabaseInterface
     {
         $dsn = "$this->driver:host=$this->host";
         if (!empty($this->dbname)) $dsn .= ";dbname=$this->dbname";
-        if (!empty($this->charset)) $dsn .= ";charset=$this->charset";
+        // if (!empty($this->charset)) $dsn .= ";charset=$this->charset";
         try {
             $this->pdo = new PDO($dsn, $this->username, $this->password, $this->options);
         } catch (PDOException $e) {
             throw new DatabaseConnectionException($e->getMessage());
         }
+        if ($this->charset) $this->setCharset($this->charset);
         return $this;
     }
 
@@ -153,6 +154,17 @@ class BaseDatabase implements DatabaseInterface
             $this->query("USE `$dbname`");
         }
         $this->dbname = $dbname;
+    }
+
+    /**
+     * Установка кодировки.
+     * @param string кодировка
+     * @return self
+     */
+    public function setCharset(string $charset)
+    {
+        $this->query("SET NAMES '{$charset}'");
+        return $this;
     }
 
 
@@ -306,15 +318,17 @@ class BaseDatabase implements DatabaseInterface
      * Получение объекта результата запроса.
      * @param PDOStatement statement запроса
      * @return QueryResultInterface
-     * @throws UnexpectedValueException
+     * @throws \UnexpectedValueException
      */
     protected function getQueryResult(PDOStatement &$stmt): QueryResultInterface
     {
         $result = new $this->queryResultClass($stmt, $this);
         if (! $result instanceof QueryResultInterface) {
             $className = get_class($result);
-            throw new UnexpectedValueException("Class\"$name\" must implements interface ".QueryResultInterface::class);
-            
+            throw new \UnexpectedValueException(
+                "Query result class\"$name\" must implements interface "
+                . QueryResultInterface::class
+            );
         }
         $this->lastStmt = &$stmt;
         return $result;
@@ -381,7 +395,14 @@ class BaseDatabase implements DatabaseInterface
         if (is_bool($value)) return intval($value);
         if (is_string($value)) return "'" . str_replace("'", '\\\'', $value) . "'";
         if (is_callable($value)) return 'NULL';
-        eval('$value = '.$this->quoteObjectsFunc.'($value);');
+        return $this->quoteArrayOrObject($value);
+    }
+
+    public function quoteArrayOrObject($value)
+    {
+        if (is_array($value) || is_object($value)) {
+            eval('$value = '.$this->quoteObjectsFunc.'($value);');
+        }
         return $value;
     }
 
