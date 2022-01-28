@@ -24,6 +24,6 @@ class DatabaseQueryException extends DbException
             'query' => $sql,
             'props' => $props ?? [],
         ];
-        return new static(json_encode($data), $code);
+        return new static(json_encode($data, JSON_UNESCAPED_UNICODE), $code);
     }
 }
