@@ -61,6 +61,32 @@ trait DatabaseSchemaCacheTrait
     }
 
     /**
+     * Обновление кэша схемы базы данных, если кэш используется.
+     * @return bool используется ли кэш
+     */
+    public function updateSchemaCache(): bool
+    {
+        if ($this->isSchemaCacheUsed()) {
+            $this->schemaCache()->updateCache();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Сброс кэша схемы базы данных, если кэш используется.
+     * @return bool используется ли кэш
+     */
+    public function clearSchemaCache(): bool
+    {
+        if ($this->isSchemaCacheUsed()) {
+            $this->schemaCache()->clearCache();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Получение схемы таблицы из кэша, если кэш используется.
      * @param string имя таблицы
      * @return array|null
