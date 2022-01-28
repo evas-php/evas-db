@@ -23,6 +23,7 @@ trait DatabaseTableTrait
      */
     public function table(string $table): Table
     {
+        $table = $this->grammar()->unwrapTable($table);
         if (empty($this->tableObjects[$table])) {
             $this->tableObjects[$table] = new Table($this, $table);
         }
@@ -47,18 +48,14 @@ trait DatabaseTableTrait
     }
     
     /**
-     * Получение списка таблицы базы данных.
+     * Получение списка таблиц базы данных.
      * @param bool перезапросить список таблиц
      * @return array
      */
     public function tablesList(bool $reload = false): ?array
     {
         if (null === $this->tablesList || true === $reload) {
-            $this->tablesList = [];
-            $rows = $this->query('SHOW TABLES')->numericArrayAll();
-            foreach ($rows as &$row) {
-                $this->tablesList[] = $row[0];
-            }
+            $this->tablesList = $this->grammar()->getTablesList();
         }
         return $this->tablesList;
     }
