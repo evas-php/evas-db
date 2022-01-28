@@ -161,47 +161,29 @@ class QueryResult implements QueryResultInterface
     }
 
     /**
-     * Получение записи в виде анонимного объекта.
+     * Получение записи в виде объекта.
+     * @param string|null имя класса
      * @return stdClass|null
      */
-    public function anonymObject(): ?object
-    {
-        $row = $this->fetch(PDO::FETCH_OBJ);
-        return $this->objectHook($row);
-    }
-
-    /**
-     * Получение всех записей в виде массива анонимных объектов.
-     * @return array
-     */
-    public function anonymObjectAll(): array
-    {
-        $rows = $this->fetchAll(PDO::FETCH_OBJ);
-        return $this->objectsHook($rows);
-    }
-
-    /**
-     * Получение записи в виде объекта класса.
-     * @param string имя класса
-     * @return object|null
-     */
-    public function classObject(string $className): ?object
+    public function object(string $className = null): ?object
     {
         if (0 === $this->rowCount()) return null;
-        $row = $this->fetch(PDO::FETCH_CLASS, $className);
-        return $this->objectHook($row);
+        return !empty($className) 
+        ? $this->objectHook($this->fetch(PDO::FETCH_CLASS, $className))
+        : $this->fetch(PDO::FETCH_OBJ); // \stdClass
     }
 
     /**
-     * Получение всех записей в виде массива объектов класса.
-     * @param string имя класса
+     * Получение всех записей в виде массива объектов.
+     * @param string|null имя класса
      * @return array
      */
-    public function classObjectAll(string $className): array
+    public function objectAll(string $className = null): array
     {
-        if (0 === $this->rowCount()) return [];
-        $rows = $this->fetchAll(PDO::FETCH_CLASS, $className);
-        return $this->objectsHook($rows);
+        if (0 === $this->rowCount()) return null;
+        return $className
+        ? $this->objectsHook($this->fetchAll(PDO::FETCH_CLASS, $className))
+        : $this->fetchAll(PDO::FETCH_OBJ); // \stdClass
     }
 
     /**
@@ -219,17 +201,20 @@ class QueryResult implements QueryResultInterface
 
     // Хуки
 
-
     /**
      * Хук для постобработки полученного объекта записи.
      * @param object|null запись
      * @return object|null постобработанная запись
      */
-    public function objectHook(object &$row = null): ?object
+    protected function objectHook(object $row = null): ?object
     {
-        if (!empty($row) && is_object($row)) {
-            $this->identityMapUpdate($row);
-            $this->runEntityAfterFindMethod($row);
+        if (!empty($row)) {
+            if ($this->canIdentityMapUpdate()) {
+                $this->identityMapUpdate($row);
+            }
+            if ($this->hasAfterFindMethod($row)) {
+                $this->runAfterFindMethod($row);
+            }
         }
         return $row;
     }
@@ -239,10 +224,10 @@ class QueryResult implements QueryResultInterface
      * @param array|null записи
      * @return array|null постобработанные записи
      */
-    public function objectsHook(array &$rows = null): ?array
+    protected function objectsHook(array $rows = null): ?array
     {
         if (!empty($rows) && ($this->canIdentityMapUpdate()
-            || $this->canRunEntityAfterFindMethod($row[0])))
+            || $this->hasAfterFindMethod($rows[0])))
             foreach ($rows as &$row) {
                 $row = $this->objectHook($row);
             }
@@ -256,7 +241,7 @@ class QueryResult implements QueryResultInterface
      * @param object сущность
      * @return bool
      */
-    public function canRunEntityAfterFindMethod(object &$row): bool
+    protected function hasAfterFindMethod(object &$row): bool
     {
         return method_exists($row, 'afterFind');
     }
@@ -265,16 +250,16 @@ class QueryResult implements QueryResultInterface
      * Запуска метода afterFind сущности, если есть.
      * @param object сущность
      */
-    public function runEntityAfterFindMethod(object &$row)
+    protected function runAfterFindMethod(object &$row)
     {
-        if ($this->canRunEntityAfterFindMethod($row)) $row->afterFind();
+        $row->afterFind();
     }
 
     /**
      * Проверка возможности обновления IdentityMap.
      * @return bool
      */
-    public function canIdentityMapUpdate(): bool
+    protected function canIdentityMapUpdate(): bool
     {
         return method_exists($this->db, 'table') 
             && method_exists($this->db, 'identityMapUpdate');
@@ -284,16 +269,14 @@ class QueryResult implements QueryResultInterface
      * Хук для обновления сущности в IdentityMap.
      * @param object сущность
      */
-    public function identityMapUpdate(object &$object)
+    protected function identityMapUpdate(object &$object)
     {
-        if ($this->canIdentityMapUpdate()) {
+        try {
             $primaryKey = $this->db->table($this->tableName())->primaryKey();
-            try {
-                $object = $this->db->identityMapUpdate($object, $primaryKey);
-            } catch (IdentityMapException $e) {
-                if ($this->db->isStrictPrimary()) throw $e;
-                else return;
-            }
+            $object = $this->db->identityMapUpdate($object, $primaryKey);
+        } catch (IdentityMapException $e) {
+            if ($this->db->isStrictPrimary()) throw $e;
+            else return;
         }
     }
 }
