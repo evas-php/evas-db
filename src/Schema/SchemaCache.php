@@ -55,10 +55,7 @@ class SchemaCache
         $filepath = $this->getFilepath();
         if (is_file($filepath)) {
             $this->schema = include $filepath;
-            if (defined('EVAS_DEBUG') && true == EVAS_DEBUG) {
-                echo "Database schema for ($this->dbInfo) is received from the cache"
-                    . ('cli' == PHP_SAPI ? "\n" : '<br>');
-            }
+            evasDebug("Database schema for ($this->dbInfo) is received from the cache");
         }
         if (empty($this->schema) || !is_array($this->schema)) {
             $this->updateCache();
@@ -120,30 +117,21 @@ class SchemaCache
         $dir = dirname($savingPath);
         if (!is_dir($dir)) mkdir($dir, 0777, true);
         file_put_contents($savingPath, $data);
-        if (defined('EVAS_DEBUG') && true == EVAS_DEBUG) {
-            echo "Generated database schema cache for ($this->dbInfo)"
-                . ('cli' == PHP_SAPI ? "\n" : '<br>');
-        }
+        evasDebug("Generated database schema cache for ($this->dbInfo)");
     }
 
     /**
      * Очистка кэша схемы базы данных.
      */
-    public function cleanCache()
+    public function clearCache()
     {
         $path = $this->getFilepath();
         if (!is_file($path)) {
-            if (defined('EVAS_DEBUG') && true == EVAS_DEBUG) {
-                echo "Database schema cache for ($this->dbInfo) has already been cleaned"
-                    . ('cli' == PHP_SAPI ? "\n" : '<br>');
-            }
+            evasDebug("Database schema cache for ($this->dbInfo) has already been cleaned");
             return;
         }
         unlink($path);
-        if (defined('EVAS_DEBUG') && true == EVAS_DEBUG) {
-            echo "Clean database schema cache for ($this->dbInfo)"
-                . ('cli' == PHP_SAPI ? "\n" : '<br>');
-        }
+        evasDebug("Clean database schema cache for ($this->dbInfo)");
     }
 
     /**
