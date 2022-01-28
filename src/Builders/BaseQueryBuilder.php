@@ -6,7 +6,7 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Db\Builders\ForQueryAndJoinBuildersTrait;
+use Evas\Db\Builders\Traits\ForQueryAndJoinBuildersTrait;
 use Evas\Db\Interfaces\DatabaseInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 
