@@ -8,20 +8,19 @@ namespace Evas\Db\Builders;
 
 use Evas\Base\Help\PhpHelp;
 use Evas\Db\Base\QueryResult;
-use Evas\Db\Builders\QueryValuesTrait;
 use Evas\Db\Exceptions\InsertBuilderException;
 use Evas\Db\Interfaces\DatabaseInterface;
 
 class InsertBuilder
 {
-    /** Подключаем поддержку работы со значениями запроса. */
-    use QueryValuesTrait;
-
     /** @var string имя таблицы */
     public $tbl;
 
     /** @var array ключи вставляемых значений записи */
     public $keys;
+
+    /** @var array значения для экранирования */
+    public $bindings = [];
 
     /** @var int счетчик количества вставляемых записей */
     protected $rowCount = 0;
@@ -34,7 +33,7 @@ class InsertBuilder
     public function __construct(DatabaseInterface &$db, string $tbl)
     {
         $this->db = &$db;
-        $this->tbl = &$tbl;
+        $this->tbl = $tbl;
     }
 
     /**
@@ -52,19 +51,22 @@ class InsertBuilder
      * Установка значений записи.
      * @param array|object
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function row($row)
     {
-        assert(is_array($row) || is_object($row));
+        if (!is_array($row) && !is_object($row)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Argument 1 passed to %s() must be an array or an object, %s given',
+                __METHOD__, gettype($id)
+            ));
+        }
         if (is_object($row)) $row = get_object_vars($row);
         if (PhpHelp::isAssoc($row)) {
             if (empty($this->keys)) $this->keys(array_keys($row));
-            foreach ($this->keys as &$key) {
-                $this->bindValue($row[$key] ?? null);
-            }
-        } else {
-            $this->bindValues($row);
+            $row = array_values($row);
         }
+        $this->addBindings($row);
         $this->rowCount++;
         return $this;
     }
@@ -81,6 +83,35 @@ class InsertBuilder
     }
 
     /**
+     * Получение количества вставляемых записей.
+     * @return int
+     */
+    public function rowCount(): int
+    {
+        return $this->rowCount;
+    }
+
+    /**
+     * Добавление экранируемых значений записи.
+     * @param array значения
+     * @return self
+     */
+    public function addBindings(array $values)
+    {
+        $this->bindings = array_merge($this->bindings, $values);
+        return $this;
+    }
+
+    /**
+     * Получение экранируемых значений записей.
+     * @return array
+     */
+    public function getBindings(): array
+    {
+        return $this->bindings;
+    }
+
+    /**
      * Получение собранного sql-запроса.
      * @return string
      * @throws InsertBuilderException
@@ -93,13 +124,7 @@ class InsertBuilder
         if (empty($this->keys)) {
             throw new InsertBuilderException('Insert builder keys is empty');
         }
-        $keys = '(`'. implode('`, `', $this->keys) .'`)';
-        $quote = '('. implode(', ', array_fill(0, count($this->keys), '?')) .')';
-        if ($this->rowCount > 1) {
-            $quote = implode(', ', array_fill(0, $this->rowCount, $quote));
-        }
-        $sql = "INSERT INTO $this->tbl $keys VALUES $quote";
-        return $sql;
+        return $this->db->grammar()->buildInsert($this);
     }
 
     /**
@@ -108,6 +133,6 @@ class InsertBuilder
      */
     public function query(): QueryResult
     {
-        return $this->db->query($this->getSql(), $this->getValues());
+        return $this->db->query($this->getSql(), $this->getBindings());
     }
 }
