@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения кеша схемы баз данных.
+ * Исключение кеша схемы баз данных.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

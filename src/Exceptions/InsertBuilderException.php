@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения сборщика INSERT-запросов.
+ * Исключение сборщика INSERT-запросов.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

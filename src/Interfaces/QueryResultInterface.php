@@ -1,6 +1,6 @@
 <?php
 /**
- * Интерфейс сборщика запроса SELECT/UPDATE/DELETE.
+ * Интерфейс результата запроса.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

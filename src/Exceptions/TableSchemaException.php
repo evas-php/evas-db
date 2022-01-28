@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения схемы таблицы.
+ * Исключение схемы таблицы.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

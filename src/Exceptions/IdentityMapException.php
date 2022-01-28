@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения маппинга идентичности сущностей IdentityMap.
+ * Исключение маппинга идентичности сущностей IdentityMap.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

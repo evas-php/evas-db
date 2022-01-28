@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения сборщика запросов SELECT/UPDATE/DELETE.
+ * Исключение сборщика запросов SELECT/UPDATE/DELETE.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
