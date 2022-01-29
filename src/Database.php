@@ -20,8 +20,7 @@ class Database extends BaseDatabase
 {
     /**
      * Подключаем поддержку: 
-     * классов таблиц, маппинга идентичности сущностей, сборки запросов
-     * кэша схемы базы данных.
+     * таблиц, маппинга идентичности сущностей, кэша схемы базы данных.
      */
     use DatabaseTableTrait, DatabaseIdentityMapTrait;
     use DatabaseSchemaCacheTrait;
