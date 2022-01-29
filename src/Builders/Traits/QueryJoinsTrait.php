@@ -67,7 +67,7 @@ trait QueryJoinsTrait
     protected function setJoinSub(string $type, $query, string $as, $first, string $operator = null, string $second = null)
     {
         $condition = func_get_args();
-        return $this->setJoin(array_shift($condition), [
+        return $this->realSetJoin(array_shift($condition), [
             array_shift($condition), array_shift($condition)
         ], $condition);
     }
@@ -75,7 +75,7 @@ trait QueryJoinsTrait
     public function setJoinSubWhere(string $type, $query, string $as, $first, string $operator = null, string $second = null)
     {
         $condition = func_get_args();
-        return $this->setJoin(array_shift($condition), [
+        return $this->realSetJoin(array_shift($condition), [
             array_shift($condition), array_shift($condition)
         ], $condition, true);
     }
