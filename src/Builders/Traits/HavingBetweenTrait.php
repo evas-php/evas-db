@@ -13,7 +13,7 @@ trait HavingBetweenTrait
     // ----------
 
     /**
-     * Установка having between.
+     * Добавление having between.
      * По умолчанию склейка через AND.
      * @param string столбец
      * @param array значения [min, max]
@@ -28,7 +28,7 @@ trait HavingBetweenTrait
     }
 
     /**
-     * Установка having OR between.
+     * Добавление having OR between.
      * @param string столбец
      * @param array значения [min, max]
      * @return self
@@ -39,7 +39,7 @@ trait HavingBetweenTrait
     }
 
     /**
-     * Установка having AND NOT between.
+     * Добавление having AND NOT between.
      * @param string столбец
      * @param array значения [min, max]
      * @return self
@@ -50,7 +50,7 @@ trait HavingBetweenTrait
     }
 
     /**
-     * Установка having OR NOT between.
+     * Добавление having OR NOT between.
      * @param string столбец
      * @param array значения [min, max]
      * @return self
@@ -65,7 +65,7 @@ trait HavingBetweenTrait
     // ----------
 
     /**
-     * Установка having between со значениями столбцов в качестве значений.
+     * Добавление having between со значениями столбцов в качестве значений.
      * По умолчанию склейка через AND.
      * @param string столбец
      * @param array столбцы из которых достать значение [min, max]
@@ -81,7 +81,7 @@ trait HavingBetweenTrait
     }
 
     /**
-     * Установка having OR between со значениями столбцов в качестве значений.
+     * Добавление having OR between со значениями столбцов в качестве значений.
      * @param string столбец
      * @param array столбцы из которых достать значение [min, max]
      * @return self
@@ -92,7 +92,7 @@ trait HavingBetweenTrait
     }
 
     /**
-     * Установка having AND NOT between со значениями столбцов в качестве значений.
+     * Добавление having AND NOT between со значениями столбцов в качестве значений.
      * @param string столбец
      * @param array столбцы из которых достать значение [min, max]
      * @return self
@@ -103,7 +103,7 @@ trait HavingBetweenTrait
     }
 
     /**
-     * Установка having OR NOT between со значениями столбцов в качестве значений.
+     * Добавление having OR NOT between со значениями столбцов в качестве значений.
      * @param string столбец
      * @param array столбцы из которых достать значение [min, max]
      * @return self
