@@ -8,14 +8,11 @@ namespace Evas\Db;
 
 use Evas\Db\Builders\QueryBuilder;
 use Evas\Db\Schema\TableSchema;
-use Evas\Db\Traits\QueryBuilderTrait;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
 
 class Table extends TableSchema
 {
-    use QueryBuilderTrait;
-
     /**
      * Начало сборки INSERT-запроса.
      * @param array|object|null значения записи/записей для сохранения с автосборкой
@@ -38,35 +35,6 @@ class Table extends TableSchema
     }
 
     // /**
-    //  * Начало сборки SELECT-запроса.
-    //  * @param string|null столбцы
-    //  * @return QueryBuilderInterface
-    //  */
-    // public function select(string $columns = null): QueryBuilderInterface
-    // {
-    //     return $this->db->select($this->name, $columns);
-    // }
-
-    // /**
-    //  * Начало сборки UPDATE-запроса.
-    //  * @param array|object значения записи
-    //  * @return QueryBuilderInterface
-    //  */
-    // public function update($row): QueryBuilderInterface
-    // {
-    //     return $this->db->update($this->name, $row);
-    // }
-
-    // /**
-    //  * Начало сборки DELETE-запроса.
-    //  * @return QueryBuilderInterface
-    //  */
-    // public function delete(): QueryBuilderInterface
-    // {
-    //     return $this->db->delete($this->name);
-    // }
-
-    // /**
     //  * Получение id последней вставленной записи.
     //  * @return int
     //  */
@@ -76,33 +44,18 @@ class Table extends TableSchema
     // }
 
     /**
-     * Получение максимального id записи.
-     * @return int
+     * Проброс методов QueryBuilder через магию php.
+     * @param string имя метода
+     * @param array|null аргументы
+     * @return mixed
      */
-    public function maxId(): int
-    {
-        $primaryKey = $this->primaryKey();
-        return intval($this->db->query(
-            "SELECT MAX(`$primaryKey`) FROM `$this->name`"
-        )->numericArray()[0]);
-    }
-
-    /**
-     * Получение количества записей в таблице.
-     * @return int
-     */
-    public function count(): int
-    {
-        $primaryKey = $this->primaryKey();
-        return intval($this->db->query(
-            "SELECT COUNT(`$primaryKey`) FROM `$this->name`"
-        )->numericArray()[0]);
-    }
-
     public function __call(string $name, array $args = null)
     {
         if (method_exists(QueryBuilder::class, $name)) {
-            return $this->buildQuery()->$name(...$args);
+            return (new QueryBuilder($this->db))->from($this->name)->$name(...$args);
         }
+        throw new \BadMethodCallException(sprintf(
+            'Call to undefined method %s()', __METHOD__
+        ));
     }
 }
