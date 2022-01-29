@@ -9,30 +9,15 @@ namespace Evas\Db\Builders\Traits;
 
 trait ForQueryAndJoinBuildersTrait
 {
-
     // ----------
     // WRAPS
     // ----------
 
-    // protected function wrap(string $value): string
-    // {
-    //     return $this->db->grammar()->wrap($value);
-    // }
-
-    // protected function wrapColumn(string $value): string
-    // {
-    //     return $this->db->grammar()->wrapColumn($value);
-    // }
-
-    // ----------
-    // WRAPS
-    // ----------
-
-    protected function wrap(string $value): string
-    {
-        return $this->db->grammar()->wrap($value);
-    }
-
+    /**
+     * Пробрасываем обёртку имени таблицы из грамматики.
+     * @param string имя таблицы
+     * @return string обёрнутое имя таблицы
+     */
     protected function wrapTable(string $value): string
     {
         return $this->db->grammar()->wrapTable($value);
@@ -42,12 +27,24 @@ trait ForQueryAndJoinBuildersTrait
     // Bindings
     // ----------
 
+    /**
+     * Добавление экранируемого значения.
+     * @param string назначение значения
+     * @param mixed значение
+     * @return self
+     */
     protected function addBinding(string $type, $value)
     {
         $this->bindings[$type][] = $value;
         return $this;
     }
 
+    /**
+     * Добавление экранируемых значений.
+     * @param string назначение значения
+     * @param array массив значений
+     * @return self
+     */
     protected function addBindings(string $type, array $values)
     {
         $this->bindings[$type] = array_merge($this->bindings[$type] ?? [], array_values($values));
@@ -58,7 +55,16 @@ trait ForQueryAndJoinBuildersTrait
     // Value & Operator Helpers
     // ----------
 
-    protected function prepareValueAndOperator($value, $operator, $useDefault = false)
+    /**
+     * Подготовка значения и оператора.
+     * Для методов, в которых можно опутить оператор сравения - "=".
+     * @param mixed значение
+     * @param mixed оператор
+     * @param bool|null использовать ли оператор в качестве значения
+     * @return array [значение, оператор]
+     * @throws \InvalidArgumentException
+     */
+    protected function prepareValueAndOperator($value, $operator, bool $useDefault = false): array
     {
         if ($useDefault) {
             return [$operator, '='];
@@ -72,7 +78,13 @@ trait ForQueryAndJoinBuildersTrait
         return [$value, $operator];
     }
 
-    protected function invalidValueAndOperator($value, $operator)
+    /**
+     * Проверка на неправильность значения и оператора.
+     * @param mixed значение
+     * @param mixed оператор
+     * @return bool
+     */
+    protected function invalidValueAndOperator($value, $operator): bool
     {
         /**
          * @todo Проверять операторы конкретной СУБД
@@ -86,7 +98,7 @@ trait ForQueryAndJoinBuildersTrait
     // ----------
 
     /**
-     * Установка from запросом.
+     * Установка from sql-сторокой.
      * @param string $sql
      * @param array|null значения для экранирования
      * @return self
@@ -98,7 +110,7 @@ trait ForQueryAndJoinBuildersTrait
     }
 
     /**
-     * Установка from таблицей или подзапросом.
+     * Установка from таблицей или sql-подзапросом.
      * @param string|\Closure|self|OrmQueryBuilder
      * @param string|null псевдоним
      * @return self
@@ -109,12 +121,12 @@ trait ForQueryAndJoinBuildersTrait
             return $this->fromSub($table, $as);
         }
         $table = $this->wrapTable($table);
-        $this->from = $as ? ("$table AS " . $this->wrap($as)) : $table;
+        $this->from = $as ? ("$table AS " . $this->wrapTable($as)) : $table;
         return $this;
     }
 
     /**
-     * Установка from подзапросом.
+     * Установка from sql-подзапросом.
      * @param \Closure|self|OrmQueryBuilder
      * @param string псевдоним
      * @return self
@@ -123,7 +135,7 @@ trait ForQueryAndJoinBuildersTrait
     {
         [$sql, $bindings] = $this->createSub($query);
         return $this->fromRaw(
-            "($sql) AS " . $this->wrap($as), $bindings
+            "($sql) AS " . $this->wrapTable($as), $bindings
         );
     }
 }
