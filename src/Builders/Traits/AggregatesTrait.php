@@ -1,10 +1,22 @@
 <?php
+/**
+ * Трейт сборки агрегатов.
+ * @package evas-php\evas-db
+ * @author Egor Vasyakin <egor@evas-php.com>
+ */
 namespace Evas\Db\Builders\Traits;
 
 trait AggregatesTrait
 {
-    // Set aggregates
+    // ----------
+    // Добавление получения агрегации в запрос
+    // ----------
 
+    /**
+     * Добавление агрегаций в запрос.
+     * @param array агрегаты
+     * @return self
+     */
     public function aggregates(array $aggregates)
     {
         foreach ($aggregates as $function => $columns) {
@@ -14,6 +26,12 @@ trait AggregatesTrait
         return $this;
     }
 
+    /**
+     * Добавление агрегации в запрос.
+     * @param string функция агрегирования (COUNT,SUM,MIN,MAX,AVG)
+     * @param array столбцы агрегации
+     * @return self
+     */
     public function aggregate(string $function, array $columns = ['*'])
     {
         $select = [];
@@ -25,65 +43,128 @@ trait AggregatesTrait
         return $this;
     }
 
-    public function count(string $column)
+    /**
+     * Агрегация количества значений в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function count(string ...$columns)
     {
-        return $this->aggregate('count', [$column]);
+        return $this->aggregate('count', $columns);
     }
 
-    public function sum(string $column)
+    /**
+     * Агрегация суммы значений в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function sum(string ...$columns)
     {
-        return $this->aggregate('sum', [$column]);
+        return $this->aggregate('sum', $columns);
     }
 
-    public function min(string $column)
+    /**
+     * Агрегация минимального значения в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function min(string ...$columns)
     {
-        return $this->aggregate('min', [$column]);
+        return $this->aggregate('min', $columns);
     }
 
-    public function max(string $column)
+    /**
+     * Агрегация максимального значения в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function max(string ...$columns)
     {
-        return $this->aggregate('max', [$column]);
+        return $this->aggregate('max', $columns);
     }
 
-    public function avg(string $column)
+    /**
+     * Агрегация среднего значения в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function avg(string ...$columns)
     {
-        return $this->aggregate('avg', [$column]);
+        return $this->aggregate('avg', $columns);
     }
 
-    // Get aggregates
+    // ----------
+    // Добавление агрегации с отправкой запроса.
+    // ----------
 
+    /**
+     * Получение агрегаций.
+     * @param array агрегаты
+     * @return self
+     */
     public function getAggregates(array $aggregates)
     {
         return $this->aggregates($aggregates)->get();
     }
 
+    /**
+     * Получение агрегации.
+     * @param array агрегаты
+     * @return self
+     */
     public function getAggregate(string $function, array $columns = ['*'])
     {
         return $this->aggregate($function, $columns)->get();
     }
 
-    public function getCount(string $column)
+
+    /**
+     * Получение агрегации количества значений в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function getCount(string ...$columns)
     {
-        return $this->getAggregate('count', [$column]);
+        return $this->getAggregate('count', $columns);
     }
 
-    public function getSum(string $column)
+    /**
+     * Получение агрегации суммы значений в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function getSum(string ...$columns)
     {
-        return $this->getAggregate('sum', [$column]);
+        return $this->getAggregate('sum', $columns);
     }
 
-    public function getMin(string $column)
+    /**
+     * Получение агрегации минимального значения в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function getMin(string ...$columns)
     {
-        return $this->getAggregate('min', [$column]);
+        return $this->getAggregate('min', $columns);
     }
 
-    public function getMax(string $column)
+    /**
+     * Получение агрегации максимального значения в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function getMax(string ...$columns)
     {
-        return $this->getAggregate('max', [$column]);
+        return $this->getAggregate('max', $columns);
     }
 
-    public function getAvg(string $column)
+    /**
+     * Получение агрегации среднего значения в столбце.
+     * @param string столбец
+     * @return self
+     */
+    public function getAvg(string ...$columns)
     {
-        return $this->getAggregate('avg', [$column]);
+        return $this->getAggregate('avg', $columns);
     }
 }
