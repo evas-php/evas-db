@@ -8,17 +8,13 @@ namespace Evas\Db;
 
 use Evas\Db\Base\BaseDatabase;
 use Evas\Db\Builders\InsertBuilder;
-use Evas\Db\Traits\QueryBuilderTrait;
-use Evas\Db\Traits\DatabaseIdentityMapTrait;
-use Evas\Db\Traits\DatabaseTableTrait;
-use Evas\Db\Traits\DatabaseSchemaCacheTrait;
-use Evas\Db\Interfaces\DatabaseQueryBuildersInterface;
-use Evas\Db\Interfaces\QueryResultInterface;
-
-use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Grammars\Grammar;
 use Evas\Db\Grammars\MysqlGrammar;
 use Evas\Db\Grammars\PgsqlGrammar;
+use Evas\Db\Interfaces\QueryResultInterface;
+use Evas\Db\Traits\DatabaseIdentityMapTrait;
+use Evas\Db\Traits\DatabaseTableTrait;
+use Evas\Db\Traits\DatabaseSchemaCacheTrait;
 
 class Database extends BaseDatabase
 {
@@ -27,8 +23,31 @@ class Database extends BaseDatabase
      * классов таблиц, маппинга идентичности сущностей, сборки запросов
      * кэша схемы базы данных.
      */
-    use DatabaseTableTrait, DatabaseIdentityMapTrait, QueryBuilderTrait;
+    use DatabaseTableTrait, DatabaseIdentityMapTrait;
     use DatabaseSchemaCacheTrait;
+
+    /** @static array маппинг расширенных грамматик СУБД */
+    public static $grammarByDrivers = [
+        'mysql' => MysqlGrammar::class,
+        'pgsql' => PgsqlGrammar::class,
+    ];
+
+    /** @var Grammar грамматика СУБД для соединения */
+    protected $grammar;
+
+
+    /**
+     * Получение грамматики СУБД для соединения.
+     * @return Grammar
+     */
+    public function grammar(): Grammar
+    {
+        if (!$this->grammar) {
+            $grammar = static::$grammarByDrivers[$this->driver] ?? Grammar::class;
+            $this->grammar = new $grammar($this);
+        }
+        return $this->grammar;
+    }
 
     /**
      * Начало сборки INSERT-запроса.
@@ -54,21 +73,5 @@ class Database extends BaseDatabase
         $ib = $this->insert($tbl);
         if (!empty($columns)) $ib->keys($columns);
         return $ib->rows($rows)->query();
-    }
-
-    protected $grammar;
-
-    public static $grammarByDrivers = [
-        'mysql' => MysqlGrammar::class,
-        'pgsql' => PgsqlGrammar::class,
-    ];
-
-    public function grammar(): Grammar
-    {
-        if (!$this->grammar) {
-            $grammar = static::$grammarByDrivers[$this->driver] ?? Grammar::class;
-            $this->grammar = new $grammar($this);
-        }
-        return $this->grammar;
     }
 }
