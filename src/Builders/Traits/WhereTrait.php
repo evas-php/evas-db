@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки базовых where.
+ * Трейт добавления базовых where.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

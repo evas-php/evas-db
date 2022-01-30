@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки where between.
+ * Трейт добавления where between.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

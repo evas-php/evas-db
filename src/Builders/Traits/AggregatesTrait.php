@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки агрегатов.
+ * Трейт добавления агрегатов.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

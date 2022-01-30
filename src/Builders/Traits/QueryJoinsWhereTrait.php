@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки joins с WHERE.
+ * Трейт добавления joins с WHERE.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

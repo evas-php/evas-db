@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки условий базирующихся на дате.
+ * Трейт добавления условий базирующихся на дате.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

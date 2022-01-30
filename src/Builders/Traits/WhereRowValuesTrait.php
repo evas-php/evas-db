@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки where с проверкой соответствия столбцов значениям.
+ * Трейт добавления where с проверкой соответствия столбцов значениям.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

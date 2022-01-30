@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки joins.
+ * Трейт добавления joins.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

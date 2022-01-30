@@ -1,6 +1,6 @@
 <?php
 /**
- * Трейт сборки unions.
+ * Трейт добавления unions.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
