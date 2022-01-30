@@ -7,7 +7,9 @@
 namespace Evas\Db;
 
 use Evas\Db\Base\BaseDatabase;
+use Evas\Db\Builders\BaseQueryBuilder;
 use Evas\Db\Builders\InsertBuilder;
+use Evas\Db\Builders\QueryBuilder;
 use Evas\Db\Grammars\Grammar;
 use Evas\Db\Grammars\MysqlGrammar;
 use Evas\Db\Grammars\PgsqlGrammar;
@@ -15,6 +17,10 @@ use Evas\Db\Interfaces\QueryResultInterface;
 use Evas\Db\Traits\DatabaseIdentityMapTrait;
 use Evas\Db\Traits\DatabaseTableTrait;
 use Evas\Db\Traits\DatabaseSchemaCacheTrait;
+
+if (!defined('EVAS_DB_QUERY_BUILDER_CLASS')) {
+    define('EVAS_DB_QUERY_BUILDER_CLASS', QueryBuilder::class);
+}
 
 class Database extends BaseDatabase
 {
@@ -34,6 +40,9 @@ class Database extends BaseDatabase
     /** @var Grammar грамматика СУБД для соединения */
     protected $grammar;
 
+    /** @var BaseDatabase класс сборщика запросов */
+    public $queryBuilderClass = EVAS_DB_QUERY_BUILDER_CLASS;
+
 
     /**
      * Получение грамматики СУБД для соединения.
@@ -46,6 +55,15 @@ class Database extends BaseDatabase
             $this->grammar = new $grammar($this);
         }
         return $this->grammar;
+    }
+
+    /**
+     * Получение нового экземпляра сборщика запросов.
+     * @return BaseQueryBuilder
+     */
+    public function newQueryBuilder(): BaseQueryBuilder
+    {
+        return new $this->queryBuilderClass($this);
     }
 
     /**
