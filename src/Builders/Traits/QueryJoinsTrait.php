@@ -1,4 +1,9 @@
 <?php
+/**
+ * Трейт сборки joins.
+ * @package evas-php\evas-db
+ * @author Egor Vasyakin <egor@evas-php.com>
+ */
 namespace Evas\Db\Builders\Traits;
 
 use Evas\Db\Builders\JoinBuilder;
@@ -8,6 +13,16 @@ trait QueryJoinsTrait
     /** @var array joins */
     public $joins = [];
 
+    // ----------
+    // JOIN Helpers
+    // ----------
+
+    /**
+     * Создание join.
+     * @param string тип join
+     * @param array [таблица] или [подзапрос, псевдоним]
+     * @return JoinBuilder
+     */
     protected function makeJoin(string $type, array $table): JoinBuilder
     {
         @[$query, $as] = $table;
@@ -22,6 +37,13 @@ trait QueryJoinsTrait
         return $join;
     }
 
+    /**
+     * Завершение сборки join.
+     * @param JoinBuilder сборщик join
+     * @param array условие
+     * @param bool|null использовать ли WHERE вместо ON
+     * @return self
+     */
     protected function endJoin(JoinBuilder $join, array $condition, bool $where = false)
     {
         @[$first, $operator, $second] = $condition;
@@ -35,6 +57,11 @@ trait QueryJoinsTrait
         return $this->addJoin($join);
     }
 
+    /**
+     * Добавление join.
+     * @param JoinBuilder сборщик join
+     * @return self
+     */
     protected function addJoin(JoinBuilder $join)
     {
         $bindings = $join->getBindings();
@@ -43,6 +70,14 @@ trait QueryJoinsTrait
         return $this;
     }
 
+    /**
+     * Реальная установка всевозможных join.
+     * @param string тип join
+     * @param array [таблица] или [подзапрос, псевдоним]
+     * @param array условие
+     * @param bool|null использовать ли WHERE вместо ON
+     * @return self
+     */
     protected function realSetJoin(string $type, array $table, array $condition, bool $where = false)
     {
         return $this->endJoin(
@@ -51,19 +86,31 @@ trait QueryJoinsTrait
         );
     }
 
+    /**
+     * Установка JOIN ON.
+     * @param string тип join
+     * @param string таблица
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     protected function setJoin(string $type, string $table, $first, string $operator = null, string $second = null)
     {
         $condition = func_get_args();
         return $this->realSetJoin(array_shift($condition), [array_shift($condition)], $condition);
     }
 
-
-    protected function setJoinWhere(string $type, string $table, $first, string $operator = null, string $second = null)
-    {
-        $condition = func_get_args();
-        return $this->realSetJoin(array_shift($condition), [array_shift($condition)], $condition, true);
-    }
-
+    /**
+     * Установка JOIN ON с подзапросом таблицы.
+     * @param string тип join
+     * @param string|Queryable подзапрос таблицы
+     * @param string псевдоним
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     protected function setJoinSub(string $type, $query, string $as, $first, string $operator = null, string $second = null)
     {
         $condition = func_get_args();
@@ -72,134 +119,160 @@ trait QueryJoinsTrait
         ], $condition);
     }
 
-    public function setJoinSubWhere(string $type, $query, string $as, $first, string $operator = null, string $second = null)
-    {
-        $condition = func_get_args();
-        return $this->realSetJoin(array_shift($condition), [
-            array_shift($condition), array_shift($condition)
-        ], $condition, true);
-    }
 
-
+    // ----------
     // INNER JOIN
+    // ----------
 
+    /**
+     * Добавление INNER JOIN ON.
+     * @param string таблица
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function join(string $table, $first, string $operator = null, string $second = null)
     {
         return $this->setJoin('INNER', ...func_get_args());
     }
 
-    public function joinWhere(string $table, $first, string $operator = null, string $second = null)
-    {
-        return $this->setJoinWhere('INNER', ...func_get_args());
-    }
-
+    /**
+     * Добавление INNER JOIN ON с подзапросом таблицы.
+     * @param string|Queryable подзапрос таблицы
+     * @param string псевдоним
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function joinSub($query, string $as, $first, string $operator = null, string $second = null)
     {
         return $this->setJoinSub('INNER', ...func_get_args());
     }
 
-    public function joinSubWhere($query, string $as, $first, string $operator = null, string $second = null)
-    {
-        return $this->setJoinSubWhere('INNER', ...func_get_args());
-    }
-
-    public function joinUsing(string $table, string $column, string $type = 'INNER')
-    {
-        return $this->setJoin($type, [$table], [$column]);
-    }
-
-    public function joinSubUsing($query, string $as, string $column, string $type = 'INNER')
-    {
-        return $this->setJoin($type, [$query, $as], [$column]);
-    }
-
-
+    // ----------
     // LEFT JOIN
+    // ----------
 
+    /**
+     * Добавление LEFT JOIN ON.
+     * @param string таблица
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function leftJoin(string $table, $first, string $operator = null, string $second = null)
     {
         return $this->setJoin('LEFT', ...func_get_args());
     }
 
+    /**
+     * Добавление LEFT JOIN ON с подзапросом таблицы.
+     * @param string|Queryable подзапрос таблицы
+     * @param string псевдоним
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function leftJoinSub($query, string $as, $first, string $operator = null, string $second = null)
     {
         return $this->setJoinSub('LEFT', ...func_get_args());
     }
 
-    public function leftJoinUsing(string $table, string $column)
-    {
-        return $this->joinUsing($table, $column, 'LEFT');
-    }
-
-    public function leftJoinSubUsing($query, string $as, string $column)
-    {
-        return $this->joinSubUsing($query, $as, $column, 'LEFT');
-    }
-
-
+    // ----------
     // LEFT OUTER JOIN
+    // ----------
 
+    /**
+     * Добавление LEFT OUTER JOIN ON.
+     * @param string таблица
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function leftOuterJoin(string $table, $first, string $operator = null, string $second = null)
     {
         return $this->setJoin('LEFT OUTER', ...func_get_args());
     }
 
+    /**
+     * Добавление LEFT OUTER JOIN ON с подзапросом таблицы.
+     * @param string|Queryable подзапрос таблицы
+     * @param string псевдоним
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function leftOuterJoinSub($query, string $as, $first, string $operator = null, string $second = null)
     {
         return $this->setJoinSub('LEFT OUTER', ...func_get_args());
     }
 
-    public function leftOuterJoinUsing(string $table, string $column)
-    {
-        return $this->joinUsing($table, $column, 'LEFT OUTER');
-    }
-
-    public function leftOuterJoinSubUsing($query, string $as, string $column)
-    {
-        return $this->joinSubUsing($query, $as, $column, 'LEFT OUTER');
-    }
-
+    // ----------
     // RIGHT JOIN
+    // ----------
 
+    /**
+     * Добавление RIGHT JOIN ON.
+     * @param string таблица
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function rightJoin(string $table, $first, string $operator = null, string $second = null)
     {
         return $this->setJoin('RIGHT', ...func_get_args());
     }
 
+    /**
+     * Добавление RIGHT JOIN ON с подзапросом таблицы.
+     * @param string|Queryable подзапрос таблицы
+     * @param string псевдоним
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function rightJoinSub($query, string $as, $first, string $operator = null, string $second = null)
     {
         return $this->setJoinSub('RIGHT', ...func_get_args());
     }
 
-    public function rightJoinUsing(string $table, string $column)
-    {
-        return $this->joinUsing($table, $column, 'RIGHT');
-    }
 
-    public function rightJoinSubUsing($query, string $as, string $column)
-    {
-        return $this->joinSubUsing($query, $as, $column, 'RIGHT');
-    }
-
+    // ----------
     // RIGHT OUTER JOIN
+    // ----------
 
+    /**
+     * Добавление RIGHT OUTER JOIN ON.
+     * @param string таблица
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function rightOuterJoin(string $table, $first, string $operator = null, string $second = null)
     {
         return $this->setJoin('RIGHT OUTER', ...func_get_args());
     }
 
+    /**
+     * Добавление RIGHT OUTER JOIN ON с подзапросом таблицы.
+     * @param string|Queryable подзапрос таблицы
+     * @param string псевдоним
+     * @param string|\Closure первый столбец или колбек для JoinBuilder
+     * @param string|null оператор, второй столбец или null
+     * @param string|null второй столбец или null
+     * @return self
+     */
     public function rightOuterJoinSub($query, string $as, $first, string $operator = null, string $second = null)
     {
         return $this->setJoinSub('RIGHT OUTER', ...func_get_args());
-    }
-
-    public function rightOuterJoinUsing(string $table, string $column)
-    {
-        return $this->joinUsing($table, $column, 'RIGHT OUTER');
-    }
-
-    public function rightOuterJoinSubUsing($query, string $as, string $column)
-    {
-        return $this->joinSubUsing($query, $as, $column, 'RIGHT OUTER');
     }
 }
