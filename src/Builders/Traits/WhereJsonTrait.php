@@ -1,8 +1,18 @@
 <?php
+/**
+ * Трейт сборки where json.
+ * @package evas-php\evas-db
+ * @author Egor Vasyakin <egor@evas-php.com>
+ */
 namespace Evas\Db\Builders\Traits;
 
 trait WhereJsonTrait
 {
+    /**
+     * @todo Доделать, протестировать!
+     */
+
+    
     public function whereJsonContains(string $column, $value, bool $isOr = false, bool $isNot = false)
     {
         return $this->pushWhere('JsonContains', compact('column', 'value', 'isOr', 'isNot'));
