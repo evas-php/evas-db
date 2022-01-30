@@ -80,6 +80,12 @@ class JoinBuilder implements JoinBuilderInterface
         return $this;
     }
 
+    /**
+     * Добавление On условия в сборку.
+     * @param string тип сборки
+     * @param array данные условия
+     * @return self
+     */
     protected function pushOn(string $type, array $on)
     {
         $on['type'] = $type;
