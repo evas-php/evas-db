@@ -41,13 +41,13 @@ class QueryBuilder extends BaseQueryBuilder
     use WhereBetweenTrait;
     /** Where Exists */
     use WhereExistsTrait;
-    /** Where Json */
-    use WhereJsonTrait;
     /** Where для сопоставления столбцов и значений */
     use WhereRowValuesTrait;
     /** Поддержка where */
     use WhereTrait;
 
+    /** Where Json */
+    // use WhereJsonTrait;
     /**
      * @todo Locks
      */
