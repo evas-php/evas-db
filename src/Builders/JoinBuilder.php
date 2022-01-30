@@ -159,19 +159,26 @@ class JoinBuilder implements JoinBuilderInterface
     }
 
     /**
-     * Получение sql.
+     * Получение sql-запроса.
      * @return string
      */
     public function getSql(): string
     {
         return $this->queryBuilder->db->grammar()->buildJoin($this);
     }
-
+    /**
+     * Получение экранированных значений.
+     * @return array
+     */
     public function getBindings(): array
     {
         return $this->bindings['on'] ?? [];
     }
 
+    /**
+     * Получение sql-запроса и экранируемых значений.
+     * @return array [sql, bindings]
+     */
     public function getSqlAndBindings(): array
     {
         return [$this->getSql(), $this->getBindings()];
