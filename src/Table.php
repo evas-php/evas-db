@@ -6,9 +6,7 @@
  */
 namespace Evas\Db;
 
-use Evas\Db\Builders\QueryBuilder;
 use Evas\Db\Schema\TableSchema;
-use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
 
 class Table extends TableSchema
@@ -44,15 +42,16 @@ class Table extends TableSchema
     // }
 
     /**
-     * Проброс методов QueryBuilder через магию php.
+     * Проброс методов сборщика запросов через магию php.
      * @param string имя метода
      * @param array|null аргументы
      * @return mixed
      */
     public function __call(string $name, array $args = null)
     {
-        if (method_exists(QueryBuilder::class, $name)) {
-            return (new QueryBuilder($this->db))->from($this->name)->$name(...$args);
+        $builder = $this->db->newQueryBuilder();
+        if (method_exists($builder, $name)) {
+            return $builder->from($this->name)->$name(...$args);
         }
         throw new \BadMethodCallException(sprintf(
             'Call to undefined method %s()', __METHOD__
