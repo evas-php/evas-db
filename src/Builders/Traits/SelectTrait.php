@@ -1,4 +1,9 @@
 <?php
+/**
+ * Трейт добавления запрашиваемых стобцов.
+ * @package evas-php\evas-db
+ * @author Egor Vasyakin <egor@evas-php.com>
+ */
 namespace Evas\Db\Builders\Traits;
 
 trait SelectTrait
@@ -9,7 +14,7 @@ trait SelectTrait
 
     /**
      * Установка запрашиваемых стобцов с экранированием.
-     * @param string|\Closure|self|OrmQueryBuilder|array
+     * @param string|\Closure|self|array
      * @param array|null значения для экранирования
      * @return self
      */
@@ -24,7 +29,7 @@ trait SelectTrait
 
     /**
      * Добавление запрашиваемых стобцов с экранированием.
-     * @param string|\Closure|self|OrmQueryBuilder|array
+     * @param string|\Closure|self|array
      * @param array|null значения для экранирования
      * @return self
      */
@@ -72,7 +77,7 @@ trait SelectTrait
 
     /**
      * Подзапрос запрашиваемых столбцов.
-     * @param string|\Closure|self|OrmQueryBuilder
+     * @param string|\Closure|self
      * @param string алиас
      */
     public function selectSub($query, string $as)
@@ -90,7 +95,7 @@ trait SelectTrait
 
     /**
      * Установка distinct.
-     * @param array|string|bool columns|column|all for distinct
+     * @param array|string|bool|null columns|column|all for distinct
      * @return self
      */
     public function distinct()
