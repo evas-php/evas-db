@@ -103,6 +103,11 @@ class BaseQueryBuilder implements QueryBuilderInterface
     // WRAPS
     // ----------
 
+    /**
+     * Проброс оборачивания столбца из грамматики.
+     * @param string столбец
+     * @return string обёрнутый столбец
+     */
     protected function wrapColumn(string $value): string
     {
         return $this->db->grammar()->wrapColumn($value);
@@ -141,7 +146,7 @@ class BaseQueryBuilder implements QueryBuilderInterface
 
     /**
      * Создание подзапроса с получением sql и экранируемых значений.
-     * @param \Closure|self|OrmQueryBuilder
+     * @param \Closure|self
      * @return array [sql, bindings]
      * @throws \InvalidArgumentException
      */
@@ -167,8 +172,8 @@ class BaseQueryBuilder implements QueryBuilderInterface
 
     /**
      * Смена имени базы для подзапроса к другой базе.
-     * @param self|OrmQueryBuilder
-     * @return self|OrmQueryBuilder
+     * @param self
+     * @return self
      */
     protected function changeDbNameIfCrossDatabaseQuery($query)
     {
@@ -187,7 +192,7 @@ class BaseQueryBuilder implements QueryBuilderInterface
     // ----------
 
     /**
-     * Добавление where условия.
+     * Добавление where условия в сборку.
      * @param string тип where
      * @param array параметры условия
      * @return self
