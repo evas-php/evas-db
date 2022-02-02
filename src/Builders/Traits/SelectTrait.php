@@ -43,11 +43,12 @@ trait SelectTrait
 
     /**
      * Установка запрашиваемых столбцов с затиранием старых.
-     * @param mixed столбцы
+     * @param mixed|null столбцы
      * @return self
      */
-    public function select($columns = ['*'])
+    public function select($columns = null)
     {
+        if (empty($columns)) $columns = ['*'];
         $this->columns = [];
         $this->bindings['select'] = [];
         return $this->addSelect(...func_get_args());
