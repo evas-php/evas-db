@@ -67,6 +67,6 @@ trait DatabaseTableTrait
      */
     public function maxId(string $table): int
     {
-        return $this->table($table)->maxId();
+        return $this->table($table)->getMax('id');
     }
 }
