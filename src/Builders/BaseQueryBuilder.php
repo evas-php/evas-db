@@ -398,22 +398,6 @@ class BaseQueryBuilder implements QueryBuilderInterface
     // ----------
 
     /**
-     * Сборка WHERE
-     */
-    // public function buildWheres(): string
-    // {
-    //     return $this->db->grammar()->buildWheres($this->wheres);
-    // }
-
-    /**
-     * Сборка HAVING
-     */
-    // public function buildHavings(): string
-    // {
-    //     return $this->db->grammar()->buildWheres($this->havings);
-    // }
-
-    /**
      * Получение первичного ключа таблицы.
      * @return string
      */
