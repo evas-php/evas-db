@@ -67,7 +67,7 @@ class Database extends BaseDatabase
     }
 
     /**
-     * Начало сборки INSERT-запроса.
+     * Вставка записи или начало сборки sql-запроса на вставку.
      * @param string имя таблицы
      * @param array|object|null значения записи для сохранения с автосборкой
      * @return InsertBuilder|QueryResultInterface
@@ -90,5 +90,20 @@ class Database extends BaseDatabase
         $ib = $this->insert($tbl);
         if (!empty($columns)) $ib->keys($columns);
         return $ib->rows($rows)->query();
+    }
+
+    /**
+     * Начало сборки SELECT-запроса через сборщик запросов.
+     * @param string таблица
+     * @param array|string|null столбцы
+     * @return BaseQueryBuilder
+     */
+    public function select(string $table, $columns = null): BaseQueryBuilder
+    {
+        if (!is_array($columns) && !is_null($columns)) {
+            $columns =  func_get_args();
+            $table = array_shift($columns);
+        }
+        return $this->table($table)->select($columns);
     }
 }
