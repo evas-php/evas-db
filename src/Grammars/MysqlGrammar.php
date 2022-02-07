@@ -32,7 +32,7 @@ class MysqlGrammar extends Grammar
     protected function buildWhereJsonContains(array $where)
     {
         [$column, $path] = $this->parseJsonColumnAndPath($where['column']);
-        return "{$this->getNot($where)} JSON_CONTAINS({$this->wrap($column)}, ?, {$path})";
+        return "{$this->getNot($where)} JSON_CONTAINS({$this->wrapColumn($column)}, ?, {$path})";
     }
 
     protected function buildWhereJsonContainsPath(array $where)
@@ -44,13 +44,13 @@ class MysqlGrammar extends Grammar
         }
         $paths = implode(', ', $paths);
         $find = $where['isOne'] ? 'one' : 'all';
-        return "{$this->getNot($where)} JSON_CONTAINS_PATH({$this->wrap($column)}, '{$find}', {$paths})";
+        return "{$this->getNot($where)} JSON_CONTAINS_PATH({$this->wrapColumn($column)}, '{$find}', {$paths})";
     }
 
     protected function buildWhereJsonLength(array $where)
     {
         [$column, $path] = $this->parseJsonColumnAndPath($where['column']);
-        $parts = $this->wrap($column);
+        $parts = $this->wrapColumn($column);
         if ($path) $parts .= ", $path";
         return "JSON_LENGTH({$parts})";
     }
