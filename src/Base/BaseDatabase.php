@@ -48,6 +48,9 @@ class BaseDatabase implements DatabaseInterface
         'serialize' => '\serialize', 
     ];
 
+    /** @var string имя для идентификации соединения в менеджере соединений */
+    public $publicName;
+
     /** @var string драйвер */
     public $driver = EVAS_DB_DRIVER;
     /** @var string хост */
