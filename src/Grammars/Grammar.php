@@ -96,20 +96,20 @@ class Grammar
     // Build query from BaseQueryBuilder
     // ----------
 
-    const BUILD_QUERY_FUNCS = [
-        'select' => 'buildSelect',
-        'update' => 'buildUpdate',
-        'delete' => 'buildDelete',
-    ];
+    // const BUILD_QUERY_FUNCS = [
+    //     'select' => 'buildSelect',
+    //     'update' => 'buildUpdate',
+    //     'delete' => 'buildDelete',
+    // ];
 
-    public function buildQueryFromBuilder(BaseQueryBuilder &$builder): string
-    {
-        if (empty($builder->from)) {
-            throw new \InvalidArgumentException('Table name not exists');
-        }
-        $func = static::BUILD_QUERY_FUNCS[$builder->type] ?? static::BUILD_QUERY_FUNCS['select'];
-        return $this->{$func}($builder);
-    }
+    // public function buildQueryFromBuilder(BaseQueryBuilder &$builder): string
+    // {
+    //     if (empty($builder->from)) {
+    //         throw new \InvalidArgumentException('Table name not exists');
+    //     }
+    //     $func = static::BUILD_QUERY_FUNCS[$builder->type] ?? static::BUILD_QUERY_FUNCS['select'];
+    //     return $this->{$func}($builder);
+    // }
 
 
     public function buildQuery(BaseQueryBuilder &$builder): string
@@ -160,34 +160,34 @@ class Grammar
         return $sql;
     }
 
-    // ----------
-    // Build update
-    // ----------
+    // // ----------
+    // // Build update
+    // // ----------
 
-    public function buildUpdate(BaseQueryBuilder &$builder): string
-    {
-        // 
-    }
+    // public function buildUpdate(BaseQueryBuilder &$builder): string
+    // {
+    //     // 
+    // }
 
-    // ----------
-    // Build delete
-    // ----------
+    // // ----------
+    // // Build delete
+    // // ----------
 
-    public function buildDelete(BaseQueryBuilder &$builder): string
-    {
-        // 
-    }
+    // public function buildDelete(BaseQueryBuilder &$builder): string
+    // {
+    //     // 
+    // }
 
 
 
-    // ----------
-    // Build select
-    // ----------
+    // // ----------
+    // // Build select
+    // // ----------
 
-    public function buildSelect(BaseQueryBuilder &$builder): string
-    {
-        // 
-    }
+    // public function buildSelect(BaseQueryBuilder &$builder): string
+    // {
+    //     // 
+    // }
 
 
 
@@ -318,7 +318,7 @@ class Grammar
     {
         $sql = "$join->type JOIN";
         if (!empty($join->as)) {
-            $sql .= " ({$join->from}) AS {$this->wrap($join->as)}";
+            $sql .= " ({$join->from}) AS {$this->wrapTable($join->as)}";
         } else {
             $sql .= " {$this->wrapTable($join->from)}";
         }
