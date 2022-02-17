@@ -39,7 +39,7 @@ trait AggregatesTrait
             // $as = strtolower($function) . "_{$column}";
             // $aggregates[$as] = strtoupper($function) . "({$this->wrapColumn($column)})";
             // $aggregates[] = strtoupper($function) . "({$this->wrapColumn($column)}) AS {$this->wrapColumn($as)}";
-            $as = $this->wrapColumn(strtolower($function) . "_{$column}");
+            $as = $this->wrapColumn(strtolower($function) . '_' . str_replace('.', '_', $column));
             $col = strtoupper($function) . "({$this->wrapColumn($column)})";
             $aggregates[] = "$col AS $as";
         }
