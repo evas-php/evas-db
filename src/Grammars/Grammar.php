@@ -309,7 +309,7 @@ class Grammar
     {
         $sql = ' ';
         foreach ($joins as $i => &$join) {
-            if ($i > 0) $sql += ' ';
+            if ($i > 0) $sql .= ' ';
             $sql .= $join->getSql();
         }
         return $sql;
@@ -319,7 +319,7 @@ class Grammar
     {
         $sql = "$join->type JOIN";
         if (!empty($join->as)) {
-            $sql .= " ({$join->from}) AS {$this->wrapTable($join->as)}";
+            $sql .= " {$join->from} AS {$this->wrapTable($join->as)}";
         } else {
             $sql .= " {$this->wrapTable($join->from)}";
         }
