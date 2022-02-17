@@ -161,7 +161,7 @@ class BaseQueryBuilder implements QueryBuilderInterface
             $query = $this->changeDbNameIfCrossDatabaseQuery($query);
             return [$query->getSql(), $query->getBindings()];
         } else if (is_string($query)) {
-            $query = preg_match('/^\w+$/', $query) ? $this->wrapColumn($query) : "($query)";
+            $query = preg_match('/^\w+(\.\w+)?$/u', $query) ? $this->wrapColumn($query) : "($query)";
             return [$query, []];
         } else {
             throw new \InvalidArgumentException(
@@ -492,15 +492,15 @@ class BaseQueryBuilder implements QueryBuilderInterface
      */
     public function get($columns = null): ?array
     {
-        if ($columns) $this->select(...func_get_args());
+        if ($columns) $this->addSelect(...func_get_args());
         return $this->query()->assocArrayAll();
     }
 
     /**
      * Получение одной записи.
-     * @return array
+     * @return array|null
      */
-    public function one(): ?array
+    public function one()
     {
         return $this->limit(1)->query()->assocArray();
     }
