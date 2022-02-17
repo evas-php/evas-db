@@ -318,11 +318,7 @@ class Grammar
     public function buildJoin($join): string
     {
         $sql = "$join->type JOIN";
-        if (!empty($join->as)) {
-            $sql .= " {$join->from} AS {$this->wrapTable($join->as)}";
-        } else {
-            $sql .= " {$this->wrapTable($join->from)}";
-        }
+        $sql .= ' ' . $join->from;
         if (count($join->on)) {
             $sql .= ' ON ' . $this->buildWheres($join->on);
         }

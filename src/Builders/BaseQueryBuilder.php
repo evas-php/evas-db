@@ -6,14 +6,14 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Db\Builders\Traits\ForQueryAndJoinBuildersTrait;
+use Evas\Db\Builders\AbsractQueryBuilder;
 use Evas\Db\Interfaces\DatabaseInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 
-class BaseQueryBuilder implements QueryBuilderInterface
+class BaseQueryBuilder extends AbsractQueryBuilder implements QueryBuilderInterface
 {
     /** Подключаем вспомогательные методы для сборщика */
-    use ForQueryAndJoinBuildersTrait;
+    // use ForQueryAndJoinBuildersTrait;
 
     /** @var array доступные операторы */
     public static $operators = [
@@ -89,51 +89,9 @@ class BaseQueryBuilder implements QueryBuilderInterface
         $this->db = $db;
     }
 
-    /**
-     * Проверка на доступность к подзапросам.
-     * @param mixed проверяемая переменная
-     * @return bool
-     */
-    protected function isQueryable($query): bool
-    {
-        return $query instanceof \Closure || $query instanceof self;
-    }
-
-    // ----------
-    // WRAPS
-    // ----------
-
-    /**
-     * Проброс оборачивания столбца из грамматики.
-     * @param string столбец
-     * @return string обёрнутый столбец
-     */
-    protected function wrapColumn(string $value): string
-    {
-        return $this->db->grammar()->wrapColumn($value);
-    }
-
     // ----------
     // SUB QUERIES
     // ----------
-
-    /**
-     * Создание нового экземпляра сборщика с тем же соединением.
-     * @return static
-     */
-    public function newQuery()
-    {
-        return new static($this->db);
-    }
-
-    /**
-     * Создание экземпляра сборщика для подзапроса.
-     * @return static
-     */
-    protected function forSubQuery()
-    {
-        return $this->newQuery();
-    }
 
     /**
      * Создание нового экземпляра сборщика для подзапроса в той же таблице.
@@ -143,49 +101,6 @@ class BaseQueryBuilder implements QueryBuilderInterface
     {
         return $this->forSubQuery()->from($this->from);
     }
-
-    /**
-     * Создание подзапроса с получением sql и экранируемых значений.
-     * @param \Closure|self
-     * @return array [sql, bindings]
-     * @throws \InvalidArgumentException
-     */
-    protected function createSub($query): array
-    {
-        if ($query instanceof \Closure) {
-            $cb = $query;
-            $cb($query = $this->forSubQuery());
-        }
-        // if ($query instanceof self || $query instanceof EloquentBuilder || $query instanceof Relation) {
-        if ($query instanceof self) {
-            $query = $this->changeDbNameIfCrossDatabaseQuery($query);
-            return [$query->getSql(), $query->getBindings()];
-        } else if (is_string($query)) {
-            $query = preg_match('/^\w+(\.\w+)?$/u', $query) ? $this->wrapColumn($query) : "($query)";
-            return [$query, []];
-        } else {
-            throw new \InvalidArgumentException(
-                'A subquery must be a query builder instance, a Closure, or a string.'
-            );
-        }
-    }
-
-    /**
-     * Смена имени базы для подзапроса к другой базе.
-     * @param self
-     * @return self
-     */
-    protected function changeDbNameIfCrossDatabaseQuery($query)
-    {
-        if ($query->db->dbname !== $this->db->dbname) {
-            $dbname = $query->db->dbname;
-            if (strpos($query->from, $dbname) !== 0 && strpos($query->from, '.') === false) {
-                $query->from($dbname.'.'.$query->from);
-            }
-        }
-        return $query;
-    }
-
 
     // ----------
     // WHERES

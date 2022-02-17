@@ -26,15 +26,7 @@ trait QueryJoinsTrait
     protected function makeJoin(string $type, array $table): JoinBuilder
     {
         @[$query, $as] = $table;
-        if ($as) {
-            [$sql, $values] = $this->createSub($query);
-            $this->addBindings('join', $values);
-            $join = new JoinBuilder($this, $type, $sql);
-            $join->as($as);
-        } else {
-            $join = new JoinBuilder($this, $type, $query);
-        }
-        return $join;
+        return new JoinBuilder($this, $type, $query, $as);
     }
 
     /**

@@ -6,16 +6,16 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Db\Builders\Traits\ForQueryAndJoinBuildersTrait;
+use Evas\Db\Builders\AbsractQueryBuilder;
 use Evas\Db\Builders\QueryBuilder;
 use Evas\Db\Builders\QueryValuesTrait;
 use Evas\Db\Interfaces\JoinBuilderInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 
-class JoinBuilder implements JoinBuilderInterface
+class JoinBuilder extends AbsractQueryBuilder implements JoinBuilderInterface
 {
     /** Подключаем вспомогательные методы для сборщика */
-    use ForQueryAndJoinBuildersTrait;
+    // use ForQueryAndJoinBuildersTrait;
 
     /** @static array поддерживаемые типы джоинов */
     protected static $types = [
@@ -30,6 +30,9 @@ class JoinBuilder implements JoinBuilderInterface
 
     /** @var QueryBuilder */
     protected $queryBuilder;
+
+    /** @var DatabaseInterface соединение с базой данных */
+    protected $db;
 
     /** @var string тип склейки */
     public $type;
@@ -58,7 +61,7 @@ class JoinBuilder implements JoinBuilderInterface
      * @param string|null таблица склейки
      * @throws InvalidArgumentException
      */
-    public function __construct(QueryBuilderInterface $queryBuilder, string $type = null, string $tbl = null)
+    public function __construct(QueryBuilderInterface $queryBuilder, string $type = null, $tbl = null, $as = null)
     {
         $type = strtoupper(trim($type));
         if (!in_array($type, static::$types)) {
@@ -66,18 +69,11 @@ class JoinBuilder implements JoinBuilderInterface
         }
         $this->queryBuilder = $queryBuilder;
         $this->type = $type;
-        $this->from = $tbl;
-    }
-
-    /**
-     * Установка псевдонима для склеиваемой таблицы.
-     * @param string псевдоним
-     * @return self
-     */
-    public function as(string $as): JoinBuilderInterface
-    {
-        $this->as = $as;
-        return $this;
+        $this->db = $queryBuilder->db;
+        if ($tbl) {
+            $this->from($tbl, $as);
+            $this->queryBuilder->addBindings('join', $this->getBindings('from'));
+        }
     }
 
     /**
@@ -168,10 +164,12 @@ class JoinBuilder implements JoinBuilderInterface
     }
     /**
      * Получение экранированных значений.
+     * @param string|null для получения части экранируемых значений
      * @return array
      */
-    public function getBindings(): array
+    public function getBindings(string $part = null): array
     {
+        if ($part) return $this->bindings[$part] ?? [];
         return $this->bindings['on'] ?? [];
     }
 
