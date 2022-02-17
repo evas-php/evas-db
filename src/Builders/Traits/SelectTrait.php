@@ -85,7 +85,7 @@ trait SelectTrait
     {
         [$sql, $bindings] = $this->createSub($query);
         return $this->addSelectRaw(
-            "$sql AS " . $this->wrap($as), $bindings
+            "$sql AS " . $this->wrapColumn($as), $bindings
         );
     }
 
