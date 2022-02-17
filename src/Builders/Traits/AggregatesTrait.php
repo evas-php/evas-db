@@ -34,12 +34,17 @@ trait AggregatesTrait
      */
     public function aggregate(string $function, array $columns = ['*'])
     {
-        $select = [];
+        $aggregates = [];
         foreach ($columns as $column) {
-            $as = strtolower($function) . "_{$column}";
-            $select[$as] = strtoupper($function) . "({$this->wrapColumn($column)})";
+            // $as = strtolower($function) . "_{$column}";
+            // $aggregates[$as] = strtoupper($function) . "({$this->wrapColumn($column)})";
+            // $aggregates[] = strtoupper($function) . "({$this->wrapColumn($column)}) AS {$this->wrapColumn($as)}";
+            $as = $this->wrapColumn(strtolower($function) . "_{$column}");
+            $col = strtoupper($function) . "({$this->wrapColumn($column)})";
+            $aggregates[] = "$col AS $as";
         }
-        $this->addSelect($select);
+        // $this->addSelect($aggregates);
+        $this->aggregates = array_merge($this->aggregates, $aggregates);
         return $this;
     }
 
