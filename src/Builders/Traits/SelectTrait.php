@@ -13,14 +13,13 @@ trait SelectTrait
     // ----------
 
     /**
-     * Установка запрашиваемых стобцов с экранированием.
-     * @param string|\Closure|self|array
+     * Установка запрашиваемых стобцов sql-строкой с экранированием.
+     * @param string столбцы sql-строкой
      * @param array|null значения для экранирования
      * @return self
      */
     public function selectRaw($sql, array $values = null)
     {
-        // $this->addSelect($sql);
         $this->columns = [$sql];
         $this->bindings['select'] = [];
         if ($values) $this->addBindings('select', $values);
@@ -28,14 +27,13 @@ trait SelectTrait
     }
 
     /**
-     * Добавление запрашиваемых стобцов с экранированием.
-     * @param string|\Closure|self|array
+     * Добавление запрашиваемых стобцов sql-строкой с экранированием.
+     * @param string столбцы sql-строкой
      * @param array|null значения для экранирования
      * @return self
      */
     public function addSelectRaw($sql, array $values = null)
     {
-        // $this->addSelect($sql);
         $this->columns[] = $sql;
         if ($values) $this->addBindings('select', $values);
         return $this;
