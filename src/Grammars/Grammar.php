@@ -125,6 +125,7 @@ class Grammar
             $builder->type = 'select';
             $cols = $builder->columns;
             if (empty($cols)) $cols = ['*'];
+            if (!empty($builder->aggregates)) $cols = array_merge($cols, $builder->aggregates);
             $cols = implode(', ', $cols);
             $sql = "SELECT $cols FROM $builder->from";
         }
