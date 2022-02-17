@@ -32,14 +32,14 @@ class Table extends TableSchema
         return $this->db->batchInsert($this->name, $rows, $keys);
     }
 
-    // /**
-    //  * Получение id последней вставленной записи.
-    //  * @return int
-    //  */
-    // public function lastInsertId(): int
-    // {
-    //     return $this->db->lastInsertId($this->name);
-    // }
+    /**
+     * Получение id последней вставленной записи.
+     * @return int
+     */
+    public function lastInsertId(): int
+    {
+        return $this->db->lastInsertId($this->name);
+    }
 
     /**
      * Проброс методов сборщика запросов через магию php.
