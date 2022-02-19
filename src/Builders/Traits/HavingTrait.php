@@ -126,4 +126,53 @@ trait HavingTrait
     {
         return $this->havingNull($column, true, true);
     }
+
+
+    // ----------
+    // Having Aggregate
+    // ----------
+
+    /**
+     * Вспомогательная функция для добавление having агрегации.
+     * @param bool использовать ли OR для склейки
+     * @param string функция агрегации
+     * @param string столбец агрегации
+     * @param mixed оператор или значение
+     * @param mixed|null значение или null
+     * @return self
+     */
+    protected function addHavingAggregate(bool $isOr, string $function, string $column, $operator, $value = null)
+    {
+        @[$value, $operator] = $this->prepareValueAndOperator(
+            $value, $operator, func_num_args() === 4
+        );
+        $sql = $this->getAggregateColumn($function, $column) . " $operator ?";
+        return $isOr ? $this->orHavingRaw($sql, [$values]) : $this->havingRaw($sql, [$value]);
+    }
+
+    /**
+     * Добавление having агрегации.
+     * @param string функция агрегации
+     * @param string столбец агрегации
+     * @param mixed оператор или значение
+     * @param mixed|null значение или null
+     * @return self
+     */
+    public function havingAggregate(string $function, string $column, $operator, $value = null)
+    {
+        return $this->addHavingAggregate(false, ...func_get_args());
+    }
+
+    /**
+     * Добавление OR having агрегации.
+     * @param string функция агрегации
+     * @param string столбец агрегации
+     * @param mixed оператор или значение
+     * @param mixed|null значение или null
+     * @return self
+     */
+    public function orHavingAggregate(string $function, string $column, $operator, $value = null)
+    {
+        return $this->addHavingAggregate(true, ...func_get_args());
+    }
 }
