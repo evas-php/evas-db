@@ -39,13 +39,36 @@ trait AggregatesTrait
             // $as = strtolower($function) . "_{$column}";
             // $aggregates[$as] = strtoupper($function) . "({$this->wrapColumn($column)})";
             // $aggregates[] = strtoupper($function) . "({$this->wrapColumn($column)}) AS {$this->wrapColumn($as)}";
-            $as = $this->wrapColumn(strtolower($function) . '_' . str_replace('.', '_', $column));
-            $col = strtoupper($function) . "({$this->wrapColumn($column)})";
+            $as = $this->wrapColumn($this->getAggregateAlias($function, $column));
+            // $col = strtoupper($function) . "({$this->wrapColumn($column)})";
+            $col = $this->getAggregateColumn($function, $column);
             $aggregates[] = "$col AS $as";
         }
         // $this->addSelect($aggregates);
         $this->aggregates = array_merge($this->aggregates, $aggregates);
         return $this;
+    }
+
+    /**
+     * Генерация песвдонима агрегации.
+     * @param string функция агрегации
+     * @param string столбец
+     * @return string псевдоним агрегации
+     */
+    public function getAggregateAlias(string $function, string $column): string
+    {
+        return strtolower($function) . '_' . str_replace('.', '_', $column);
+    }
+
+    /**
+     * Генерация выборки агрегации.
+     * @param string функция агрегации
+     * @param string столбец
+     * @return string выборка агрегации
+     */
+    public function getAggregateColumn(string $function, string $column): string
+    {
+        return strtoupper($function) . "({$this->wrapColumn($column)})";
     }
 
     /**
