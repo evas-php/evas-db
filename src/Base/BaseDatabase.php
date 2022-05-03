@@ -327,7 +327,7 @@ class BaseDatabase implements DatabaseInterface
     {
         $result = new $this->queryResultClass($stmt, $this);
         if (! $result instanceof QueryResultInterface) {
-            $className = get_class($result);
+            $name = get_class($result);
             throw new \UnexpectedValueException(
                 "Query result class\"$name\" must implements interface "
                 . QueryResultInterface::class
