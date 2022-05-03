@@ -10,6 +10,9 @@ use Evas\Db\IdentityMap;
 
 trait DatabaseIdentityMapTrait
 {
+    /** @var bool включено ли использование IdentityMap */
+    protected $useIdentityMap = false;
+
     /** @var IdentityMap */
     protected $identityMap;
 
@@ -46,6 +49,18 @@ trait DatabaseIdentityMapTrait
     }
 
     /**
+     * Включить/отключить использование IdentityMap.
+     * @param bool|null установить ли использование
+     * @return self
+     */
+    public function useIdentityMap(bool $use = true)
+    {
+        $this->useIdentityMap = $use;
+        return $this;
+    }
+
+
+    /**
      * Получение маппинга идентичности сущностей.
      * @return IdentityMap
      */
@@ -65,7 +80,7 @@ trait DatabaseIdentityMapTrait
      */
     public function identityMapUpdate(object &$object, string $primaryKey): object
     {
-        return $this->identityMap()->update($object, $primaryKey);
+        return $this->useIdentityMap ? $this->identityMap()->update($object, $primaryKey) : $object;
     }
 
     /**
@@ -76,7 +91,7 @@ trait DatabaseIdentityMapTrait
      */
     public function identityMapGetState(object &$object, string $primaryKey): ?array
     {
-        return $this->identityMap()->getState($object, $primaryKey);
+        return $this->useIdentityMap ? $this->identityMap()->getState($object, $primaryKey) : null;
     }
 
     /**
@@ -86,7 +101,9 @@ trait DatabaseIdentityMapTrait
      */
     public function identityMapUnset(object &$object, string $primaryKey)
     {
-        $this->identityMap()->unset($object, $primaryKey);
+        if ($this->useIdentityMap) {
+            $this->identityMap()->unset($object, $primaryKey);
+        }
     }
 
     /**
@@ -94,6 +111,8 @@ trait DatabaseIdentityMapTrait
      */
     public function identityMapClear()
     {
-        $this->identityMap()->clearStates();
+        if ($this->useIdentityMap) {
+            $this->identityMap()->clearStates();
+        }
     }
 }
