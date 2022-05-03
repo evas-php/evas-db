@@ -180,7 +180,7 @@ class QueryResult implements QueryResultInterface
      */
     public function objectAll(string $className = null): array
     {
-        if (0 === $this->rowCount()) return null;
+        if (0 === $this->rowCount()) return [];
         return $className
         ? $this->objectsHook($this->fetchAll(PDO::FETCH_CLASS, $className))
         : $this->fetchAll(PDO::FETCH_OBJ); // \stdClass
