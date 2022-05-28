@@ -34,10 +34,17 @@ class DatabasesManager
     public function last(): DatabaseInterface
     {
         if (!isset($this->lastName)) {
+            $count = count($this->connections);
+            if ($count < 1) {
+                throw new \RuntimeException('DatabasesManager not has connections');
+            }
+            if ($count < 2) {
+                return $this->setLast(array_keys($this->connections)[0])->last();
+            }
             throw new \RuntimeException('DatabasesManager not has last connection');
         }
         return $this->connections[$this->lastName] 
-        ?? throw new \RuntimeException("Database with publicName $this->lastName not found");
+        ?? throw new \RuntimeException("Database with name `$this->lastName` not found");
     }
 
     /**
@@ -52,7 +59,7 @@ class DatabasesManager
         if ($this->has($name)) {
             return $this->connections[$name];
         }
-        throw new \RuntimeException("Database with publicName $name not found");
+        throw new \RuntimeException("Database with name `$name` not found");
     }
 
     /**
@@ -77,34 +84,60 @@ class DatabasesManager
             $this->lastName = $name;
             return $this;
         }
-        throw new \RuntimeException("Database with publicName $name not found");
+        throw new \RuntimeException("Database with name `$name` not found");
     }
 
     /**
      * Установка соединения.
+     * @param string имя соединения
      * @param DatabaseInterface|array соединение или конфиг соединения
      * @return self
      * @throws \RuntimeException
      */
-    public function set($db)
+    public function set(string $name, $db)
     {
         if (is_array($db)) {
-            return $this->set(new Database($db));
+            return $this->set($name, new Database($db));
         } else if ($db instanceof DatabaseInterface) {
-            if (!isset($db->publicName)) {
-                if (count($this->connections) < 1) {
-                    $db->publicName = 'default';
-                } else {
-                    throw new \RuntimeException("Database connection not has publicName property for Databases Manager");
-                }
-            }
-            $this->connections[$db->publicName] = &$db;
-            $this->setLast($db->publicName);
+            $this->connections[$name] = &$db;
+            $this->setLast($name);
             return $this;
         }
         throw new \RuntimeException(sprintf(
             'Argument 1 passed to %s() must be an array or an instance of %s',
             __METHOD__, DatabaseInterface::class
         ));
+    }
+
+    /**
+     * Конструктор.
+     * @param array|DatabaseInterface[] маппинг соединений или конфигов соединений по именам
+     * @throws \RuntimeException
+     */
+    public function __construct(array $dbs = null)
+    {
+        if ($dbs) foreach ($dbs as $name => $db) {
+            $this->set($name, $db);
+        }
+    }
+
+    /**
+     * Магический перехват вызовов методов соединения.
+     * @param string имя метода
+     * @param array|null аргументы
+     */
+    public function __call(string $name, array $args = [])
+    {
+        return $this->last()->$name(...$args);
+    }
+
+    /**
+     * Хук перехвата аргументов di контейнера.
+     * @param string|null имя соединения
+     * @return self
+     */
+    public function __invoke(string $name = null)
+    {
+        return $name ? $this->setLast($name) : $this;
     }
 }
