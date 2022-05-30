@@ -13,6 +13,8 @@ use Evas\Db\Builders\Traits\DateBasedWhereTrait;
 use Evas\Db\Builders\Traits\HavingBetweenTrait;
 use Evas\Db\Builders\Traits\HavingTrait;
 use Evas\Db\Builders\Traits\QueryJoinsTrait;
+use Evas\Db\Builders\Traits\QueryJoinsUsingTrait;
+// use Evas\Db\Builders\Traits\QueryJoinsWhereTrait;
 use Evas\Db\Builders\Traits\SelectTrait;
 use Evas\Db\Builders\Traits\UnionsTrait;
 use Evas\Db\Builders\Traits\WhereBetweenTrait;
@@ -33,6 +35,7 @@ class QueryBuilder extends BaseQueryBuilder
     use HavingTrait;
     /** Joins */
     use QueryJoinsTrait;
+    use QueryJoinsUsingTrait;
     /** Select columns */
     use SelectTrait;
     /** Unions */
