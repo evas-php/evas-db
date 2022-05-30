@@ -34,7 +34,7 @@ trait QueryJoinsUsingTrait
      */
     public function joinSubUsing($query, string $as, string $column, string $type = 'INNER')
     {
-        return $this->setJoin($type, $query, $as, $column);
+        return $this->setJoinSub($type, $query, $as, $column);
     }
 
     // ----------
