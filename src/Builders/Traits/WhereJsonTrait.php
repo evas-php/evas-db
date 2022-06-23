@@ -41,14 +41,14 @@ trait WhereJsonTrait
         );
     }
 
-    public function whereJsonContainsPathOne(string $column, array $paths)
-    {
-        return $this->whereJsonContainsPathAll($column, $paths, true);
-    }
-
     public function orWhereJsonContainsPathAll(string $column, array $paths)
     {
         return $this->whereJsonContainsPathAll($column, $paths, false, true);
+    }
+
+    public function whereJsonContainsPathOne(string $column, array $paths)
+    {
+        return $this->whereJsonContainsPathAll($column, $paths, true);
     }
 
     public function orWhereJsonContainsPathOne(string $column, array $paths)
