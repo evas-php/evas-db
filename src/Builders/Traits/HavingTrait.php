@@ -14,7 +14,7 @@ trait HavingTrait
 
     /**
      * Добавление having sql-строкой.
-     * @param array sql-строка
+     * @param string sql-строка
      * @param array|null значения для экранирования
      * @param bool|null использовать ли OR для склейки
      * @return self
@@ -26,7 +26,7 @@ trait HavingTrait
 
     /**
      * Добавление having sql-строкой через OR.
-     * @param array sql-строка
+     * @param string sql-строка
      * @param array|null значения для экранирования
      * @return self
      */
