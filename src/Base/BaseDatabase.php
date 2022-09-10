@@ -150,6 +150,7 @@ class BaseDatabase implements DatabaseInterface
     /**
      * Переключение на базу данных.
      * @param string имя базы данных
+     * @return self
      */
     public function changeDbName(string $dbname)
     {
@@ -157,6 +158,7 @@ class BaseDatabase implements DatabaseInterface
             $this->query("USE `$dbname`");
         }
         $this->dbname = $dbname;
+        return $this;
     }
 
     /**
@@ -273,7 +275,7 @@ class BaseDatabase implements DatabaseInterface
     }
 
     /**
-     * Выполнение запроса с возвражением количества измененных строк.
+     * Выполнение запроса с возвращением количества измененных строк.
      * @param string sql-запрос
      * @return int
      * @throws DatabaseQueryException
@@ -375,6 +377,7 @@ class BaseDatabase implements DatabaseInterface
     /**
      * Установка функции экранирования объектов и массивов.
      * @param string строковая команда
+     * @return self
      */
     public function setQuoteObjectsFunc(string $type = 'null')
     {
