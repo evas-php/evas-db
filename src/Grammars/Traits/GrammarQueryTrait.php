@@ -119,12 +119,10 @@ trait GrammarQueryTrait
      */
     protected function buildJoin($join): string
     {
-        $sql = "$join->type JOIN";
-        $sql .= ' ' . $join->from;
+        $sql = "{$join->type} JOIN {$join->from}";
         if (count($join->on)) {
             $sql .= ' ON ' . $this->buildWheres($join->on);
-        }
-        if (!empty($join->using)) {
+        } else if (!empty($join->using)) {
             $sql .= " USING ({$this->wrapColumn($join->using)})";
         }
         return $sql;
