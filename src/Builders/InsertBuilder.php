@@ -16,7 +16,7 @@ class InsertBuilder implements InsertBuilderInterface
     public $columns;
 
     /** @var array значения для экранирования */
-    public $bindings = [];
+    protected $bindings = [];
 
     /** @var int счетчик количества вставляемых записей */
     protected $rowCount = 0;
@@ -82,15 +82,6 @@ class InsertBuilder implements InsertBuilderInterface
     }
 
     /**
-     * Получение количества вставляемых записей.
-     * @return int
-     */
-    public function rowCount(): int
-    {
-        return $this->rowCount;
-    }
-
-    /**
      * Добавление экранируемых значений записи.
      * @param array значения
      * @return self
@@ -118,6 +109,15 @@ class InsertBuilder implements InsertBuilderInterface
             throw new InsertBuilderException('Insert builder columns is empty');
         }
         return $this->db->grammar()->buildInsert($this);
+    }
+
+    /**
+     * Получение количества вставляемых записей.
+     * @return int
+     */
+    public function getRowCount(): int
+    {
+        return $this->rowCount;
     }
 
     /**
