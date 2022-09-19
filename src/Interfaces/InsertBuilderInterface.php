@@ -29,6 +29,12 @@ interface InsertBuilderInterface
     public function getSql(): string;
 
     /**
+     * Получение количества вставляемых записей.
+     * @return int
+     */
+    public function getRowCount(): int;
+
+    /**
      * Получение экранируемых значений собранного запроса.
      * @return array
      */
