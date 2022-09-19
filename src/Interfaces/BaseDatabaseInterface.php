@@ -54,6 +54,13 @@ interface BaseDatabaseInterface
     public function setCharset(string $charset);
 
     /**
+     * Установка таймзоны.
+     * @param string кодировка
+     * @return self
+     */
+    public function setTimezone(string $timezone);
+
+    /**
      * Переключение на базу данных.
      * @param string имя базы данных
      * @return self
