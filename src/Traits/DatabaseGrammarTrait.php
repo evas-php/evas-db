@@ -6,7 +6,11 @@
  */
 namespace Evas\Db\Traits;
 
+use Evas\Db\Exceptions\DatabaseQueryException;
+use Evas\Db\Grammars\MysqlGrammar;
+use Evas\Db\Grammars\PgsqlGrammar;
 use Evas\Db\Interfaces\GrammarInterface;
+
 
 if (!defined('EVAS_DB_GRAMMARS')) {
     define('EVAS_DB_GRAMMARS', [
@@ -33,9 +37,12 @@ trait DatabaseGrammarTrait
     public function grammar(): GrammarInterface
     {
         if (!$this->grammar) {
-            $grammar = static::$grammars[$this->driver] || throw new DatabaseQueryException(
-                "Grammar for \"$this->driver\" driver doesn't exists"
-            );
+            $grammar = static::$grammars[$this->driver] ?? null;
+            if (!$grammar || !class_exists($grammar, true)) {
+                throw new DatabaseQueryException(
+                    "Grammar for \"$this->driver\" driver doesn't exists"
+                );
+            }
             $this->grammar = new $grammar($this);
         }
         return $this->grammar;
