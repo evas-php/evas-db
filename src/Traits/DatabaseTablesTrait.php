@@ -35,7 +35,7 @@ trait DatabaseTablesTrait
      */
     public function table(string $table): Table
     {
-        $table = $this->grammar()->unwrapTable($table);
+        $table = $this->grammar()->unwrap($table);
         if (empty($this->tableObjects[$table])) {
             $this->tableObjects[$table] = new Table($this, $table);
         }
