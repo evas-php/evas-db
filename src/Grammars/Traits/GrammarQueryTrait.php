@@ -8,9 +8,13 @@ namespace Evas\Db\Grammars\Traits;
 
 use Evas\Db\Interfaces\InsertBuilderInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
+use Evas\Db\Grammars\Traits\GrammarQueryWhereTrait;
 
 trait GrammarQueryTrait
 {
+    // Сборка where или having условий
+    use GrammarQueryWhereTrait;
+
     /**
      * Сборка insert запроса.
      * @param InsertBuilderInterface
@@ -64,8 +68,8 @@ trait GrammarQueryTrait
         }
         if (count($builder->unions)) $sql .= $this->buildUnions($builder);
         if (count($builder->orders)) $sql .= $this->buildOrders($builder->orders);
-        if (!empty($builder->limit)) $sql .= $this->buildLimit($builder->limit);
-        if (!empty($builder->offset)) $sql .= $this->buildOffset($builder->offset);
+        $sql .= $this->buildLimit($builder->limit);
+        $sql .= $this->buildOffset($builder->offset);
         return $sql;
     }
 
@@ -94,23 +98,18 @@ trait GrammarQueryTrait
     }
 
     /**
-     * Получение разделителя между wheres.
-     * @param array where
-     * @return string
+     * Сборка нескольких join.
+     * @param 
+     * @return string готовые sql-join
      */
-    protected function getWhereSeparator(array $where): string
+    protected function buildJoins(array $joins): string
     {
-        return ($where['isOr'] ?? null) ? ' OR ' : ' AND ';
-    }
-
-    /**
-     * Получение NOT для условия по необходимости.
-     * @param array where
-     * @return string
-     */
-    protected function getNot(array $where): string
-    {
-        return ($where['isNot'] ?? null) ? 'NOT ' : '';
+        $sql = ' ';
+        foreach ($joins as $i => &$join) {
+            if ($i > 0) $sql .= ' ';
+            $sql .= $join->getSql();
+        }
+        return $sql;
     }
 
     /**
@@ -119,15 +118,17 @@ trait GrammarQueryTrait
      * @return string готовый sql-join
      */
     protected function buildJoin($join): string
-    {}
-
-    /**
-     * Сборка нескольких join.
-     * @param 
-     * @return string готовые sql-join
-     */
-    protected function buildJoins(array $joins): string
-    {}
+    {
+        $sql = "$join->type JOIN";
+        $sql .= ' ' . $join->from;
+        if (count($join->on)) {
+            $sql .= ' ON ' . $this->buildWheres($join->on);
+        }
+        if (!empty($join->using)) {
+            $sql .= " USING ({$this->wrapColumn($join->using)})";
+        }
+        return $sql;
+    }
 
     /**
      * Сборка группировки.
@@ -135,15 +136,9 @@ trait GrammarQueryTrait
      * @return string готовый sql-group
      */
     protected function buildGroups(array $groups): string
-    {}
-
-    /**
-     * Сборка объединения.
-     * @param array union
-     * @return string готовый sql-union
-     */
-    protected function buildUnion(array $union): string
-    {}
+    {
+        return ' GROUP BY ' . implode(', ', $groups);
+    }
 
     /**
      * Сборка нескольких объединений.
@@ -151,7 +146,29 @@ trait GrammarQueryTrait
      * @return string готовые sql-union
      */
     protected function buildUnions(QueryBuilderInterface &$builder): string
-    {}
+    {
+        $sql = '';
+        foreach ($builder->unions as &$union) {
+            if (!count($union['query']->columns)) {
+                // устанавливаем столбцы для JOIN из запроса, если не установлены
+                $union['query']->columns = $builder->columns;
+            }
+            $sql .= $this->buildUnion($union);
+        }
+        return $sql;
+    }
+
+    /**
+     * Сборка объединения.
+     * @param array union
+     * @return string готовый sql-union
+     */
+    protected function buildUnion(array $union): string
+    {
+        $all = ($union['all'] || false) ? ' ALL' : '';
+        $sql = $union['query']->getSql();
+        return " UNION {$all} ({$sql})";
+    }
 
     /**
      * Сборка сортировок.
@@ -159,7 +176,16 @@ trait GrammarQueryTrait
      * @return string готовый sql-order
      */
     protected function buildOrders(array $orders): string
-    {}
+    {
+        $sql = ' ORDER BY ';
+        foreach ($orders as $i => $order) {
+            if ($i > 0) $sql .= ', ';
+            @[$_sql, $isDesc] = $order;
+            $sql .= $_sql;
+            if ($isDesc) $sql .= ' DESC';
+        }
+        return $sql;
+    }
 
     /**
      * Сборки лимита.
@@ -167,7 +193,9 @@ trait GrammarQueryTrait
      * @return string готовый sql-limit
      */
     protected function buildLimit(int $limit = null): string
-    {}
+    {
+        return $limit > 0 ? " LIMIT {$limit}" : '';
+    }
 
     /**
      * Сборки сдвига.
@@ -175,5 +203,7 @@ trait GrammarQueryTrait
      * @return string готовый sql-offset
      */
     protected function buildOffset(int $offset = null): string
-    {}
+    {
+        return $offset > 0 ? " OFFSET {$offset}" : '';
+    }
 }
