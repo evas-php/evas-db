@@ -10,9 +10,28 @@ use Evas\Db\Interfaces\BaseDatabaseInterface;
 use Evas\Db\Interfaces\InsertBuilderInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
+use Evas\Db\Interfaces\TableInterface;
 
 interface DatabaseInterface extends BaseDatabaseInterface
 {
+    // Работа с таблицами
+
+    /**
+     * Получение списка таблиц базы данных.
+     * @param bool перезапросить список таблиц
+     * @return array|null
+     */
+    public function tablesList(bool $reload = false): ?array;
+
+    /**
+     * Получение объекта таблицы.
+     * @param string имя таблицы
+     * @return TableInterface
+     */
+    public function table(string $table): TableInterface;
+
+    // Запросы через сборщики заросов.
+
     /**
      * Начало сборки sql-запроса на вставку.
      * @param string имя таблицы
