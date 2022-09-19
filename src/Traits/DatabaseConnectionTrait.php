@@ -108,6 +108,17 @@ trait DatabaseConnectionTrait
     }
 
     /**
+     * Установка таймзоны.
+     * @param string кодировка
+     * @return self
+     */
+    public function setTimezone(string $timezone)
+    {
+        $this->grammar()->setTimezone($timezone);
+        return $this;
+    }
+
+    /**
      * Переключение на базу данных.
      * @param string имя базы данных
      * @return self
