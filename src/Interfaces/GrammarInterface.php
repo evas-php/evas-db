@@ -33,6 +33,13 @@ interface GrammarInterface
     public function unwrap(string $value): string;
 
     /**
+     * Оборачивание столбца.
+     * @param string столбец
+     * @return string обёрнутый столбец
+     */
+    public function wrapColumn(string $column): string;
+
+    /**
      * Оборачивание столбцов в готовые sql-столбцы.
      * @param array столбцы
      * @return string готовые sql-столбцами
@@ -45,6 +52,26 @@ interface GrammarInterface
      * @return string готовые sql-столбцами
      */
     public function wrapStringColumns(string $value): string;
+
+    // Настройка соединения
+
+    /**
+     * Установка кодировки.
+     * @param string кодировка
+     */
+    public function setCharset(string $charset);
+
+    /**
+     * Установка таймзоны.
+     * @param string кодировка
+     */
+    public function setTimezone(string $timezone);
+
+    /**
+     * Переключение базы данных.
+     * @param string имя базы данных
+     */
+    public function changeDbName(string $dbname);
 
 
     // Кэш схемы
@@ -60,7 +87,6 @@ interface GrammarInterface
      */
     public function getTablePrimaryKey(string $table): ?string;
 
-
     /**
      * Получение столбцов таблицы.
      * @param string имя таблицы
@@ -72,21 +98,6 @@ interface GrammarInterface
      * @param string имя таблицы
      */
     public function getForeignKeys(string $table);
-
-
-    // 
-
-    /**
-     * Переключение базы данных.
-     * @param string имя базы данных
-     */
-    public function changeDbName(string $dbname);
-
-    /**
-     * Установка кодировки.
-     * @param string кодировка
-     */
-    public function setCharset(string $charset);
 
 
     // Сборка запросов
