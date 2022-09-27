@@ -107,7 +107,7 @@ class QueryResult implements QueryResultInterface
     protected function fetch(int $mode = null, $modeMore = null)
     {
         return $this->rowCount() < 1 ? null
-        : $this->fetchWithMode(false, $mode, $modeMore);
+        : $this->realFetch(false, $mode, $modeMore);
     }
 
     /**
@@ -120,7 +120,7 @@ class QueryResult implements QueryResultInterface
     protected function fetchAll(int $mode = null, $modeMore = null): array
     {
         return $this->rowCount() < 1 ? []
-        : $this->fetchWithMode(true, $mode, $modeMore);
+        : $this->realFetch(true, $mode, $modeMore);
     }
 
 
@@ -132,7 +132,7 @@ class QueryResult implements QueryResultInterface
      */
     public function numericArray(): ?array
     {
-        return $this->fetch(PDO::FETCH_NUM);
+        return $this->fetch(\PDO::FETCH_NUM);
     }
 
     /**
@@ -141,7 +141,7 @@ class QueryResult implements QueryResultInterface
      */
     public function numericArrayAll(): array
     {
-        return $this->fetchAll(PDO::FETCH_NUM);
+        return $this->fetchAll(\PDO::FETCH_NUM);
     }
 
     /**
@@ -150,7 +150,7 @@ class QueryResult implements QueryResultInterface
      */
     public function assocArray(): ?array
     {
-        return $this->fetch(PDO::FETCH_ASSOC);
+        return $this->fetch(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -159,7 +159,7 @@ class QueryResult implements QueryResultInterface
      */
     public function assocArrayAll(): array
     {
-        return $this->fetchAll(PDO::FETCH_ASSOC);
+        return $this->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -171,8 +171,8 @@ class QueryResult implements QueryResultInterface
     {
         return 1 > $this->rowCount() ? null
         : (!empty($className) 
-            ? $this->objectHook($this->fetch(PDO::FETCH_CLASS, $className))
-            : $this->fetch(PDO::FETCH_OBJ) // \stdClass
+            ? $this->objectHook($this->fetch(\PDO::FETCH_CLASS, $className))
+            : $this->fetch(\PDO::FETCH_OBJ) // \stdClass
         );
     }
 
@@ -185,8 +185,8 @@ class QueryResult implements QueryResultInterface
     {
         return 1 > $this->rowCount() ? []
         : (!empty($className) 
-            ? $this->objectsHook($this->fetchAll(PDO::FETCH_CLASS, $className))
-            : $this->fetchAll(PDO::FETCH_OBJ) // \stdClass
+            ? $this->objectsHook($this->fetchAll(\PDO::FETCH_CLASS, $className))
+            : $this->fetchAll(\PDO::FETCH_OBJ) // \stdClass
         );
     }
 
@@ -198,7 +198,7 @@ class QueryResult implements QueryResultInterface
     public function intoObject(object &$object): object
     {
         if (1 > $this->rowCount()) return $object;
-        $this->fetch(PDO::FETCH_INTO, $object);
+        $this->fetch(\PDO::FETCH_INTO, $object);
         return $this->objectHook($object);
     }
 
