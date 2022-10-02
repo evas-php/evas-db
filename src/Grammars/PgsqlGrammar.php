@@ -53,7 +53,7 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         return $tables;
     }
 
-    public function getTablePrimaryKey(string $table)
+    public function getTablePrimaryKey(string $table): string
     {
         return $this->db->query(
             'SELECT a.attname, format_type(a.atttypid, a.atttypmod) AS data_type
@@ -64,7 +64,7 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         )->assocArray()['attname'];
     }
 
-    public function getTableColumns(string $table)
+    public function getTableColumns(string $table): array
     {
         $rows = $this->db->query(
             'SELECT * FROM information_schema.columns
@@ -84,7 +84,7 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         return $columns;
     }
 
-    public function getForeignKeys(string $table)
+    public function getForeignKeys(string $table): array
     {
         $rows = $this->db->query('SELECT
             tc.table_schema, tc.constraint_name, 
