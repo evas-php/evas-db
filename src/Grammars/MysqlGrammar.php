@@ -36,20 +36,20 @@ class MysqlGrammar extends AbstractGrammar implements GrammarInterface
     }
 
 
-    public function getTablePrimaryKey(string $table): ?string
+    public function getTablePrimaryKey(string $table): string
     {
         return $this->db->query(
             "SHOW KEYS FROM {$this->wrap($table)} WHERE Key_name = 'PRIMARY'"
         )->assocArray()['Column_name'] ?? null;
     }
 
-    public function getTableColumns(string $table): ?array
+    public function getTableColumns(string $table): array
     {
         return $this->db->query("SHOW COLUMNS FROM {$this->wrap($table)}")
         ->assocArrayAll();
     }
 
-    public function getForeignKeys(string $table): ?array
+    public function getForeignKeys(string $table): array
     {
         $rows = $this->db->query(
             'SELECT * FROM information_schema.KEY_COLUMN_USAGE 
