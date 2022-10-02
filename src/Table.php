@@ -16,7 +16,9 @@ class Table extends TableSchemaCache implements TableInterface
      * @return int
      */
     public function lastInsertId(): int
-    {}
+    {
+        return $this->db->lastInsertId($this->name);
+    }
 
     /**
      * Проброс методов сборщика запросов через магию php.
@@ -26,4 +28,25 @@ class Table extends TableSchemaCache implements TableInterface
      */
     public function __call(string $name, array $args = null)
     {}
+
+    /**
+     * Начало сборки INSERT-запроса.
+     * @param array|object|null значения записи/записей для сохранения с автосборкой
+     * @return InsertBuilderInterface|QueryResultInterface
+     */
+    public function insert($row = null): object
+    {
+        return $this->db->insert($this->name, $row);
+    }
+
+    /**
+     * Вставка нескольких записей.
+     * @param array значения записей
+     * @param array|null столбцы записей
+     * @return QueryResultInterface
+     */
+    public function batchInsert(array $rows, array $columns = null): QueryResultInterface
+    {
+        return $this->db->batchInsert($this->name, $rows, $columns);
+    }
 }
