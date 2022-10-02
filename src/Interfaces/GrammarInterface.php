@@ -78,26 +78,30 @@ interface GrammarInterface
 
     /**
      * Получение списка таблиц.
+     * @return array таблицы
      */
     public function getTablesList(): array;
 
     /**
      * Получение первичного ключа таблицы.
      * @param string имя таблицы
+     * @return string первичный ключ
      */
-    public function getTablePrimaryKey(string $table): ?string;
+    public function getTablePrimaryKey(string $table): string;
 
     /**
      * Получение столбцов таблицы.
      * @param string имя таблицы
+     * @return array столбцы
      */
-    public function getTableColumns(string $table);
+    public function getTableColumns(string $table): array;
 
     /**
      * Получение внешних ключей таблицы.
      * @param string имя таблицы
+     * @return array внешние ключи
      */
-    public function getForeignKeys(string $table);
+    public function getForeignKeys(string $table): array;
 
 
     // Сборка запросов
