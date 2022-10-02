@@ -18,12 +18,12 @@ trait DatabaseTablesTrait
     /**
      * Получение списка таблиц базы данных.
      * @param bool перезапросить список таблиц
-     * @return array|null
+     * @return array
      */
-    public function tablesList(bool $reload = false): ?array
+    public function tablesList(bool $reload = false): array
     {
         if (null === $this->tablesList || true === $reload) {
-            $this->tablesList = $this->grammar()->getTablesList();
+            $this->tablesList = $this->schemaCache()->tablesList($reload);
         }
         return $this->tablesList;
     }
