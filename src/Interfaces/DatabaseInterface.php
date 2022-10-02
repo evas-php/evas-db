@@ -10,10 +10,20 @@ use Evas\Db\Interfaces\BaseDatabaseInterface;
 use Evas\Db\Interfaces\InsertBuilderInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
+use Evas\Db\Interfaces\SchemaCacheInterface;
 use Evas\Db\Interfaces\TableInterface;
 
 interface DatabaseInterface extends BaseDatabaseInterface
 {
+    // Работа с кэшем схемы БД
+
+    /**
+     * Получение кэша схемы БД.
+     * @return SchemaCacheInterface
+     */
+    public function schemaCache(): SchemaCacheInterface;
+
+
     // Работа с таблицами
 
     /**
@@ -62,7 +72,7 @@ interface DatabaseInterface extends BaseDatabaseInterface
      * @param string имя таблицы
      * @return QueryBuilderInterface
      */
-    public function buildQuery(string $table): QueryBuilderInterface;
+    public function buildQuery(string $table = null): QueryBuilderInterface;
 
     /**
      * Начало сборки sql-запроса select через сборщик запроса.
