@@ -29,9 +29,9 @@ interface DatabaseInterface extends BaseDatabaseInterface
     /**
      * Получение списка таблиц базы данных.
      * @param bool перезапросить список таблиц
-     * @return array|null
+     * @return array
      */
-    public function tablesList(bool $reload = false): ?array;
+    public function tablesList(bool $reload = false): array;
 
     /**
      * Получение объекта таблицы.
