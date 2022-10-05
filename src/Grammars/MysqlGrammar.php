@@ -25,6 +25,10 @@ class MysqlGrammar extends AbstractGrammar implements GrammarInterface
 
     // Кэш схемы
 
+    /**
+     * Получение списка таблиц.
+     * @return array таблицы
+     */
     public function getTablesList(): array
     {
         $tables = [];
@@ -35,20 +39,34 @@ class MysqlGrammar extends AbstractGrammar implements GrammarInterface
         return $tables;
     }
 
-
+    /**
+     * Получение первичного ключа таблицы.
+     * @param string имя таблицы
+     * @return string первичный ключ
+     */
     public function getTablePrimaryKey(string $table): string
     {
         return $this->db->query(
-            "SHOW KEYS FROM {$this->wrap($table)} WHERE Key_name = 'PRIMARY'"
+            "SHOW KEYS FROM {$this->wrapOne($table)} WHERE Key_name = 'PRIMARY'"
         )->assocArray()['Column_name'] ?? null;
     }
 
+    /**
+     * Получение столбцов таблицы.
+     * @param string имя таблицы
+     * @return array столбцы
+     */
     public function getTableColumns(string $table): array
     {
-        return $this->db->query("SHOW COLUMNS FROM {$this->wrap($table)}")
+        return $this->db->query("SHOW COLUMNS FROM {$this->wrapOne($table)}")
         ->assocArrayAll();
     }
 
+    /**
+     * Получение внешних ключей таблицы.
+     * @param string имя таблицы
+     * @return array внешние ключи
+     */
     public function getForeignKeys(string $table): array
     {
         $rows = $this->db->query(
