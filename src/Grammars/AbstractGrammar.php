@@ -56,12 +56,6 @@ abstract class AbstractGrammar
         if ($this->isJsonSelector($key)) {
             return $this->wrapJsonSelector($key);
         }
-
-        // $parts = explode('.', $key);
-        // foreach ($parts as &$part) {
-        //     $part = $this->wrap($part);
-        // }
-        // return implode('.', $parts);
         return implode('.', array_map([$this, 'wrapOne'], explode('.', $key)));
     }
 
@@ -114,15 +108,7 @@ abstract class AbstractGrammar
      */
     public function wrapColumns(array $columns): string
     {
-        foreach ($columns as &$column) {
-            
-            foreach ($parts as &$part) {
-                $part = $this->wrap($column);
-            }
-            if (!strstr($column, 'AS'))
-                $column = $this->wrap($column);
-        }
-        return implode(', ', $columns);
+        return implode(', ', array_map([$this, 'wrap'], $columns));
     }
 
     /**
