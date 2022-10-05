@@ -19,25 +19,25 @@ interface GrammarInterface
     public function __construct(DatabaseInterface &$db);
 
     /**
-     * Оборачивание значения.
-     * @param string значение
-     * @return string обернутое значение
+     * Раскрытие оборачивания ключа (таблица/столбец).
+     * @param string обернутый ключ
+     * @return string ключ
      */
-    public function wrap(string $value): string;
+    public function unwrap(string $key): string;
 
     /**
-     * Раскрытие оборачивания значения.
-     * @param string обернутое значение
-     * @return string значение
+     * Оборачивание ключа (таблица/столбец).
+     * @param string ключ
+     * @return string обернутый ключ
      */
-    public function unwrap(string $value): string;
+    public function wrap(string $key): string;
 
     /**
-     * Оборачивание столбца.
-     * @param string столбец
-     * @return string обёрнутый столбец
+     * Оборачивание сегмента ключа (таблица/столбец).
+     * @param string ключ
+     * @return string обернутый ключ
      */
-    public function wrapColumn(string $column): string;
+    public function wrapOne(string $key): string;
 
     /**
      * Оборачивание столбцов в готовые sql-столбцы.

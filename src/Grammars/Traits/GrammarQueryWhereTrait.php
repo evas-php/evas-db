@@ -35,7 +35,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSingle(array $where)
     {
-        return "{$this->wrapColumn($where['column'])} {$where['operator']} ?";
+        return "{$this->wrap($where['column'])} {$where['operator']} ?";
     }
 
     /**
@@ -45,7 +45,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSingleColumn(array $where)
     {
-        return "{$this->wrapColumn($where['first'])} {$where['operator']} {$this->wrapColumn($where['second'])}";
+        return "{$this->wrap($where['first'])} {$where['operator']} {$this->wrap($where['second'])}";
     }
 
     /**
@@ -65,7 +65,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSub(array $where)
     {
-        return "{$this->wrapColumn($where['column'])} {$where['operator']} ({$where['sql']})";
+        return "{$this->wrap($where['column'])} {$where['operator']} ({$where['sql']})";
     }
 
     /**
@@ -85,7 +85,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereNull(array $where)
     {
-        return "{$this->wrapColumn($where['column'])} IS {$this->getNot($where)}NULL";
+        return "{$this->wrap($where['column'])} IS {$this->getNot($where)}NULL";
     }
 
     /**
@@ -96,7 +96,7 @@ trait GrammarQueryWhereTrait
     protected function buildWhereIn(array $where)
     {
         $quotes = implode(', ', array_fill(0, count($where['values']), '?'));
-        return "{$this->wrapColumn($where['column'])} {$this->getNot($where)}IN({$quotes})";
+        return "{$this->wrap($where['column'])} {$this->getNot($where)}IN({$quotes})";
     }
 
     /**
@@ -116,7 +116,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereBetween(array $where)
     {
-        return "{$this->wrapColumn($where['column'])} {$this->getNot($where)}BETWEEN ? AND ?";
+        return "{$this->wrap($where['column'])} {$this->getNot($where)}BETWEEN ? AND ?";
     }
 
     /**
@@ -127,9 +127,9 @@ trait GrammarQueryWhereTrait
     protected function buildWhereBetweenColumns(array $where)
     {
         $not = $this->getNot($where);
-        $min = $this->wrapColumn($where['columns'][0]);
-        $max = $this->wrapColumn($where['columns'][1]);
-        return "{$this->wrapColumn($where['column'])} {$not}BETWEEN {$min} AND {$max}";
+        $min = $this->wrap($where['columns'][0]);
+        $max = $this->wrap($where['columns'][1]);
+        return "{$this->wrap($where['column'])} {$not}BETWEEN {$min} AND {$max}";
     }
 
     /**
@@ -140,7 +140,7 @@ trait GrammarQueryWhereTrait
     protected function buildWhereDateBased(array $where)
     {
         $not = $this->getNot($where);
-        return "{$where['date_operator']}({$this->wrapColumn($where['column'])}) {$where['operator']} ?";
+        return "{$where['date_operator']}({$this->wrap($where['column'])}) {$where['operator']} ?";
     }
 
     /**
@@ -151,7 +151,7 @@ trait GrammarQueryWhereTrait
     protected function buildWhereBetweenDateBased(array $where)
     {
         $not = $this->getNot($where);
-        return "{$where['date_operator']}({$this->wrapColumn($where['column'])}) {$not}BETWEEN ? AND ?";
+        return "{$where['date_operator']}({$this->wrap($where['column'])}) {$not}BETWEEN ? AND ?";
     }
 
     /**
@@ -164,7 +164,7 @@ trait GrammarQueryWhereTrait
         $sql = '';
         foreach ($where['columns'] as $i => $column) {
             if ($i > 0) $sql .= $this->getWhereSeparator($where);
-            $sql .= "{$this->wrapColumn($column)} {$where['operator']} ?";
+            $sql .= "{$this->wrap($column)} {$where['operator']} ?";
         }
         return "($sql)";
     }

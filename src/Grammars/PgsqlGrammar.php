@@ -13,16 +13,25 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
 {
     // Оборачивание
 
+    /**
+     * Раскрытие оборачивания ключа (таблица/столбец).
+     * @param string обернутый ключ
+     * @return string ключ
+     */
+    public function unwrap(string $key): string
+    {
+        return str_replace('"', '', trim($value, '"'));
+    }
 
-    public function wrap(string $value): string
+    /**
+     * Оборачивание сегмента ключа (таблица/столбец).
+     * @param string ключ
+     * @return string обернутый ключ
+     */
+    public function wrapOne(string $key): string
     {
         $value = $this->unwrap($value);
         return '*' === $value ? $value : "\"$value\"";
-    }
-
-    public function unwrap(string $value): string
-    {
-        return trim($value, '"');
     }
 
 

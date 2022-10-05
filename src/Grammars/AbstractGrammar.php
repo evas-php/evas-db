@@ -34,38 +34,77 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Оборачивание значения.
-     * @param string значение
-     * @return string обернутое значение
+     * Раскрытие оборачивания ключа (таблица/столбец).
+     * @param string обернутый ключ
+     * @return string ключ
      */
-    public function wrap(string $value): string
+    public function unwrap(string $key): string
     {
-        $value = $this->unwrap($value);
-        return '*' === $value ? $value : "`$value`";
+        return str_replace('`', '', trim($key, '`'));
     }
 
     /**
-     * Раскрытие оборачивания значения.
-     * @param string обернутое значение
-     * @return string значение
+     * Оборачивание ключа (таблица/столбец).
+     * @param string ключ
+     * @return string обернутый ключ
      */
-    public function unwrap(string $value): string
+    public function wrap(string $key): string
     {
-        return trim($value, '`');
-    }
-
-    /**
-     * Оборачивание столбца.
-     * @param string столбец
-     * @return string обёрнутый столбец
-     */
-    public function wrapColumn(string $column): string
-    {
-        $parts = explode('.', $column);
-        foreach ($parts as &$part) {
-            $part = $this->wrap($part);
+        if (stripos($key, ' AS ') !== false) {
+            return $this->wrapAliased($key);
         }
-        return implode('.', $parts);
+        if ($this->isJsonSelector($key)) {
+            return $this->wrapJsonSelector($key);
+        }
+
+        // $parts = explode('.', $key);
+        // foreach ($parts as &$part) {
+        //     $part = $this->wrap($part);
+        // }
+        // return implode('.', $parts);
+        return implode('.', array_map([$this, 'wrapOne'], explode('.', $key)));
+    }
+
+    /**
+     * Оборачивание сегмента ключа (таблица/столбец).
+     * @param string ключ
+     * @return string обернутый ключ
+     */
+    public function wrapOne(string $key): string
+    {
+        $key = $this->unwrap($key);
+        return '*' === $key ? $key : "`$key`";
+    }
+
+    /**
+     * Оборачивание ключа (таблица/столбец) с алиасом (AS).
+     * @param string ключ
+     * @return string обернутый ключ
+     */
+    public function wrapAliased(string $key): string
+    {
+        $parts = preg_split('/\s+AS\s+/i', $key);
+        return $this->wrap($parts[0]) . ' AS ' . $this->wrapOne($parts[1]);
+    }
+
+    /**
+     * Проверка ключа (таблица/столбец) на то, является ли он json-ключом.
+     * @param string ключ
+     * @return bool
+     */
+    protected function isJsonSelector(string $key): bool
+    {
+        return strstr($key, '->');
+    }
+
+    /**
+     * Оборачивание json-ключа (столбец).
+     * @param string ключ
+     * @return string обернутый ключ
+     */
+    public function wrapJsonSelector(string $key): string
+    {
+        throw new \RuntimeException('This database does not support JSON operations');
     }
 
     /**
@@ -76,8 +115,12 @@ abstract class AbstractGrammar
     public function wrapColumns(array $columns): string
     {
         foreach ($columns as &$column) {
+            
+            foreach ($parts as &$part) {
+                $part = $this->wrap($column);
+            }
             if (!strstr($column, 'AS'))
-                $column = $this->wrapColumn($column);
+                $column = $this->wrap($column);
         }
         return implode(', ', $columns);
     }

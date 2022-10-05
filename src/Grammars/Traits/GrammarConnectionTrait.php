@@ -29,6 +29,6 @@ trait GrammarConnectionTrait
      */
     public function changeDbName(string $dbname)
     {
-        return $this->db->query("USE {$this->wrap($dbname)}");
+        return $this->db->query("USE {$this->wrapOne($dbname)}");
     }
 }

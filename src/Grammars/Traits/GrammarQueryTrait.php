@@ -123,7 +123,7 @@ trait GrammarQueryTrait
         if (count($join->on)) {
             $sql .= ' ON ' . $this->buildWheres($join->on);
         } else if (!empty($join->using)) {
-            $sql .= " USING ({$this->wrapColumn($join->using)})";
+            $sql .= " USING ({$this->wrap($join->using)})";
         }
         return $sql;
     }
