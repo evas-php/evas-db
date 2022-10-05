@@ -1,4 +1,9 @@
 <?php
+/**
+ * Сборщик INSERT-запроса.
+ * @package evas-php\evas-db
+ * @author Egor Vasyakin <egor@evas-php.com>
+ */
 namespace Evas\Db\Builders;
 
 use Evas\Base\Help\PhpHelp;
