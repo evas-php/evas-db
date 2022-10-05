@@ -13,9 +13,10 @@ interface QueryBuilderInterface
 {
     /**
      * Конструктор.
-     * @param DatabaseInterface
+     * @param DatabaseInterface соединение с базой данных
+     * @param string|null имя таблицы
      */
-    public function __construct(DatabaseInterface &$db);
+    public function __construct(DatabaseInterface &$db, string $table = null);
 
 
     // Получение данных для выполнения запроса
