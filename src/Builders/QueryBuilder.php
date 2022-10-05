@@ -1,4 +1,9 @@
 <?php
+/**
+ * Сборщик запросов SELECT/UPDATE/DELETE.
+ * @package evas-php\evas-db
+ * @author Egor Vasyakin <egor@evas-php.com>
+ */
 namespace Evas\Db\Builders;
 
 use Evas\Db\Interfaces\DatabaseInterface;
@@ -11,11 +16,13 @@ class QueryBuilder implements QueryBuilderInterface
 
     /**
      * Конструктор.
-     * @param DatabaseInterface
+     * @param DatabaseInterface соединение с базой данных
+     * @param string|null имя таблицы
      */
-    public function __construct(DatabaseInterface &$db)
+    public function __construct(DatabaseInterface &$db, string $table = null)
     {
         $this->db = $db;
+        if (!is_null($table)) $this->from($table);
     }
 
 
@@ -155,7 +162,7 @@ class QueryBuilder implements QueryBuilderInterface
         $vals = [];
         $sql = [];
         foreach ($data as $key => $val) {
-            $sql[] = $this->wrapColumn($key) . ' = ?';
+            $sql[] = $this->wrap($key) . ' = ?';
             $vals[] = $this->db->quoteArrayOrObject($val);
         }
         $sql = implode(', ', $sql);
