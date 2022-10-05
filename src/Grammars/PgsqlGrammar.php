@@ -49,6 +49,10 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
 
     // Кэш схемы
 
+    /**
+     * Получение списка таблиц.
+     * @return array таблицы
+     */
     public function getTablesList(): array
     {
         $tables = [];
@@ -62,6 +66,11 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         return $tables;
     }
 
+    /**
+     * Получение первичного ключа таблицы.
+     * @param string имя таблицы
+     * @return string первичный ключ
+     */
     public function getTablePrimaryKey(string $table): string
     {
         return $this->db->query(
@@ -73,6 +82,11 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         )->assocArray()['attname'];
     }
 
+    /**
+     * Получение столбцов таблицы.
+     * @param string имя таблицы
+     * @return array столбцы
+     */
     public function getTableColumns(string $table): array
     {
         $rows = $this->db->query(
@@ -93,6 +107,11 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         return $columns;
     }
 
+    /**
+     * Получение внешних ключей таблицы.
+     * @param string имя таблицы
+     * @return array внешние ключи
+     */
     public function getForeignKeys(string $table): array
     {
         $rows = $this->db->query('SELECT
