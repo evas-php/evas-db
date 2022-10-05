@@ -68,7 +68,7 @@ trait DatabaseQueryTrait
      */
     public function select(string $table, $columns = null): QueryBuilder
     {
-        if (!is_array($columns) && !is_null($columns)) {
+        if (!is_null($columns) && func_num_args() > 2) {
             $columns =  func_get_args();
             $table = array_shift($columns);
         }
