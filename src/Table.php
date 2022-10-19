@@ -25,9 +25,19 @@ class Table extends TableSchemaCache implements TableInterface
      * @param string имя метода
      * @param array|null аргументы
      * @return mixed
+     * @throws \BadMethodCallException
      */
     public function __call(string $name, array $args = null)
-    {}
+    {
+        $builder = $this->db->buildQuery($this->name);
+        if (method_exists($builder, $name)) {
+            // return $builder->from($this->name)->$name(...$args);
+            return $builder->$name(...$args);
+        }
+        throw new \BadMethodCallException(sprintf(
+            'Call to undefined method %s()', __METHOD__
+        ));
+    }
 
     /**
      * Начало сборки INSERT-запроса.
