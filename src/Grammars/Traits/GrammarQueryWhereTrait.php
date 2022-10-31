@@ -35,7 +35,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSingle(array $where)
     {
-        return "{$this->wrap($where['column'])} {$where['operator']} ?";
+        return "{$where['column']} {$where['operator']} ?";
     }
 
     /**
@@ -45,7 +45,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSingleColumn(array $where)
     {
-        return "{$this->wrap($where['first'])} {$where['operator']} {$this->wrap($where['second'])}";
+        return "{$where['first']} {$where['operator']} {$this->wrap($where['second'])}";
     }
 
     /**
@@ -55,7 +55,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereNested(array $where)
     {
-        return "({$where['sql']})";
+        return $where['sql'];
     }
 
     /**
@@ -65,7 +65,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSub(array $where)
     {
-        return "{$this->wrap($where['column'])} {$where['operator']} ({$where['sql']})";
+        return "{$where['column']} {$where['operator']} {$where['value']}";
     }
 
     /**
@@ -85,7 +85,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereNull(array $where)
     {
-        return "{$this->wrap($where['column'])} IS {$this->getNot($where)}NULL";
+        return "{$where['column']} IS {$this->getNot($where)}NULL";
     }
 
     /**
@@ -95,8 +95,10 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereIn(array $where)
     {
-        $quotes = implode(', ', array_fill(0, count($where['values']), '?'));
-        return "{$this->wrap($where['column'])} {$this->getNot($where)}IN({$quotes})";
+        $quotes = is_array($where['values'])
+        ? $this->quotes(count($where['values']))
+        : $where['values']; // subquery
+        return "{$where['column']} {$this->getNot($where)}IN {$quotes}";
     }
 
     /**
@@ -106,7 +108,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereExists(array $where)
     {
-        return "{$this->getNot($where)}EXISTS ({$where['sql']})";
+        return "{$this->getNot($where)}EXISTS {$where['sql']}";
     }
 
     /**
@@ -116,7 +118,7 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereBetween(array $where)
     {
-        return "{$this->wrap($where['column'])} {$this->getNot($where)}BETWEEN ? AND ?";
+        return "{$where['column']} {$this->getNot($where)}BETWEEN ? AND ?";
     }
 
     /**
@@ -127,9 +129,8 @@ trait GrammarQueryWhereTrait
     protected function buildWhereBetweenColumns(array $where)
     {
         $not = $this->getNot($where);
-        $min = $this->wrap($where['columns'][0]);
-        $max = $this->wrap($where['columns'][1]);
-        return "{$this->wrap($where['column'])} {$not}BETWEEN {$min} AND {$max}";
+        [$min, $max] = $where['columns'];
+        return "{$where['column']} {$not}BETWEEN {$min} AND {$max}";
     }
 
     /**
@@ -140,7 +141,9 @@ trait GrammarQueryWhereTrait
     protected function buildWhereDateBased(array $where)
     {
         $not = $this->getNot($where);
-        return "{$where['date_operator']}({$this->wrap($where['column'])}) {$where['operator']} ?";
+        $column = trim($where['column'], '()');
+        $value = $where['value'] ?? '?';
+        return "{$where['function']}({$column}) {$where['operator']} ?";
     }
 
     /**
@@ -151,21 +154,19 @@ trait GrammarQueryWhereTrait
     protected function buildWhereBetweenDateBased(array $where)
     {
         $not = $this->getNot($where);
-        return "{$where['date_operator']}({$this->wrap($where['column'])}) {$not}BETWEEN ? AND ?";
+        $column = trim($where['column'], '()');
+        return "{$where['function']}({$column}) {$not}BETWEEN ? AND ?";
     }
 
     /**
-     * Сборка множественных условий.
+     * Сборка проверки соответствия значений столбцов значениям или подзапросу.
      * @param array where
      * @return string
      */
-    protected function buildWhereRowValues(array $where)
+    protected function buildWhereRow(array $where)
     {
-        $sql = '';
-        foreach ($where['columns'] as $i => $column) {
-            if ($i > 0) $sql .= $this->getWhereSeparator($where);
-            $sql .= "{$this->wrap($column)} {$where['operator']} ?";
-        }
-        return "($sql)";
+        $columns = $this->wrapColumns($where['columns']);
+        $sql = $where['sql'] ?? $this->quotes(count($where['columns']));
+        return "({$columns}) {$where['operator']} {$sql}";
     }
 }
