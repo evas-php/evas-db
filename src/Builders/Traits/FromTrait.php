@@ -6,24 +6,34 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\FromOption;
-
 trait FromTrait
 {
     /** @var array FROM часть */
     public $from = [];
 
     /**
+     * Сбросить from.
+     * @return self
+     */
+    public function resetFrom()
+    {
+        $this->from = [];
+        $this->bindings['from'] = [];
+        return $this;
+    }
+
+    /**
      * Установка from sql сторокой.
      * @param string sql строка
      * @param array|null значения для экранирования
+     * @param string псевдоним
      * @return self
      */
-    public function fromRaw(string $sql, array $bindings = [])
+    public function fromRaw(string $sql, array $bindings = [], string $as = null)
     {
-        $this->from[] = FromOption::raw($sql, $bindings);
-        return $this;
-        // return $this->addBindings('from', $bindings);
+        $sql = $this->wrapRoundBrackets($sql);
+        $this->from[] = is_null($as) ? $sql : ("$sql AS " . $this->wrap($as));
+        return $this->addBindings('from', $bindings);
     }
 
     /**
@@ -34,27 +44,29 @@ trait FromTrait
      */
     public function from($table, string $as = null)
     {
-        // if ($this->isQueryable($table) && !is_null($as)) {
-        //     return $this->fromSub($table, $as);
-        // }
-        // // $table = $this->wrap($table);
-        // // $this->from = $as ? ("$table AS " . $this->wrapOne($as)) : $table;
-        // $this->from = $this->wrap($as ? "{$table} AS {$as}" : $table);
-        $this->from[] = FromOption::table($table, $as);
+        if (is_array($table)) {
+            foreach ($table as $_as => $_table) {
+                $this->from($_table, is_string($_as) ? $_as : null);
+            }
+            return $this;
+        }
+        if (static::isQueryable($table) && !is_null($as)) {
+            return $this->fromSub($table, $as);
+        }
+        $table = $this->wrap($table);
+        $this->from[] = is_null($as) ? $table : ($table . ' AS ' . $this->wrap($as));
         return $this;
     }
 
     /**
      * Установка from sql-подзапросом.
-     * @param \Closure|self
+     * @param \Closure|self|string
      * @param string псевдоним
      * @return self
      */
     public function fromSub($query, string $as)
     {
-        // [$sql, $bindings] = $this->createSub($query);
-        // return $this->fromRaw("{$sql} AS " . $this->wrapOne($as), $bindings);
-        $this->from[] = FromOption::sub($query, $as);
-        return $this;
+        [$sql, $bindings] = $this->createSub($query);
+        return $this->fromRaw($sql, $bindings, $as);
     }
 }
