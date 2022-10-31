@@ -6,8 +6,6 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\GroupByOption;
-
 trait GroupByTrait
 {
     /** @var array поля группировки */
@@ -20,7 +18,7 @@ trait GroupByTrait
      */
     public function groupBy(string ...$groups)
     {
-        $this->groups = array_merge($this->groups, GroupByOption::columns(...$groups));
+        $this->groups = array_merge($this->groups, array_map([$this, 'wrap'], $groups));
         return $this;
     }
 
@@ -32,7 +30,8 @@ trait GroupByTrait
      */
     public function groupByRaw(string $sql, array $values = [])
     {
-        $this->groups[] = GroupByOption::raw($sql, $values);
+        $this->groups[] = $sql;
+        $this->addBindings('groups', $values);
         return $this;
     }
 }
