@@ -61,6 +61,6 @@ trait BindingsTrait
             array_push($parts, 'columns', 'from');
         }
         array_push($parts, 'joins', 'wheres', 'havings', 'unions');
-        return $this->bindings($parts);
+        return $this->getBindings($parts);
     }
 }
