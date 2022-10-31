@@ -16,6 +16,16 @@ trait GrammarQueryTrait
     use GrammarQueryWhereTrait;
 
     /**
+     * Сборка ?.
+     * @param int количество экранируемых значений
+     * @return string sql
+     */
+    protected function quotes(int $count)
+    {
+        return '('. implode(', ', array_fill(0, $count, '?')) .')';
+    }
+
+    /**
      * Сборка insert запроса.
      * @param InsertBuilderInterface
      * @return string готовый insert запрос
@@ -23,11 +33,11 @@ trait GrammarQueryTrait
     public function buildInsert(InsertBuilderInterface &$builder): string
     {
         $columns = "({$this->wrapColumns($builder->columns)})";
-        $quote = '('. implode(', ', array_fill(0, count($builder->columns), '?')) .')';
+        $quotes = $this->quotes(count($builder->columns));
         if ($builder->getRowCount() > 1) {
-            $quote = implode(', ', array_fill(0, $builder->getRowCount(), $quote));
+            $quotes = implode(', ', array_fill(0, $builder->getRowCount(), $quotes));
         }
-        $sql = "INSERT INTO {$this->wrapTable($builder->table)} $columns VALUES $quote";
+        $sql = "INSERT INTO {$this->wrapTable($builder->table)} $columns VALUES $quotes";
         return $sql;
     }
 
@@ -39,20 +49,20 @@ trait GrammarQueryTrait
      */
     public function buildQuery(QueryBuilderInterface &$builder): string
     {
+        // var_dump($builder);
+        // return '';
         if (empty($builder->from)) {
             throw new \InvalidArgumentException('Not has table name in QueryBuilder');
         }
+        $from = $this->buildFrom($builder);
         if ('update' === $builder->type) {
-            $sql = "UPDATE {$builder->from} SET {$builder->updateSql}";
+            $sql = "UPDATE {$from} SET {$builder->updateSql}";
         } else if ('delete' === $builder->type) {
-            $sql = "DELETE FROM {$builder->from}";
+            $sql = "DELETE FROM {$from}";
         } else {
             $builder->type = 'select';
-            $cols = $builder->aggregates;
-            if (empty($cols)) $cols = $builder->columns;
-            if (empty($cols)) $cols = ['*'];
-            $cols = implode(', ', $cols);
-            $sql = "SELECT {$cols} FROM {$builder->from}";
+            $cols = $this->buildColumns($builder);
+            $sql = "SELECT {$cols} FROM {$from}";
         }
         if (count($builder->joins)) $sql .= $this->buildJoins($builder->joins);
         if (count($builder->wheres)) {
@@ -60,8 +70,14 @@ trait GrammarQueryTrait
             if ($where) $sql .= " WHERE {$where}";
         }
         if ('select' == $builder->type) {
-            if (count($builder->groups)) $sql .= $this->buildGroups($builder->groups);
+            $hasGroupBy = count($builder->groups) > 0;
+            if ($hasGroupBy) {
+                $sql .= $this->buildGroups($builder->groups);
+            }
             if (count($builder->havings)) {
+                if (!$hasGroupBy) {
+                    throw new \RuntimeException('QueryBuilder has HAVING without GROUP BY');
+                }
                 $having = $this->buildWheres($builder->havings);
                 if ($having) $sql .= " HAVING {$having}";
             }
@@ -77,24 +93,27 @@ trait GrammarQueryTrait
     // Частичная сборка select-запроса
 
     /**
-     * Сборка Where или Having части sql.
-     * @param array части where или having
-     * @return string готовый sql-where или sql-having
+     * Сборка columns.
      */
-    protected function buildWheres(array &$wheres): string
+    protected function buildColumns(QueryBuilderInterface &$builder): string
     {
-        $sql = '';
-        foreach ($wheres as $i => &$where) {
-            $method = 'buildWhere' . $where['type'];
-            if (method_exists($this, $method)) {
-                $line = $this->$method($where);
-                if ($line) {
-                    if ($i > 0) $sql .= $this->getWhereSeparator($where);
-                    $sql .= $line;
-                }
-            }
-        }
-        return $sql;
+        $cols = $builder->aggregates ?? null;
+        if (empty($cols)) $cols = $builder->columns;
+        if (empty($cols)) $cols = ['*'];
+        // $cols = $this->wrapColumns($cols);
+        $cols = implode(', ', $cols);
+        return $cols;
+
+    }
+
+    /**
+     * Сборка FROM.
+     */
+    protected function buildFrom(QueryBuilderInterface &$builder): string
+    {
+        // $from = $this->wrapColumns($builder->from);
+        $from = implode(', ', $builder->from);
+        return $from;
     }
 
     /**
@@ -124,6 +143,27 @@ trait GrammarQueryTrait
             $sql .= ' ON ' . $this->buildWheres($join->on);
         } else if (!empty($join->using)) {
             $sql .= " USING ({$this->wrap($join->using)})";
+        }
+        return $sql;
+    }
+
+    /**
+     * Сборка Where или Having части sql.
+     * @param array части where или having
+     * @return string готовый sql-where или sql-having
+     */
+    protected function buildWheres(array &$wheres): string
+    {
+        $sql = '';
+        foreach ($wheres as $i => &$where) {
+            $method = 'buildWhere' . $where['type'];
+            if (method_exists($this, $method)) {
+                $line = $this->$method($where);
+                if ($line) {
+                    if ($i > 0) $sql .= $this->getWhereSeparator($where);
+                    $sql .= $line;
+                }
+            }
         }
         return $sql;
     }
