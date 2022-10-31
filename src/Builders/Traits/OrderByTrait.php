@@ -6,8 +6,6 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\OrderByOption;
-
 trait OrderByTrait
 {
     /** @var array поля сортировки */
@@ -20,7 +18,8 @@ trait OrderByTrait
      */
     public function orderByRaw(string $sql)
     {
-        $this->orders[] = OrderByOption::raw($sql);
+        $this->orders[] = $sql;
+        // if ($values) $this->addBindings('orders', $values);
         return $this;
     }
 
@@ -33,7 +32,26 @@ trait OrderByTrait
      */
     public function orderBy($column, bool $isDesc = false)
     {
-        $this->orders = array_merge($this->orders, OrderByOption::columns($column, $isDesc));
+        if (is_string($column)) {
+            $this->orders[] = [$this->wrap($column), $isDesc];
+        } else if ($this->isQueryable($column)) {
+            [$sql, $bindings] = $this->createSub($column);
+            $this->orders[] = [$sql, $isDesc];
+            // $this->addBindings('orders', $bindings);
+        } else if (is_array($column)) {
+            foreach ($column as $col => $subDesc) {
+                if (is_numeric($col) && is_string($subDesc)) {
+                    $col = $subDesc;
+                    $subDesc = $isDesc;
+                }
+                $this->orderBy($col, $subDesc);
+            }
+        } else {
+            throw new \InvalidArgumentException(sprintf(
+                'Argument 1 passed to %s() must be an array, a string or a queryable, %s given',
+                __METHOD__, gettype($id)
+            ));
+        }
         return $this;
     }
 
