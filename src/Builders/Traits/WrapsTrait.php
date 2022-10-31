@@ -37,4 +37,15 @@ trait WrapsTrait
     {
         return $this->db->grammar()->wrapOne($key);
     }
+
+    /**
+     * Оборачивание строки круглыми скобками, если это подзапрос.
+     * @param string строка
+     * @return string оригинальная или обёрнутая круглыми скобками строка
+     */
+    protected function wrapRoundBrackets(string $column): string
+    {
+        if ('SELECT' === substr($column, 0, 6)) $column = "($column)";
+        return $column;
+    }
 }
