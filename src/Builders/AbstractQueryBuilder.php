@@ -76,6 +76,15 @@ abstract class AbstractQueryBuilder
         return [$this->getSql(), $this->getBindings()];
     }
 
+    /**
+     * Приведение сборщика запросов к строке.
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getSql();
+    }
+
 
     // Выполнение запроса
 
