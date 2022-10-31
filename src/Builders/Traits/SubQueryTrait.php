@@ -6,6 +6,7 @@
  */
 namespace Evas\Db\Builders\Traits;
 
+use Evas\Base\Help\PhpHelp;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 
 trait SubQueryTrait
@@ -28,8 +29,6 @@ trait SubQueryTrait
     protected function createSub($query): array
     {
         if ($query instanceof \Closure) {
-            // $cb = $query;
-            // $cb($query = $this->forSubQuery());
             call_user_func($query, $query = $this->newQuery());
         }
 
