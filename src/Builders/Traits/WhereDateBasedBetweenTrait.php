@@ -6,103 +6,208 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\WhereOption;
-
 trait WhereDateBasedBetweenTrait
 {
-    public function whereDateBetween(string $column, array $values)
-    {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'DATE', $column, $values);
-        return $this;
+    /**
+     * Добавление between условия базирующегося на дате.
+     * @param bool использовать ли OR в качестве разделителя условий
+     * @param string функция даты
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     * @throws \InvalidArgumentException
+     */
+    protected function pushWhereDateBasedBetween(
+        bool $isOr, string $function, $column, array $values
+    ) {
+        $column = $this->prepareColumn($column);
+        $values = array_slice($values, 0, 2);
+        if (count($values) < 2) {
+            throw new \InvalidArgumentException(sprintf(
+                'Argument #2 (array $values) passed to %s() must has 2 values',
+                __METHOD__
+            ));
+        }
+        $bindings = $values;
+        return $this->pushWhere(
+            'BetweenDateBased', compact('column', 'function', 'bindings', 'isOr')
+        );
     }
 
-    public function orWhereDateBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия даты диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereDateBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'DATE', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'DATE', $column, $values);
     }
 
-    public function whereYearBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия даты диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereDateBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'YEAR', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'DATE', $column, $values);
     }
 
-    public function orWhereYearBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия года диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereYearBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'YEAR', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'YEAR', $column, $values);
     }
 
-    public function whereMonthBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия года диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereYearBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'MONTH', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'YEAR', $column, $values);
     }
 
-    public function orWhereMonthBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия месяца диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereMonthBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'MONTH', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'MONTH', $column, $values);
     }
 
-    public function whereDayBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия месяца диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereMonthBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'DAY', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'MONTH', $column, $values);
     }
 
-    public function orWhereDayBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия дня диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereDayBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'DAY', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'DAY', $column, $values);
     }
 
-    public function whereTimeBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия дня диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereDayBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'TIME', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'DAY', $column, $values);
     }
 
-    public function orWhereTimeBetween(string $column, array $values)
+
+    /**
+     * Добавление условия соответствия времени диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereTimeBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'TIME', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'TIME', $column, $values);
     }
 
-    public function whereHourBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия времени диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereTimeBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'HOUR', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'TIME', $column, $values);
     }
 
-    public function orWhereHourBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия часов диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereHourBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'HOUR', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'HOUR', $column, $values);
     }
 
-    public function whereMinuteBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия часов диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereHourBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'MINUTE', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'HOUR', $column, $values);
     }
 
-    public function orWhereMinuteBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия минут диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereMinuteBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'MINUTE', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'MINUTE', $column, $values);
     }
 
-    public function whereSecondBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия минут диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereMinuteBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(false, 'SECOND', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(true, 'MINUTE', $column, $values);
     }
 
-    public function orWhereSecondBetween(string $column, array $values)
+    /**
+     * Добавление условия соответствия секунд диапазону значений через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function whereSecondBetween($column, array $values)
     {
-        $this->wheres[] = WhereOption::dateBasedBetween(true, 'SECOND', $column, $values);
-        return $this;
+        return $this->pushWhereDateBasedBetween(false, 'SECOND', $column, $values);
+    }
+
+    /**
+     * Добавление условия соответствия секунд диапазону значений через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param array значения [min, max]
+     * @return self
+     */
+    public function orWhereSecondBetween($column, array $values)
+    {
+        return $this->pushWhereDateBasedBetween(true, 'SECOND', $column, $values);
     }
 }
