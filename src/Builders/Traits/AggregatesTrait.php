@@ -12,7 +12,33 @@ trait AggregatesTrait
 {
     public $aggregates = [];
 
-     // ----------
+
+    // Help methods
+
+    /**
+     * Генерация выборки агрегации.
+     * @param string функция агрегации
+     * @param string столбец
+     * @return string выборка агрегации
+     */
+    public function getAggregateColumn(string $function, string $column): string
+    {
+        return strtoupper($function) . "({$this->wrap($column)})";
+    }
+
+    /**
+     * Генерация песвдонима агрегации.
+     * @param string функция агрегации
+     * @param string столбец
+     * @return string псевдоним агрегации
+     */
+    public function getAggregateAlias(string $function, string $column): string
+    {
+        return strtolower($function) . '_' . str_replace('.', '_', $column);
+    }
+
+
+    // ----------
     // Добавление получения агрегации в запрос
     // ----------
 
@@ -23,10 +49,10 @@ trait AggregatesTrait
      */
     public function aggregates(array $aggregates)
     {
-        $this->aggregates = array_merge(
-            $this->aggregates, 
-            SelectOption::aggregates($aggregates)
-        );
+        foreach ($aggregates as $function => $columns) {
+            if (is_string($columns)) $columns = [$columns];
+            $this->aggregate($function, $columns);
+        }
         return $this;
     }
 
@@ -38,11 +64,11 @@ trait AggregatesTrait
      */
     public function aggregate(string $function, array $columns)
     {
-        
-        $this->aggregates = array_merge(
-            $this->aggregates, 
-            SelectOption::aggregate($function, $columns)
-        );
+        foreach ($columns as $column) {
+            $as = $this->wrap($this->getAggregateAlias($function, $column));
+            $col = $this->getAggregateColumn($function, $column);
+            $this->aggregates[] = "$col AS $as";
+        }
         return $this;
     }
 
@@ -113,10 +139,11 @@ trait AggregatesTrait
 
     /**
      * Получение агрегации.
-     * @param array агрегаты
+     * @param string функция агрегации
+     * @param array столбцы
      * @return self
      */
-    public function getAggregate(string $function, array $columns = ['*'])
+    public function getAggregate(string $function, array $columns)
     {
         return $this->aggregate($function, $columns)->get();
     }
