@@ -13,15 +13,26 @@ use Evas\Db\Builders\AbstractQueryBuilder;
 use Evas\Db\Builders\Traits\SubQueryTrait;
 use Evas\Db\Builders\Traits\WrapsTrait;
 use Evas\Db\Builders\Traits\BindingsTrait;
+use Evas\Db\Builders\Traits\PrepareTrait;
 
 use Evas\Db\Builders\Traits\AggregatesTrait;
 use Evas\Db\Builders\Traits\SelectTrait;
 use Evas\Db\Builders\Traits\FromTrait;
 
 use Evas\Db\Builders\Traits\JoinsTrait;
+
 use Evas\Db\Builders\Traits\WhereTrait;
+use Evas\Db\Builders\Traits\WhereBetweenColumnsTrait;
+use Evas\Db\Builders\Traits\WhereBetweenTrait;
+use Evas\Db\Builders\Traits\WhereDateBasedBetweenTrait;
+use Evas\Db\Builders\Traits\WhereDateBasedTrait;
+use Evas\Db\Builders\Traits\WhereExistsTrait;
+// use Evas\Db\Builders\Traits\WhereJsonTrait;
+use Evas\Db\Builders\Traits\WhereRowTrait;
+
 use Evas\Db\Builders\Traits\GroupByTrait;
 use Evas\Db\Builders\Traits\HavingTrait;
+use Evas\Db\Builders\Traits\HavingBetweenTrait;
 use Evas\Db\Builders\Traits\OrderByTrait;
 
 class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
@@ -29,15 +40,26 @@ class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
     use SubQueryTrait;
     use WrapsTrait;
     use BindingsTrait;
+    use PrepareTrait;
 
     use AggregatesTrait;
     use SelectTrait;
     use FromTrait;
 
     use JoinsTrait;
+    
     use WhereTrait;
+    use WhereBetweenColumnsTrait;
+    use WhereBetweenTrait;
+    use WhereDateBasedBetweenTrait;
+    use WhereDateBasedTrait;
+    use WhereExistsTrait;
+    // use WhereJsonTrait;
+    use WhereRowTrait;
+
     use GroupByTrait;
     use HavingTrait;
+    use HavingBetweenTrait;
     use OrderByTrait;
 
 
