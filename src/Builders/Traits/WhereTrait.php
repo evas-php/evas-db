@@ -6,228 +6,347 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\WhereOption;
-
 trait WhereTrait
 {
     /** @var array WHERE часть */
     public $wheres = [];
 
-    public function whereRaw(string $sql, array $bindings = null)
+
+    // Help methods
+
+    /**
+     * Добавление where условия в сборку.
+     * @param string тип where
+     * @param array параметры условия
+     * @return self
+     */
+    protected function pushWhere(string $type, array $where)
     {
-        $this->wheres[] = WhereOption::raw($sql, $bindings);
+        $where['type'] = $type;
+        $this->wheres[] = $where;
+        if (!empty($where['bindings'])) {
+            $this->addBindings('wheres', $where['bindings']);
+        }
         return $this;
     }
 
-    public function orWhereRaw(string $sql, array $bindings = null)
+
+    protected function pushSingleWhere(bool $isOr, $column, $operator = null, $value = null)
     {
-        $this->wheres[] = WhereOption::raw($sql, $bindings, true);
+        // массив where условий
+        if (is_array($column)) {
+            return $this->eachSingle('pushSingleWhere', $column, $isOr);
+        }
+
+        // Raw запрос через queryable
+        if (func_num_args() < 3) return $this->whereNested($column, $isOr);
+
+        // подготовка значения и оператора условия
+        $this->prepareValueAndOperator($value, $operator, func_num_args() === 3);
+
+        // IS NULL условие
+        if (is_null($value)) return $this->whereNull($column, $isOr, $operator !== '=');
+
+        // подзапрос значения
+        if ($this->isQueryable($value)) {
+            return $this->pushWhereSub($isOr, $column, $operator, $value);
+        }
+
+        // single условие
+        $column = $this->prepareColumn($column);
+        $bindings = [$value];
+        return $this->pushWhere('Single', compact('column', 'operator', 'bindings', 'isOr'));
+    }
+
+    /**
+     * Добавление where соответствия значения столбца значению другого столбца.
+     * @param bool использовать ли OR для склейки
+     * @param array|string|\Closure|self столбец или набор соответствий или колбэк или сборщик
+     * @param string|mixed|null оператор или второй столбец или null
+     * @param mixed|null второй столбец или null
+     * @return self
+     */
+    protected function pushSingleWhereColumn(bool $isOr, $first, $operator = null, $second = null)
+    {
+        // массив where условий
+        if (is_array($first)) {
+            return $this->eachSingle('pushSingleWhereColumn', $first, $isOr);
+        }
+
+        // подготовка значения и оператора условия
+        $this->prepareValueAndOperator($second, $operator, func_num_args() === 3);
+
+        $first = $this->prepareColumn($first);
+        $second = $this->prepareColumn($second);
+        return $this->pushWhere('SingleColumn', compact('first', 'operator', 'second', 'isOr'));
+    }
+
+    protected function eachSingle(string $methodName, array $columns, bool $isOr = false)
+    {
+        foreach ($columns as $column => $value) {
+            if (is_array($value)) {
+                $args = array_values($value);
+                if (!is_numeric($column)) array_unshift($args, $column);
+            } else {
+                $args = [$column, '=', $value];
+            }
+            $this->$methodName($isOr, ...$args);
+        }
         return $this;
     }
 
+    /**
+     * Добавление OR/AND where Sub.
+     */
+    protected function pushWhereSub(bool $isOr, $column, $operator, $value = null)
+    {
+        $column = $this->prepareColumn($column);
+        $this->prepareValueAndOperator($value, $operator, func_num_args() === 3);
+        [$value, $bindings] = $this->createSub($value);
+        return $this->pushWhere('Sub', 
+            compact('column', 'operator', 'value', 'bindings', 'isOr')
+        );
+    }
 
+    /**
+     * Подготовка столбца со сборкой подзапроса.
+     * @param mixed столбец
+     * @param string|null тип экранируемых значений
+     * @return string столбец
+     */
+    protected function prepareColumn($column, string $bindingsType = 'wheres')
+    {
+        // $column = trim($column, '()');
+        [$column, $bindings] = $this->createSub($column);
+        if (!empty($bindings)) $this->addBindings($bindingsType, $bindings);
+        return $column;
+    }
+
+
+    // ----------
+    // Or/And Where Raw
+    // ----------
+
+    /**
+     * Добавление and where sql-строкой.
+     * @param string sql-запрос
+     * @param array|null экранируемые значения
+     * @param bool|null использовать ли OR для склейки
+     * @return self
+     */
+    public function whereRaw(string $sql, array $bindings = [], bool $isOr = false)
+    {
+        return $this->pushWhere('Raw', compact('sql', 'bindings', 'isOr'));
+    }
+
+    /**
+     * Добавление or where sql-строкой.
+     * @param string sql-запрос
+     * @param array|null экранируемые значения
+     * @return self
+     */
+    public function orWhereRaw(string $sql, array $bindings = [])
+    {
+        return $this->whereRaw($sql, $bindings, true);
+    }
+
+
+    // ----------
+    // Or/And Where
+    // ----------
+
+    /**
+     * Добавление where AND.
+     * @param array|string|\Closure|self соответствия|столбец|подзарос столбца|подзапрос
+     * @param string|mixed|null оператор|значение|подзапрос|null
+     * @param mixed|null значение|подзапрос|null
+     * @return self
+     */
     public function where($column, $operator = null, $value = null)
     {
-        $this->wheres[] = WhereOption::single(false, ...func_get_args());
-        return $this;
+        return $this->pushSingleWhere(false, ...func_get_args());
     }
 
+    /**
+     * Добавление where OR.
+     * @param array|string|\Closure|self соответствия|столбец|подзарос столбца|подзапрос
+     * @param string|mixed|null оператор|значение|подзапрос|null
+     * @param mixed|null значение|подзапрос|null
+     * @return self
+     */
     public function orWhere($column, $operator = null, $value = null)
     {
-        $this->wheres[] = WhereOption::single(true, ...func_get_args());
-        return $this;
+        return $this->pushSingleWhere(true, ...func_get_args());
     }
 
 
+    // ----------
+    // Or/And Where Column
+    // ----------
+
+    /**
+     * Добавление where AND соответствия значений столбцов.
+     * @param array|string соответствия или столбец
+     * @param string|mixed|null оператор или второй столбец или null
+     * @param mixed|null второй столбец или null
+     * @return self
+     */
     public function whereColumn($first, $operator = null, $second = null)
     {
-        $this->wheres[] = WhereOption::singleColumn(false, ...func_get_args());
-        return $this;
+        return $this->pushSingleWhereColumn(true, ...func_get_args());
     }
 
+    /**
+     * Добавление where OR соответствия значений столбцов.
+     * @param array|string соответствия или столбец
+     * @param string|mixed|null оператор или второй столбец или null
+     * @param mixed|null второй столбец или null
+     * @return self
+     */
     public function orWhereColumn($first, $operator = null, $second = null)
     {
-        $this->wheres[] = WhereOption::singleColumn(true, ...func_get_args());
-        return $this;
+        return $this->pushSingleWhereColumn(false, ...func_get_args());
     }
 
 
-    // Sub
+    // ----------
+    // Or/And Where Sub
+    // ----------
 
-    public function whereSub(string $column, $operator, $queryable = null)
+    public function whereSub($column, $operator, $value = null)
     {
-        $this->wheres[] = WhereOption::sub(false, ...func_get_args());
-        return $this;
+        return $this->pushWhereSub(false, ...func_get_args());
     }
 
-    public function orWhereSub(string $column, $operator, $queryable = null)
+    public function orWhereSub($column, $operator, $value = null)
     {
-        $this->wheres[] = WhereOption::sub(true, ...func_get_args());
-        return $this;
+        return $this->pushWhereSub(true, ...func_get_args());
     }
 
 
-    // Sub column
+    // ----------
+    // Or/And Nested where
+    // ----------
 
-    public function whereSubColumn($queryable, $operator, $value = null)
+    public function whereNested($query, bool $isOr = false)
     {
-        $this->wheres[] = WhereOption::subColumn(false, ...func_get_args());
-        return $this;
+        [$sql, $bindings] = $this->createSub($query);
+        return $this->pushWhere('Nested', compact('sql', 'bindings', 'isOr'));
     }
 
-    public function orWhereSubColumn($queryable, $operator, $value = null)
+    public function orWhereNested($query)
     {
-        $this->wheres[] = WhereOption::subColumn(true, ...func_get_args());
-        return $this;
+        return $this->whereNested($query, true);
     }
 
 
-    // Nested
+    // ----------
+    // Or/And Where Is (Not) Null
+    // ----------
 
-    public function whereNested($queryable)
+    /**
+     * Добавление where AND IS NULL.
+     * @param array|string\Closure|self стобцы или столбец или подзапрос столбца
+     * @param bool|null использовать ли OR для склейки
+     * @param bool|null использовать ли NOT
+     * @return self
+     */
+    public function whereNull($column, bool $isOr = false, bool $isNot = false)
     {
-        $this->wheres[] = WhereOption::nested($queryable, false);
-        return $this;
+        if (is_array($column)) {
+            foreach ($column as $sub) {
+                $this->whereNull($sub, $isOr, $isNot);
+            }
+            return $this;
+        }
+        $column = $this->prepareColumn($column);
+        return $this->pushWhere('Null', compact('column', 'isOr', 'isNot'));
     }
 
-    public function orWhereNested($queryable)
-    {
-        $this->wheres[] = WhereOption::nested($queryable, true);
-        return $this;
-    }
-
-
-    // Exists
-
-    public function whereExists($queryable)
-    {
-        $this->wheres[] = WhereOption::exists($queryable, false, false);
-        return $this;
-    }
-
-    public function orWhereExists($queryable)
-    {
-        $this->wheres[] = WhereOption::exists($queryable, true, false);
-        return $this;
-    }
-
-    public function whereNotExists($queryable)
-    {
-        $this->wheres[] = WhereOption::exists($queryable, false, true);
-        return $this;
-    }
-
-    public function orWhereNotExists($queryable)
-    {
-        $this->wheres[] = WhereOption::exists($queryable, true, true);
-        return $this;
-    }
-
-
-    // Null
-
-    public function whereNull($column)
-    {
-        $this->wheres[] = WhereOption::null($column, false, false);
-        return $this;
-    }
-
+    /**
+     * Добавление where OR IS NULL.
+     * @param array|string стобцы или столбец
+     * @return self
+     */
     public function orWhereNull($column)
     {
-        $this->wheres[] = WhereOption::null($column, true, false);
-        return $this;
+        return $this->whereNull($column, true);
     }
 
+    /**
+     * Добавление where AND IS NOT NULL.
+     * @param array|string стобцы или столбец
+     * @return self
+     */
     public function whereNotNull($column)
     {
-        $this->wheres[] = WhereOption::null($column, false, true);
-        return $this;
+        return $this->whereNull($column, false, true);
     }
 
+    /**
+     * Добавление where OR IS NOT NULL.
+     * @param array|string стобцы или столбец
+     * @return self
+     */
     public function orWhereNotNull($column)
     {
-        $this->wheres[] = WhereOption::null($column, true, true);
-        return $this;
+        return $this->whereNull($column, true, true);
     }
 
 
-    // In
+    // ----------
+    // Or/And Where (Not) In
+    // ----------
 
-    public function whereIn(string $column, $values)
+    /**
+     * Добавление where AND/OR (NOT) IN.
+     * @param string|\Closure|self столбец или подзарос столбца
+     * @param array|\Closure|self массив значений или подзапрос
+     * @param bool|null использовать ли OR для склейки
+     * @param bool|null использовать ли NOT
+     * @return self
+     */
+    public function whereIn($column, $values, bool $isOr = false, bool $isNot = false)
     {
-        $this->wheres[] = WhereOption::in($column, $values, false, false);
-        return $this;
+        $column = $this->prepareColumn($column);
+        if (is_array($values)) {
+            $bindings = $values;
+        } else {
+            [$values, $bindings] = $this->createSub($values);
+        }
+        return $this->pushWhere('In', compact('column', 'values', 'bindings', 'isOr', 'isNot'));
     }
 
-    public function orWhereIn(string $column, $values)
+    /**
+     * Добавление where OR IN.
+     * @param string|\Closure|self столбец или подзарос столбца
+     * @param array|\Closure|self массив значений или подзапрос
+     * @return self
+     */
+    public function orWhereIn($column, $values)
     {
-        $this->wheres[] = WhereOption::in($column, $values, true, false);
-        return $this;
+        return $this->whereIn($column, $values, true);
     }
 
-    public function whereNotIn(string $column, $values)
+    /**
+     * Добавление where AND NOT IN.
+     * @param string|\Closure|self столбец или подзарос столбца
+     * @param array|\Closure|self массив значений или подзапрос
+     * @return self
+     */
+    public function whereNotIn($column, $values)
     {
-        $this->wheres[] = WhereOption::in($column, $values, false, true);
-        return $this;
+        return $this->whereIn($column, $values,false, true);
     }
 
-    public function orWhereNotIn(string $column, $values)
+    /**
+     * Добавление where OR NOT IN.
+     * @param string|\Closure|self столбец или подзарос столбца
+     * @param array|\Closure|self массив значений или подзапрос
+     * @return self
+     */
+    public function orWhereNotIn($column, $values)
     {
-        $this->wheres[] = WhereOption::in($column, $values, true, true);
-        return $this;
-    }
-
-
-    // Between
-
-    public function whereBetween($column, $values)
-    {
-        $this->wheres[] = WhereOption::between($column, $values, false, false);
-        return $this;
-    }
-
-    public function orWhereBetween($column, $values)
-    {
-        $this->wheres[] = WhereOption::between($column, $values, true, false);
-        return $this;
-    }
-
-    public function whereNotBetween($column, $values)
-    {
-        $this->wheres[] = WhereOption::between($column, $values, false, true);
-        return $this;
-    }
-
-    public function orWhereNotBetween($column, $values)
-    {
-        $this->wheres[] = WhereOption::between($column, $values, true, true);
-        return $this;
-    }
-
-
-    // Between columns
-
-    public function whereBetweenColumns($column, $columns)
-    {
-        $this->wheres[] = WhereOption::betweenColumns($column, $columns, false, false);
-        return $this;
-    }
-
-    public function orWhereBetweenColumns($column, $columns)
-    {
-        $this->wheres[] = WhereOption::betweenColumns($column, $columns, true, false);
-        return $this;
-    }
-
-    public function whereNotBetweenColumns($column, $columns)
-    {
-        $this->wheres[] = WhereOption::betweenColumns($column, $columns, false, true);
-        return $this;
-    }
-
-    public function orWhereNotBetweenColumns($column, $columns)
-    {
-        $this->wheres[] = WhereOption::betweenColumns($column, $columns, true, true);
-        return $this;
+        return $this->whereIn($column, $values, true, true);
     }
 }
