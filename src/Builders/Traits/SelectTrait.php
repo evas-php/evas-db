@@ -6,8 +6,6 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\SelectOption;
-
 trait SelectTrait
 {
     /** @var array забираемые поля */
@@ -22,10 +20,12 @@ trait SelectTrait
      * @param array|null значения для экранирования
      * @return self
      */
-    public function selectRaw(string $sql, array $bindings = null)
+    public function selectRaw(string $sql, array $bindings = [], string $as = null)
     {
-        $this->columns[] = SelectOption::raw($sql, $bindings);
-        return $this;
+        $sql = $this->wrapRoundBrackets($sql);
+        if (null !== $as) $sql = "$sql AS " . $this->wrap($as);
+        $this->columns[] = $sql;
+        return $this->addBindings('columns', $bindings);
     }
 
     /**
@@ -35,8 +35,14 @@ trait SelectTrait
      */
     public function select($columns = ['*'])
     {
-        // $this->columns = array_merge($this->columns, SelectOption::columns(...func_get_args()));
-        $this->columns = SelectOption::columns(...func_get_args());
+        $columns = is_array($columns) ? $columns : func_get_args();
+        foreach ($columns as $as => $column) {
+            if (is_string($as) && ($this->isQueryable($column) || is_string($column))) {
+                $this->selectSub($column, $as);
+            } else {
+                $this->columns[] = $this->wrapRoundBrackets($this->wrap($column));
+            }
+        }
         return $this;
     }
 
@@ -47,8 +53,8 @@ trait SelectTrait
      */
     public function selectSub($query, string $as)
     {
-        $this->columns[] = SelectOption::sub($query, $as);
-        return $this;
+        [$sql, $bindings] = $this->createSub($query);
+        return $this->selectRaw($sql, $bindings, $as);
     }
 
 
