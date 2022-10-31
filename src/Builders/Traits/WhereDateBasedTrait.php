@@ -6,103 +6,218 @@
  */
 namespace Evas\Db\Builders\Traits;
 
-use Evas\Db\Builders\Options\WhereOption;
-
 trait WhereDateBasedTrait
 {
-    public function whereDate(string $column, string $operator, string $value = null)
-    {
-        $this->wheres[] = WhereOption::dateBased(false, 'DATE', ...func_get_args());
-        return $this;
+    /**
+     * Добавление условия базирующегося на дате.
+     * @param bool использовать ли OR в качестве разделителя условий
+     * @param string функция даты
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    protected function pushWhereDateBased(
+        bool $isOr, string $function, $column, string $operator, string $value = null
+    ) {
+        $column = $this->prepareColumn($column);
+        $this->prepareValueAndOperator($value, $operator, func_num_args() === 4);
+        $bindings = [$value];
+        return $this->pushWhere('DateBased', 
+            compact('column', 'operator', 'function', 'bindings', 'isOr')
+        );
     }
 
-    public function orWhereDate(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления даты через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereDate($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'DATE', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'DATE', ...func_get_args());
     }
 
-    public function whereYear(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления даты через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereDate($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'YEAR', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'DATE', ...func_get_args());
     }
 
-    public function orWhereYear(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления года через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereYear($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'YEAR', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'YEAR', ...func_get_args());
     }
 
-    public function whereMonth(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления года через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereYear($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'MONTH', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'YEAR', ...func_get_args());
     }
 
-    public function orWhereMonth(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления месяца через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereMonth($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'MONTH', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'MONTH', ...func_get_args());
     }
 
-    public function whereDay(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления месяца через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereMonth($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'DAY', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'MONTH', ...func_get_args());
     }
 
-    public function orWhereDay(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления дня через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereDay($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'DAY', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'DAY', ...func_get_args());
     }
 
-    public function whereTime(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления дня через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereDay($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'TIME', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'DAY', ...func_get_args());
     }
 
-    public function orWhereTime(string $column, string $operator, string $value = null)
+
+    /**
+     * Добавление условия сопоставления времени через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereTime($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'TIME', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'TIME', ...func_get_args());
     }
 
-    public function whereHour(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления времени через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereTime($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'HOUR', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'TIME', ...func_get_args());
     }
 
-    public function orWhereHour(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления часа через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereHour($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'HOUR', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'HOUR', ...func_get_args());
     }
 
-    public function whereMinute(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления часа через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereHour($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'MINUTE', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'HOUR', ...func_get_args());
     }
 
-    public function orWhereMinute(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления минут через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereMinute($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'MINUTE', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'MINUTE', ...func_get_args());
     }
 
-    public function whereSecond(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления минут через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereMinute($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(false, 'SECOND', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(true, 'MINUTE', ...func_get_args());
     }
 
-    public function orWhereSecond(string $column, string $operator, string $value = null)
+    /**
+     * Добавление условия сопоставления секунд через AND.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function whereSecond($column, string $operator, string $value = null)
     {
-        $this->wheres[] = WhereOption::dateBased(true, 'SECOND', ...func_get_args());
-        return $this;
+        return $this->pushWhereDateBased(false, 'SECOND', ...func_get_args());
+    }
+
+    /**
+     * Добавление условия сопоставления секунд через OR.
+     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string оператор или значение
+     * @param string|null значение или null
+     * @return self
+     */
+    public function orWhereSecond($column, string $operator, string $value = null)
+    {
+        return $this->pushWhereDateBased(true, 'SECOND', ...func_get_args());
     }
 }
