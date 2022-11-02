@@ -28,10 +28,10 @@ trait GroupByTrait
      * @param array|null экранируемые значения
      * @return self
      */
-    public function groupByRaw(string $sql, array $values = [])
+    public function groupByRaw(string $sql, array $bindings = [])
     {
         $this->groups[] = $sql;
-        $this->addBindings('groups', $values);
+        $this->addBindings('groups', $bindings);
         return $this;
     }
 }

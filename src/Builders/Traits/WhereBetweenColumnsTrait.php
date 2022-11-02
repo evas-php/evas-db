@@ -38,9 +38,9 @@ trait WhereBetweenColumnsTrait
      * @param array столбцы из которых достать значение [min, max]
      * @return self
      */
-    public function orWhereBetweenColumns($column, array $values)
+    public function orWhereBetweenColumns($column, array $columns)
     {
-        return $this->whereBetweenColumns($column, $values, true);
+        return $this->whereBetweenColumns($column, $columns, true);
     }
 
     /**
@@ -49,9 +49,9 @@ trait WhereBetweenColumnsTrait
      * @param array столбцы из которых достать значение [min, max]
      * @return self
      */
-    public function whereNotBetweenColumns($column, array $values)
+    public function whereNotBetweenColumns($column, array $columns)
     {
-        return $this->whereBetweenColumns($column, $values, false, true);
+        return $this->whereBetweenColumns($column, $columns, false, true);
     }
 
     /**
@@ -60,8 +60,8 @@ trait WhereBetweenColumnsTrait
      * @param array столбцы из которых достать значение [min, max]
      * @return self
      */
-    public function orWhereNotBetweenColumns($column, array $values)
+    public function orWhereNotBetweenColumns($column, array $columns)
     {
-        return $this->whereBetweenColumns($column, $values, true, true);
+        return $this->whereBetweenColumns($column, $columns, true, true);
     }
 }

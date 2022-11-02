@@ -19,7 +19,7 @@ trait OrderByTrait
     public function orderByRaw(string $sql)
     {
         $this->orders[] = $sql;
-        // if ($values) $this->addBindings('orders', $values);
+        // if ($bindings) $this->addBindings('orders', $bindings);
         return $this;
     }
 
