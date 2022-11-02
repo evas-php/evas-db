@@ -21,7 +21,7 @@ trait BindingsTrait
     /**
      * Добавление экранируемого значения.
      * @param string для какой части запроса
-     * @param array экранируемые значения.
+     * @param array|null экранируемые значения
      * @return self
      */
     public function addBindings(string $part, array $bindings = [])

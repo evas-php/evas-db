@@ -25,7 +25,7 @@ trait FromTrait
     /**
      * Установка from sql сторокой.
      * @param string sql строка
-     * @param array|null значения для экранирования
+     * @param array|null экранируемые значения
      * @param string|null псевдоним
      * @return self
      */

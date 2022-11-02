@@ -17,7 +17,7 @@ trait SelectTrait
     /**
      * Добавление запрашиваемых стобцов sql-строкой с экранированием.
      * @param string столбцы sql-строкой
-     * @param array|null значения для экранирования
+     * @param array|null экранируемые значения
      * @return self
      */
     public function selectRaw(string $sql, array $bindings = [], string $as = null)

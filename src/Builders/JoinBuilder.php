@@ -80,7 +80,7 @@ class JoinBuilder extends AbstractQueryBuilder// implements JoinBuilderInterface
     /**
      * Установка условия склеивания sql-строкой.
      * @param string sql-условие
-     * @param string значения для экранирования
+     * @param array|null значения для экранирования
      * @param bool|null использовать ли OR для склейки
      * @return self
      */
@@ -92,7 +92,7 @@ class JoinBuilder extends AbstractQueryBuilder// implements JoinBuilderInterface
     /**
      * Установка условия склеивания sql-строкой через OR.
      * @param string sql-условие
-     * @param string значения для экранирования
+     * @param array|null значения для экранирования
      * @return self
      */
     public function orOnRaw(string $sql, array $bindings = [])
