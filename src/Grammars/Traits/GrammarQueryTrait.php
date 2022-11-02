@@ -187,16 +187,6 @@ trait GrammarQueryTrait
     {
         $sql = '';
         foreach ($builder->unions as &$union) {
-            // if ($union['query'] instanceof QueryBuilderInterface) {
-            //     if (!count($union['query']->columns)) {
-            //         // устанавливаем столбцы для UNION из запроса, если не установлены
-            //         $union['query']->columns = $builder->columns;
-            //     }
-            //     $all = ($union['all'] || false) ? ' ALL' : '';
-            //     $_sql = $union['query']->getSql();
-            // } else if (is_string($union['query'])) {
-            //     $_sql = $union['query'];
-            // }
             $all = ($union['all'] || false) ? ' ALL' : '';
             $sql .= " UNION {$all}{$union['sql']}";
         }
