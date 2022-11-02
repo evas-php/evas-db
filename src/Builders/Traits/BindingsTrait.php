@@ -52,15 +52,18 @@ trait BindingsTrait
             }
             return $values;
         }
-        $parts = [];
-        if ('update' === $this->type) {
-            array_push($parts, 'update', 'from');
-        } else if ('delete' === $this->type) {
-            $parts[] = 'from';
-        } else {
-            array_push($parts, 'columns', 'from');
-        }
-        array_push($parts, 'joins', 'wheres', 'havings', 'unions');
+        return $this->getBindingsAll();
+    }
+
+    /**
+     * Получение всех экранируемых значений.
+     * @return array
+     */
+    public function getBindingsAll(): array
+    {
+        $parts = ['from', 'joins', 'wheres', 'havings', 'unions'];
+        if ('update' === $this->type) array_unshift($parts, 'update');
+        else if ('delete' !== $this->type) array_unshift($parts, 'columns');
         return $this->getBindings($parts);
     }
 }
