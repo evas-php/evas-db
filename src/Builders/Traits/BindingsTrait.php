@@ -26,7 +26,9 @@ trait BindingsTrait
      */
     public function addBindings(string $part, array $bindings = [])
     {
-        $this->bindings[$part] = array_merge($this->bindings[$part] ?? [], $bindings);
+        if (count($bindings)) {
+            $this->bindings[$part] = array_merge($this->bindings[$part] ?? [], $bindings);
+        }
         return $this;
     }
 
@@ -46,11 +48,11 @@ trait BindingsTrait
                     __METHOD__, gettype($part)
                 ));
             }
-            $values = [];
+            $bindings = [];
             foreach ($part as $sub) {
-                $values = array_merge($values, $this->bindings[$sub] ?? []);
+                $bindings = array_merge($bindings, $this->bindings[$sub] ?? []);
             }
-            return $values;
+            return $bindings;
         }
         return $this->getBindingsAll();
     }
