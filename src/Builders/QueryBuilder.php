@@ -33,6 +33,7 @@ use Evas\Db\Builders\Traits\WhereRowTrait;
 use Evas\Db\Builders\Traits\GroupByTrait;
 use Evas\Db\Builders\Traits\HavingTrait;
 use Evas\Db\Builders\Traits\HavingBetweenTrait;
+use Evas\Db\Builders\Traits\UnionsTrait;
 use Evas\Db\Builders\Traits\OrderByTrait;
 
 class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
@@ -60,6 +61,7 @@ class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
     use GroupByTrait;
     use HavingTrait;
     use HavingBetweenTrait;
+    use UnionsTrait;
     use OrderByTrait;
 
 

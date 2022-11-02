@@ -179,7 +179,7 @@ trait GrammarQueryTrait
     }
 
     /**
-     * Сборка нескольких объединений.
+     * Сборка объединений.
      * @param QueryBuilderInterface 
      * @return string готовые sql-union
      */
@@ -187,25 +187,20 @@ trait GrammarQueryTrait
     {
         $sql = '';
         foreach ($builder->unions as &$union) {
-            if (!count($union['query']->columns)) {
-                // устанавливаем столбцы для JOIN из запроса, если не установлены
-                $union['query']->columns = $builder->columns;
-            }
-            $sql .= $this->buildUnion($union);
+            // if ($union['query'] instanceof QueryBuilderInterface) {
+            //     if (!count($union['query']->columns)) {
+            //         // устанавливаем столбцы для UNION из запроса, если не установлены
+            //         $union['query']->columns = $builder->columns;
+            //     }
+            //     $all = ($union['all'] || false) ? ' ALL' : '';
+            //     $_sql = $union['query']->getSql();
+            // } else if (is_string($union['query'])) {
+            //     $_sql = $union['query'];
+            // }
+            $all = ($union['all'] || false) ? ' ALL' : '';
+            $sql .= " UNION {$all}{$union['sql']}";
         }
         return $sql;
-    }
-
-    /**
-     * Сборка объединения.
-     * @param array union
-     * @return string готовый sql-union
-     */
-    protected function buildUnion(array $union): string
-    {
-        $all = ($union['all'] || false) ? ' ALL' : '';
-        $sql = $union['query']->getSql();
-        return " UNION {$all} ({$sql})";
     }
 
     /**
