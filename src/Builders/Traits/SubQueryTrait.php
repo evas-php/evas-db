@@ -22,11 +22,12 @@ trait SubQueryTrait
 
     /**
      * Создание подзапроса с получением sql и экранируемых значений.
-     * @param \Closure|self
+     * @param string|\Closure|self подзапрос
+     * @param array|null экранируемые значения для string-подзароса
      * @return array [sql, bindings]
      * @throws \InvalidArgumentException
      */
-    protected function createSub($query): array
+    protected function createSub($query, array $bindings = []): array
     {
         if ($query instanceof \Closure) {
             call_user_func($query, $query = $this->newQuery());
@@ -34,14 +35,12 @@ trait SubQueryTrait
 
         if ($query instanceof QueryBuilderInterface) {
             $query = $this->setDbNameIfCrossDatabaseQuery($query);
-            return ['(' . $query->getSql() . ')', $query->getBindings()];
-        }
-        else if (is_string($query)) {
+            return ['('. $query->getSql() .')', $query->getBindings()];
+        } else if (is_string($query)) {
             $query = preg_match('/^\w+(\.\w+)?$/u', $query) 
             ? $this->wrap($query) : "({$query})";
-            return [$query, []];
-        }
-        else {
+            return [$query, $bindings];
+        } else {
             throw new \InvalidArgumentException(sprintf(
                 'A subquery must be an instance of %s, a Closure, or a string, %s given',
                 QueryBuilderInterface::class,
