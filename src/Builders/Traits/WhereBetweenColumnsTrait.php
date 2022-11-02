@@ -11,8 +11,8 @@ trait WhereBetweenColumnsTrait
     /**
      * Добавление where between со значениями столбцов в качестве значений.
      * По умолчанию склейка через AND.
-     * @param string столбец
-     * @param array столбцы из которых достать значение [min, max]
+     * @param string|\Closure|self столбец или подзапрос
+     * @param array столбцы или подзапросы из которых достать значение [min, max]
      * @param bool использовать ли OR для склейки where
      * @param bool использовать ли NOT перед between
      * @return self
@@ -34,7 +34,7 @@ trait WhereBetweenColumnsTrait
 
     /**
      * Добавление where OR between со значениями столбцов в качестве значений.
-     * @param string столбец
+     * @param string|\Closure|self столбец или подзапрос
      * @param array столбцы из которых достать значение [min, max]
      * @return self
      */
@@ -45,7 +45,7 @@ trait WhereBetweenColumnsTrait
 
     /**
      * Добавление where AND NOT between со значениями столбцов в качестве значений.
-     * @param string столбец
+     * @param string|\Closure|self столбец или подзапрос
      * @param array столбцы из которых достать значение [min, max]
      * @return self
      */
@@ -56,7 +56,7 @@ trait WhereBetweenColumnsTrait
 
     /**
      * Добавление where OR NOT between со значениями столбцов в качестве значений.
-     * @param string столбец
+     * @param string|\Closure|self столбец или подзапрос
      * @param array столбцы из которых достать значение [min, max]
      * @return self
      */

@@ -12,7 +12,7 @@ trait WhereDateBasedBetweenTrait
      * Добавление between условия базирующегося на дате.
      * @param bool использовать ли OR в качестве разделителя условий
      * @param string функция даты
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      * @throws \InvalidArgumentException
@@ -36,7 +36,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия даты диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -47,7 +47,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия даты диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -58,7 +58,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия года диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -69,7 +69,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия года диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -80,7 +80,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия месяца диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -91,7 +91,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия месяца диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -102,7 +102,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия дня диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -113,7 +113,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия дня диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -125,7 +125,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия времени диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -136,7 +136,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия времени диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -147,7 +147,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия часов диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -158,7 +158,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия часов диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -169,7 +169,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия минут диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -180,7 +180,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия минут диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -191,7 +191,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия секунд диапазону значений через AND.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */
@@ -202,7 +202,7 @@ trait WhereDateBasedBetweenTrait
 
     /**
      * Добавление условия соответствия секунд диапазону значений через OR.
-     * @param string|\Closure|self столбец или подзапрос столбца
+     * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
      */

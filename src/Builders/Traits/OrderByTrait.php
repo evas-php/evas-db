@@ -25,7 +25,7 @@ trait OrderByTrait
 
     /**
      * Установка сортировки.
-     * @param array|string|\Closure|self столбцы
+     * @param array|string|\Closure|self столбец/столбцы или подзапрос/подзапросы
      * @param bool|null сортировать по убыванию
      * @return self
      * @throws \InvalidArgumentException

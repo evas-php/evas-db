@@ -29,8 +29,8 @@ trait SelectTrait
     }
 
     /**
-     * Добавление запрашиваемых столбцов.
-     * @param mixed столбцы
+     * Добавление столбца/столбцов.
+     * @param mixed столбец/столбцы
      * @return self
      */
     public function select($columns = ['*'])
@@ -47,8 +47,8 @@ trait SelectTrait
     }
 
     /**
-     * Подзапрос запрашиваемых столбцов.
-     * @param string|\Closure|self
+     * Добавление подзапроса столбцов.
+     * @param string|\Closure|self подзапрос
      * @param string алиас
      */
     public function selectSub($query, string $as)

@@ -31,6 +31,14 @@ trait WhereTrait
     }
 
 
+    /**
+     * Добавление where соответствия значения столбца значению.
+     * @param bool использовать ли OR для склейки
+     * @param array|string|\Closure|self столбец или набор соответствий или колбэк или сборщик
+     * @param string|mixed|null оператор или второй столбец или null
+     * @param mixed|null второй столбец или null
+     * @return self
+     */
     protected function pushSingleWhere(bool $isOr, $column, $operator = null, $value = null)
     {
         // массив where условий

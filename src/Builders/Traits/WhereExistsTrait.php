@@ -11,7 +11,7 @@ trait WhereExistsTrait
     /**
      * Добавление where exists.
      * По умолчанию склейка через AND.
-     * @param \Closure|string|self подзапрос
+     * @param string|\Closure|self подзапрос
      * @param bool использовать ли OR для склейки where
      * @param bool использовать ли NOT перед between
      * @return self
@@ -24,7 +24,7 @@ trait WhereExistsTrait
 
     /**
      * Добавление where OR exists.
-     * @param \Closure|string|self подзапрос
+     * @param string|\Closure|self подзапрос
      * @return self
      */
     public function orWhereExists($query)
@@ -34,7 +34,7 @@ trait WhereExistsTrait
 
     /**
      * Добавление where AND NOT exists.
-     * @param \Closure|string|self подзапрос
+     * @param string|\Closure|self подзапрос
      * @return self
      */
     public function whereNotExists($query)
@@ -44,7 +44,7 @@ trait WhereExistsTrait
 
     /**
      * Добавление where OR NOT exists.
-     * @param \Closure|string|self подзапрос
+     * @param string|\Closure|self подзапрос
      * @return self
      */
     public function orWhereNotExists($query)

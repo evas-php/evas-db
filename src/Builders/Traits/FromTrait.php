@@ -26,7 +26,7 @@ trait FromTrait
      * Установка from sql сторокой.
      * @param string sql строка
      * @param array|null значения для экранирования
-     * @param string псевдоним
+     * @param string|null псевдоним
      * @return self
      */
     public function fromRaw(string $sql, array $bindings = [], string $as = null)
@@ -38,7 +38,7 @@ trait FromTrait
 
     /**
      * Установка from таблицей или sql-подзапросом.
-     * @param string|\Closure|self
+     * @param string|\Closure|self подзапрос
      * @param string|null псевдоним
      * @return self
      */
