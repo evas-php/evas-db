@@ -7,6 +7,7 @@
 namespace Evas\Db\Grammars\Traits;
 
 use Evas\Db\Interfaces\InsertBuilderInterface;
+// use Evas\Db\Interfaces\JoinBuilderInterface;
 use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Grammars\Traits\GrammarQueryWhereTrait;
 
@@ -54,7 +55,7 @@ trait GrammarQueryTrait
         if (empty($builder->from)) {
             throw new \InvalidArgumentException('Not has table name in QueryBuilder');
         }
-        $from = $this->buildFrom($builder);
+        $from = $this->buildFrom($builder->from);
         if ('update' === $builder->type) {
             $sql = "UPDATE {$from} SET {$builder->updateSql}";
         } else if ('delete' === $builder->type) {
@@ -109,10 +110,10 @@ trait GrammarQueryTrait
     /**
      * Сборка FROM.
      */
-    protected function buildFrom(QueryBuilderInterface &$builder): string
+    protected function buildFrom(array $from): string
     {
-        // $from = $this->wrapColumns($builder->from);
-        $from = implode(', ', $builder->from);
+        // $from = $this->wrapColumns($from);
+        $from = implode(', ', $from);
         return $from;
     }
 
@@ -127,6 +128,7 @@ trait GrammarQueryTrait
         foreach ($joins as $i => &$join) {
             if ($i > 0) $sql .= ' ';
             $sql .= $join->getSql();
+            // $sql .= $this->buildJoin($join);
         }
         return $sql;
     }
@@ -136,9 +138,9 @@ trait GrammarQueryTrait
      * @param 
      * @return string готовый sql-join
      */
-    protected function buildJoin($join): string
+    public function buildJoin($join): string
     {
-        $sql = "{$join->type} JOIN {$join->from}";
+        $sql = "{$join->type} JOIN {$this->buildFrom($join->from)}";
         if (count($join->on)) {
             $sql .= ' ON ' . $this->buildWheres($join->on);
         } else if (!empty($join->using)) {
