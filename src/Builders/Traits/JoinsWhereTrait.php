@@ -19,12 +19,10 @@ trait JoinsWhereTrait
      * @param string|null второй столбец или null
      * @return self
      */
-    protected function setJoinWhere(string $type, string $table, $first, string $operator = null, string $second = null)
-    {
-        $condition = func_get_args();
-        return $this->realSetJoin(
-            array_shift($condition), [array_shift($condition)], $condition, true
-        );
+    protected function setJoinWhere(
+        string $type, string $table, $first, string $operator = null, string $second = null
+    ) {
+        return $this->realSetJoin($type, [$table], array_slice(func_get_args(), 2), true);
     }
 
     /**
@@ -40,11 +38,7 @@ trait JoinsWhereTrait
     protected function setJoinSubWhere(
         string $type, $query, string $as, $first, string $operator = null, string $second = null
     ) {
-        $condition = func_get_args();
-
-        return $this->realSetJoin(array_shift($condition), [
-            array_shift($condition), array_shift($condition)
-        ], $condition, true);
+        return $this->realSetJoin($type, [$query, $as], array_slice(func_get_args(), 3), true);
     }
 
 

@@ -56,10 +56,8 @@ trait JoinsTrait
      */
     protected function addJoin(JoinBuilder $join)
     {
-        $bindings = $join->getBindings();
-        if (count($bindings)) $this->addBindings('join', $bindings);
         $this->joins[] = $join;
-        return $this;
+        return $this->addBindings('join', $join->getBindings());
     }
 
     /**
@@ -91,8 +89,7 @@ trait JoinsTrait
     protected function setJoin(
         string $type, string $table, $first, string $operator = null, string $second = null
     ) {
-        $condition = func_get_args();
-        return $this->realSetJoin(array_shift($condition), [array_shift($condition)], $condition);
+        return $this->realSetJoin($type, [$table], array_slice(func_get_args(), 2));
     }
 
     /**
@@ -108,10 +105,7 @@ trait JoinsTrait
     protected function setJoinSub(
         string $type, $query, string $as, $first, string $operator = null, string $second = null
     ) {
-        $condition = func_get_args();
-        return $this->realSetJoin(array_shift($condition), [
-            array_shift($condition), array_shift($condition)
-        ], $condition);
+        return $this->realSetJoin($type, [$query, $as], array_slice(func_get_args(), 3));
     }
 
 
