@@ -45,7 +45,8 @@ trait GrammarQueryWhereTrait
      */
     protected function buildWhereSingleColumn(array $where)
     {
-        return "{$where['first']} {$where['operator']} {$this->wrap($where['second'])}";
+        [$f, $s] = [$this->wrap($where['first']), $this->wrap($where['second'])];
+        return "{$f} {$where['operator']} {$s}";
     }
 
     /**
