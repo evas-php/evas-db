@@ -6,20 +6,15 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Db\Interfaces\QueryBuilderInterface;
 
-use Evas\Db\Builders\AbstractQueryBuilder;
-
-use Evas\Db\Builders\Traits\SubQueryTrait;
-use Evas\Db\Builders\Traits\WrapsTrait;
-use Evas\Db\Builders\Traits\BindingsTrait;
-use Evas\Db\Builders\Traits\PrepareTrait;
+use Evas\Db\Builders\BaseQueryBuilder;
 
 use Evas\Db\Builders\Traits\AggregatesTrait;
 use Evas\Db\Builders\Traits\SelectTrait;
-use Evas\Db\Builders\Traits\FromTrait;
 
 use Evas\Db\Builders\Traits\JoinsTrait;
+use Evas\Db\Builders\Traits\JoinsWhereTrait;
+use Evas\Db\Builders\Traits\JoinsUsingTrait;
 
 use Evas\Db\Builders\Traits\WhereTrait;
 use Evas\Db\Builders\Traits\WhereBetweenColumnsTrait;
@@ -36,18 +31,16 @@ use Evas\Db\Builders\Traits\HavingBetweenTrait;
 use Evas\Db\Builders\Traits\UnionsTrait;
 use Evas\Db\Builders\Traits\OrderByTrait;
 
-class QueryBuilder extends AbstractQueryBuilder implements QueryBuilderInterface
-{
-    use SubQueryTrait;
-    use WrapsTrait;
-    use BindingsTrait;
-    use PrepareTrait;
+use Evas\Db\Interfaces\QueryBuilderInterface;
 
+class QueryBuilder extends BaseQueryBuilder implements QueryBuilderInterface
+{
     use AggregatesTrait;
     use SelectTrait;
-    use FromTrait;
 
     use JoinsTrait;
+    use JoinsWhereTrait;
+    use JoinsUsingTrait;
     
     use WhereTrait;
     use WhereBetweenColumnsTrait;
