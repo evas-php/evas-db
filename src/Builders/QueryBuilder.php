@@ -28,6 +28,7 @@ use Evas\Db\Builders\Traits\WhereRowTrait;
 use Evas\Db\Builders\Traits\GroupByTrait;
 use Evas\Db\Builders\Traits\HavingTrait;
 use Evas\Db\Builders\Traits\HavingBetweenTrait;
+use Evas\Db\Builders\Traits\HavingBetweenColumnsTrait;
 use Evas\Db\Builders\Traits\UnionsTrait;
 use Evas\Db\Builders\Traits\OrderByTrait;
 
@@ -54,6 +55,7 @@ class QueryBuilder extends BaseQueryBuilder implements QueryBuilderInterface
     use GroupByTrait;
     use HavingTrait;
     use HavingBetweenTrait;
+    use HavingBetweenColumnsTrait;
     use UnionsTrait;
     use OrderByTrait;
 
