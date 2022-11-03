@@ -10,6 +10,8 @@ use Evas\Base\Help\PhpHelp;
 
 trait UnionsTrait
 {
+    public $unions = [];
+    
     /**
      * Добавление union.
      * @param string|\Closure|self подзапрос
