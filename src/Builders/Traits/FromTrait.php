@@ -54,8 +54,9 @@ trait FromTrait
         if (!is_null($as)) {
             return $this->fromSub($table, $as);
         }
-        $table = $this->wrap($table);
-        $this->from[] = is_null($as) ? $table : ($table . ' AS ' . $this->wrap($as));
+        $this->from[] = $this->wrap($table);
+        // $table = $this->wrap($table);
+        // $this->from[] = is_null($as) ? $table : ($table . ' AS ' . $this->wrap($as));
         return $this;
     }
 
