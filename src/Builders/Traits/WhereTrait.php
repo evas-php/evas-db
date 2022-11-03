@@ -107,41 +107,6 @@ trait WhereTrait
         );
     }
 
-    /**
-     * Итеративное выполение метода к столбцам.
-     * @param string имя метода
-     * @param array столбцы
-     * @param bool|null использовать ли OR для склейки
-     * @return self
-     */
-    protected function eachSingle(string $methodName, array $columns, bool $isOr = false)
-    {
-        foreach ($columns as $column => $value) {
-            if (is_array($value)) {
-                $args = array_values($value);
-                if (!is_numeric($column)) array_unshift($args, $column);
-            } else {
-                $args = [$column, '=', $value];
-            }
-            $this->$methodName($isOr, ...$args);
-        }
-        return $this;
-    }
-
-    /**
-     * Подготовка столбца со сборкой подзапроса.
-     * @param mixed столбец
-     * @param string|null тип экранируемых значений
-     * @return string столбец
-     */
-    protected function prepareColumn($column, string $bindingsType = 'wheres')
-    {
-        // $column = trim($column, '()');
-        [$column, $bindings] = $this->createSub($column);
-        if (!empty($bindings)) $this->addBindings($bindingsType, $bindings);
-        return $column;
-    }
-
 
     // ----------
     // Or/And Where
