@@ -20,10 +20,10 @@ interface BaseQueryBuilderInterface
 
 
     /**
-     * Установка FROM.
-     * @param mixed таблицы или подзапрос
-     * @param string|null алиас
-     * @return BaseQueryBuilderInterface
+     * Установка from таблицей или sql-подзапросом.
+     * @param string|\Closure|self таблица или подзапрос
+     * @param string|null псевдоним
+     * @return self
      */
     public function from($table, string $as = null);
 
@@ -37,11 +37,11 @@ interface BaseQueryBuilderInterface
     public function getSql(): string;
 
     /**
-     * Получение экранируемых значений собранного запроса.
-     * @param string|null для получения части экранируемых значений
+     * Получение экранируемых значений.
+     * @param array|string|null для получения части экранируемых значений
      * @return array
      */
-    public function getBindings(string $part = null): array;
+    public function getBindings($part = null): array;
 
     /**
      * Получение sql-запроса и экранируемых значений.
@@ -54,9 +54,9 @@ interface BaseQueryBuilderInterface
 
     /**
      * Выполнение sql-запроса.
-     * @return BaseQueryBuilderInterface|object|array of objects
+     * @return QueryResultInterface
      */
-    public function query(); //: BaseQueryBuilderInterface;
+    public function query(); //: QueryResultInterface;
 
     /**
      * Выполнение select-запроса с получением нескольких записей.
@@ -84,22 +84,22 @@ interface BaseQueryBuilderInterface
     /**
      * Выолнение delete-запроса удаления записи/записей.
      * @param mixed|null id записи/записей, если нужно удалить конкретные
-     * @return BaseQueryBuilderInterface
+     * @return QueryResultInterface
      */
-    public function delete($id = null); //: BaseQueryBuilderInterface;
+    public function delete($id = null); //: QueryResultInterface;
 
     /**
      * Выолнение update-запроса обновления записи/записей sql-строкой.
      * @param string sql-запрос
      * @param array обновлённые данные
-     * @return BaseQueryBuilderInterface
+     * @return QueryResultInterface
      */
-    public function updateRaw(string $sql, array $vals); //: BaseQueryBuilderInterface;
+    public function updateRaw(string $sql, array $vals); //: QueryResultInterface;
 
     /**
      * Выолнение update-запроса обновления записи/записей.
      * @param array обновлённые данные
-     * @return BaseQueryBuilderInterface
+     * @return QueryResultInterface
      */
-    public function update(array $data); //: BaseQueryBuilderInterface;
+    public function update(array $data); //: QueryResultInterface;
 }
