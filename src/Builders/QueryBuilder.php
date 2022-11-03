@@ -60,31 +60,13 @@ class QueryBuilder extends BaseQueryBuilder implements QueryBuilderInterface
     use OrderByTrait;
 
 
+    /** @var string тип сборки (select/update/delete) */
     public $type = 'select';
-
-    // public $from = [];
-    // public $columns = [];
-    // public $joins = [];
-    // public $wheres = [];
-    // public $groups = [];
-    // public $havings = [];
-    // public $orders = [];
     
+    /** @var int|null лимит выборки */
     public $limit;
+    /** @var int|null сдвиг */
     public $offset;
-
-    public $unions = [];
-    
-    // protected $bindings = [
-    //     'from' => [],
-    //     'update' => [],
-    //     'columns' => [],
-    //     'joins' => [],
-    //     'wheres' => [],
-    //     'havings' => [],
-    //     'unions' => [],
-    // ];
-
 
     /**
      * Установка лимита.
