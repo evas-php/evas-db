@@ -50,16 +50,6 @@ trait GrammarQueryWhereTrait
     }
 
     /**
-     * Сборка вложенного условия.
-     * @param array where
-     * @return string
-     */
-    protected function buildWhereNested(array $where)
-    {
-        return $where['sql'];
-    }
-
-    /**
      * Сборка одиночного условия с подзапросом значения.
      * @param array where
      * @return string
