@@ -81,13 +81,25 @@ trait HavingTrait
     // Or/And Having Raw
     // ----------
 
-
-    public function havingRaw(string $sql, array $bindings = [], bool $isOr = false)
+    /**
+     * Добавление and having sql-строкой.
+     * @param string sql-запрос
+     * @param array|null экранируемые значения
+     * @param bool|null использовать ли OR для склейки
+     * @return self
+     */
+    public function havingRaw(string $sql, array $bindings = null, bool $isOr = false)
     {
         return $this->pushHaving('Raw', compact('sql', 'bindings', 'isOr'));
     }
 
-    public function orHavingRaw(string $sql, array $bindings = [])
+    /**
+     * Добавление or having sql-строкой.
+     * @param string sql-запрос
+     * @param array|null экранируемые значения
+     * @return self
+     */
+    public function orHavingRaw(string $sql, array $bindings = null)
     {
         return $this->havingRaw($sql, $bindings);
     }
@@ -97,12 +109,25 @@ trait HavingTrait
     // Or/And Having
     // ----------
 
-
+    /**
+     * Добавление and having.
+     * @param array|string|\Closure|self соответствия|столбец|подзарос столбца|подзапрос
+     * @param string|mixed|null оператор|значение|подзапрос|null
+     * @param mixed|null значение|подзапрос|null
+     * @return self
+     */
     public function having($column, $operator = null, $value = null)
     {
         return $this->pushSingleHaving(false, ...func_get_args());
     }
 
+    /**
+     * Добавление or having.
+     * @param array|string|\Closure|self соответствия|столбец|подзарос столбца|подзапрос
+     * @param string|mixed|null оператор|значение|подзапрос|null
+     * @param mixed|null значение|подзапрос|null
+     * @return self
+     */
     public function orHaving($column, $operator = null, $value = null)
     {
         return $this->pushSingleHaving(true, ...func_get_args());
@@ -113,6 +138,13 @@ trait HavingTrait
     // Or/And Having Is (Not) Null
     // ----------
 
+    /**
+     * Добавление and having IS NULL.
+     * @param array|string\Closure|self стобцы или столбец или подзапрос столбца
+     * @param bool|null использовать ли OR для склейки
+     * @param bool|null использовать ли NOT
+     * @return self
+     */
     public function havingNull($column, bool $isOr = false, bool $isNot = false)
     {
         if (is_array($column)) {
@@ -125,16 +157,31 @@ trait HavingTrait
         return $this->pushHaving('Null', compact('column', 'isOr', 'isNot'));
     }
 
+    /**
+     * Добавление or having IS NULL.
+     * @param array|string стобцы или столбец
+     * @return self
+     */
     public function orHavingNull($column)
     {
         return $this->havingNull($column, true, false);
     }
 
+    /**
+     * Добавление and having IS NOT NULL.
+     * @param array|string стобцы или столбец
+     * @return self
+     */
     public function havingNotNull($column)
     {
         return $this->havingNull($column, false, true);
     }
 
+    /**
+     * Добавление or having IS NOT NULL.
+     * @param array|string стобцы или столбец
+     * @return self
+     */
     public function orHavingNotNull($column)
     {
         return $this->havingNull($column, true, true);
@@ -198,13 +245,31 @@ trait HavingTrait
     }
 
 
-    // Aggregates
+    // ----------
+    // Having Aggregate
+    // ----------
 
+    /**
+     * Добавление and having агрегации.
+     * @param string функция агрегации
+     * @param string столбец агрегации
+     * @param mixed оператор или значение
+     * @param mixed|null значение или null
+     * @return self
+     */
     public function havingAggregate(string $function, string $column, $operator, $value = null)
     {
         return $this->pushHavingAggregate(false, ...func_get_args());
     }
 
+    /**
+     * Добавление or having агрегации.
+     * @param string функция агрегации
+     * @param string столбец агрегации
+     * @param mixed оператор или значение
+     * @param mixed|null значение или null
+     * @return self
+     */
     public function orHavingAggregate(string $function, string $column, $operator, $value = null)
     {
         return $this->pushHavingAggregate(true, ...func_get_args());

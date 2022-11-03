@@ -9,10 +9,10 @@ namespace Evas\Db\Builders\Traits;
 trait WhereBetweenColumnsTrait
 {
     /**
-     * Добавление where between со значениями столбцов в качестве значений.
+     * Добавление (and) where between со значениями столбцов в качестве значений.
      * По умолчанию склейка через AND.
      * @param string|\Closure|self столбец или подзапрос
-     * @param array столбцы или подзапросы из которых достать значение [min, max]
+     * @param array столбцы или подзапросы [min, max]
      * @param bool использовать ли OR для склейки where
      * @param bool использовать ли NOT перед between
      * @return self
@@ -33,9 +33,9 @@ trait WhereBetweenColumnsTrait
     }
 
     /**
-     * Добавление where OR between со значениями столбцов в качестве значений.
+     * Добавление where or between со значениями столбцов в качестве значений.
      * @param string|\Closure|self столбец или подзапрос
-     * @param array столбцы из которых достать значение [min, max]
+     * @param array столбцы или подзапросы [min, max]
      * @return self
      */
     public function orWhereBetweenColumns($column, array $columns)
@@ -44,9 +44,9 @@ trait WhereBetweenColumnsTrait
     }
 
     /**
-     * Добавление where AND NOT between со значениями столбцов в качестве значений.
+     * Добавление where and NOT between со значениями столбцов в качестве значений.
      * @param string|\Closure|self столбец или подзапрос
-     * @param array столбцы из которых достать значение [min, max]
+     * @param array столбцы или подзапросы [min, max]
      * @return self
      */
     public function whereNotBetweenColumns($column, array $columns)
@@ -55,9 +55,9 @@ trait WhereBetweenColumnsTrait
     }
 
     /**
-     * Добавление where OR NOT between со значениями столбцов в качестве значений.
+     * Добавление where or NOT between со значениями столбцов в качестве значений.
      * @param string|\Closure|self столбец или подзапрос
-     * @param array столбцы из которых достать значение [min, max]
+     * @param array столбцы или подзапросы [min, max]
      * @return self
      */
     public function orWhereNotBetweenColumns($column, array $columns)

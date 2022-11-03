@@ -9,7 +9,7 @@ namespace Evas\Db\Builders\Traits;
 trait WhereBetweenTrait
 {
     /**
-     * Добавление where between.
+     * Добавление (and) where between.
      * По умолчанию склейка через AND.
      * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
@@ -33,7 +33,7 @@ trait WhereBetweenTrait
     }
 
     /**
-     * Добавление where OR between.
+     * Добавление or where between.
      * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
@@ -44,7 +44,7 @@ trait WhereBetweenTrait
     }
 
     /**
-     * Добавление where AND NOT between.
+     * Добавление and where NOT between.
      * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
@@ -55,7 +55,7 @@ trait WhereBetweenTrait
     }
 
     /**
-     * Добавление where OR NOT between.
+     * Добавление or where NOT between.
      * @param string|\Closure|self столбец или подзапрос
      * @param array значения [min, max]
      * @return self
