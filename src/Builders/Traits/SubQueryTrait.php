@@ -27,7 +27,7 @@ trait SubQueryTrait
      * @return array [sql, bindings]
      * @throws \InvalidArgumentException
      */
-    protected function createSub($query, array $bindings = []): array
+    protected function createSub($query, array $bindings = null): array
     {
         if ($query instanceof \Closure) {
             call_user_func($query, $query = $this->newQuery());
@@ -39,7 +39,7 @@ trait SubQueryTrait
         } else if (is_string($query)) {
             $query = preg_match('/^\w+(\.\w+)?$/u', $query) 
             ? $this->wrap($query) : "({$query})";
-            return [$query, $bindings];
+            return [$query, $bindings ?? []];
         } else {
             throw new \InvalidArgumentException(sprintf(
                 'A subquery must be an instance of %s, a Closure, or a string, %s given',
