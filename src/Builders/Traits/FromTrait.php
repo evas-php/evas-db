@@ -38,7 +38,7 @@ trait FromTrait
 
     /**
      * Установка from таблицей или sql-подзапросом.
-     * @param string|\Closure|self подзапрос
+     * @param @param string|\Closure|self таблица или подзапрос
      * @param string|null псевдоним
      * @return self
      */
@@ -50,7 +50,8 @@ trait FromTrait
             }
             return $this;
         }
-        if (static::isQueryable($table) && !is_null($as)) {
+        // if (static::isQueryable($table) && !is_null($as)) {
+        if (!is_null($as)) {
             return $this->fromSub($table, $as);
         }
         $table = $this->wrap($table);
