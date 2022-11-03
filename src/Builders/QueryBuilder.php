@@ -77,7 +77,7 @@ class QueryBuilder extends BaseQueryBuilder implements QueryBuilderInterface
     public function limit(int $limit = null, int $offset = null)
     {
         $this->limit = $limit < 1 ? null : $limit;
-        return $offset > 0 ? $this->offset($offset) : $this;
+        return func_num_args() > 1 ? $this->offset($offset) : $this;
     }
 
     /**
