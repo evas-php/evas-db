@@ -47,7 +47,7 @@ trait WhereTrait
         }
 
         // Raw запрос через queryable
-        if (func_num_args() < 3) return $this->whereNested($column, $isOr);
+        if (func_num_args() < 3) return $this->whereNested($column, null, $isOr);
 
         // подготовка значения и оператора условия
         $this->prepareValueAndOperator($value, $operator, func_num_args() === 3);
@@ -89,6 +89,31 @@ trait WhereTrait
         return $this->pushWhere('SingleColumn', compact('first', 'operator', 'second', 'isOr'));
     }
 
+    /**
+     * Добавление OR/AND подзапроса where.
+     * @param bool|null использовать ли OR для склейки
+     * @param string|\Closure|self подзапрос или столбец
+     * @param string|\Closure|self оператор или подзапрос
+     * @param string|\Closure|self|null подзапрос или null
+     * @return self
+     */
+    protected function pushWhereSub(bool $isOr, $column, $operator, $value = null)
+    {
+        $column = $this->prepareColumn($column);
+        $this->prepareValueAndOperator($value, $operator, func_num_args() === 3);
+        [$value, $bindings] = $this->createSub($value);
+        return $this->pushWhere('Sub', 
+            compact('column', 'operator', 'value', 'bindings', 'isOr')
+        );
+    }
+
+    /**
+     * Итеративное выполение метода к столбцам.
+     * @param string имя метода
+     * @param array столбцы
+     * @param bool|null использовать ли OR для склейки
+     * @return self
+     */
     protected function eachSingle(string $methodName, array $columns, bool $isOr = false)
     {
         foreach ($columns as $column => $value) {
@@ -101,19 +126,6 @@ trait WhereTrait
             $this->$methodName($isOr, ...$args);
         }
         return $this;
-    }
-
-    /**
-     * Добавление OR/AND where Sub.
-     */
-    protected function pushWhereSub(bool $isOr, $column, $operator, $value = null)
-    {
-        $column = $this->prepareColumn($column);
-        $this->prepareValueAndOperator($value, $operator, func_num_args() === 3);
-        [$value, $bindings] = $this->createSub($value);
-        return $this->pushWhere('Sub', 
-            compact('column', 'operator', 'value', 'bindings', 'isOr')
-        );
     }
 
     /**
@@ -132,39 +144,11 @@ trait WhereTrait
 
 
     // ----------
-    // Or/And Where Raw
-    // ----------
-
-    /**
-     * Добавление and where sql-строкой.
-     * @param string sql-запрос
-     * @param array|null экранируемые значения
-     * @param bool|null использовать ли OR для склейки
-     * @return self
-     */
-    public function whereRaw(string $sql, array $bindings = [], bool $isOr = false)
-    {
-        return $this->pushWhere('Raw', compact('sql', 'bindings', 'isOr'));
-    }
-
-    /**
-     * Добавление or where sql-строкой.
-     * @param string sql-запрос
-     * @param array|null экранируемые значения
-     * @return self
-     */
-    public function orWhereRaw(string $sql, array $bindings = [])
-    {
-        return $this->whereRaw($sql, $bindings, true);
-    }
-
-
-    // ----------
     // Or/And Where
     // ----------
 
     /**
-     * Добавление where AND.
+     * Добавление and where.
      * @param array|string|\Closure|self соответствия|столбец|подзарос столбца|подзапрос
      * @param string|mixed|null оператор|значение|подзапрос|null
      * @param mixed|null значение|подзапрос|null
@@ -176,7 +160,7 @@ trait WhereTrait
     }
 
     /**
-     * Добавление where OR.
+     * Добавление or where.
      * @param array|string|\Closure|self соответствия|столбец|подзарос столбца|подзапрос
      * @param string|mixed|null оператор|значение|подзапрос|null
      * @param mixed|null значение|подзапрос|null
@@ -193,7 +177,7 @@ trait WhereTrait
     // ----------
 
     /**
-     * Добавление where AND соответствия значений столбцов.
+     * Добавление and where соответствия значений столбцов.
      * @param array|string соответствия или столбец
      * @param string|mixed|null оператор или второй столбец или null
      * @param mixed|null второй столбец или null
@@ -205,7 +189,7 @@ trait WhereTrait
     }
 
     /**
-     * Добавление where OR соответствия значений столбцов.
+     * Добавление or where соответствия значений столбцов.
      * @param array|string соответствия или столбец
      * @param string|mixed|null оператор или второй столбец или null
      * @param mixed|null второй столбец или null
@@ -221,11 +205,25 @@ trait WhereTrait
     // Or/And Where Sub
     // ----------
 
+    /**
+     * Добавление and where подзапроса.
+     * @param string|\Closure|self подзапрос или столбец
+     * @param string|\Closure|self оператор или подзапрос
+     * @param string|\Closure|self|null подзапрос или null
+     * @return self
+     */
     public function whereSub($column, $operator, $value = null)
     {
         return $this->pushWhereSub(false, ...func_get_args());
     }
 
+    /**
+     * Добавление or where подзапроса.
+     * @param string|\Closure|self подзапрос или столбец
+     * @param string|\Closure|self оператор или подзапрос
+     * @param string|\Closure|self|null подзапрос или null
+     * @return self
+     */
     public function orWhereSub($column, $operator, $value = null)
     {
         return $this->pushWhereSub(true, ...func_get_args());
@@ -233,18 +231,59 @@ trait WhereTrait
 
 
     // ----------
+    // Or/And Where Raw
+    // ----------
+
+    /**
+     * Добавление and where sql-строкой.
+     * @param string sql-запрос
+     * @param array|null экранируемые значения
+     * @param bool|null использовать ли OR для склейки
+     * @return self
+     */
+    public function whereRaw(string $sql, array $bindings = null, bool $isOr = false)
+    {
+        return $this->pushWhere('Raw', compact('sql', 'bindings', 'isOr'));
+    }
+
+    /**
+     * Добавление or where sql-строкой.
+     * @param string sql-запрос
+     * @param array|null экранируемые значения
+     * @return self
+     */
+    public function orWhereRaw(string $sql, array $bindings = null)
+    {
+        return $this->whereRaw($sql, $bindings, true);
+    }
+
+
+    // ----------
     // Or/And Nested where
     // ----------
 
-    public function whereNested($query, bool $isOr = false)
+    /**
+     * Добавление and where подзароса.
+     * @param string|\Closure|self подзапрос
+     * @param array|null экранируемые значения для string-подзароса
+     * @param bool|null использовать ли OR для склейки
+     * @return self
+     */
+    public function whereNested($query, array $bindings = null, bool $isOr = false)
     {
-        [$sql, $bindings] = $this->createSub($query);
-        return $this->pushWhere('Nested', compact('sql', 'bindings', 'isOr'));
+        [$sql, $bindings] = $this->createSub($query, $bindings);
+        return $this->whereRaw($sql, $bindings, $isOr);
     }
 
-    public function orWhereNested($query)
+    /**
+     * Добавление or where подзароса.
+     * @param string|\Closure|self подзапрос
+     * @param array|null экранируемые значения для string-подзароса
+     * @return self
+     */
+    public function orWhereNested($query, array $bindings = null)
     {
-        return $this->whereNested($query, true);
+        return $this->whereNested($query, $bindings, true);
     }
 
 
@@ -253,7 +292,7 @@ trait WhereTrait
     // ----------
 
     /**
-     * Добавление where AND IS NULL.
+     * Добавление and where IS NULL.
      * @param array|string\Closure|self стобцы или столбец или подзапрос столбца
      * @param bool|null использовать ли OR для склейки
      * @param bool|null использовать ли NOT
@@ -272,7 +311,7 @@ trait WhereTrait
     }
 
     /**
-     * Добавление where OR IS NULL.
+     * Добавление or where IS NULL.
      * @param array|string стобцы или столбец
      * @return self
      */
@@ -282,7 +321,7 @@ trait WhereTrait
     }
 
     /**
-     * Добавление where AND IS NOT NULL.
+     * Добавление and where IS NOT NULL.
      * @param array|string стобцы или столбец
      * @return self
      */
@@ -292,7 +331,7 @@ trait WhereTrait
     }
 
     /**
-     * Добавление where OR IS NOT NULL.
+     * Добавление or where IS NOT NULL.
      * @param array|string стобцы или столбец
      * @return self
      */
