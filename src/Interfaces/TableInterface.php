@@ -39,4 +39,11 @@ interface TableInterface
      * @return mixed
      */
     public function __call(string $name, array $args = null);
+
+    /**
+     * Вставка записи или начало сборки sql-запроса на вставку.
+     * @param array|object|null значения записи/записей для сохранения с автосборкой
+     * @return InsertBuilderInterface|QueryResultInterface
+     */
+    public function insert($row = null): object;
 }
