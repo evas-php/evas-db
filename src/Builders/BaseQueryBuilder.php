@@ -34,8 +34,11 @@ class BaseQueryBuilder extends AbstractQueryBuilder
      */
     protected function primaryKey(): string
     {
-        if (strpos($this->from, ' ') !== false) return 'id';
-        return $this->db->table($this->from)->primaryKey();
+        // if (strpos($this->from, ' ') !== false) return 'id';
+        if (count($this->from) !== 1 || strpos($this->from[0], ' ') !== false) {
+            return 'id';
+        }
+        return $this->db->table($this->from[0])->primaryKey();
     }
 
     /**
