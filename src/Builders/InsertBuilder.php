@@ -67,7 +67,7 @@ class InsertBuilder implements InsertBuilderInterface
         }
         if (is_object($row)) $row = get_object_vars($row);
         if (PhpHelp::isAssoc($row)) {
-            if (empty($this->columns)) $this->columns(array_columns($row));
+            if (empty($this->columns)) $this->columns(array_keys($row));
             $row = array_values($row);
         }
         $this->addBindings($row);
