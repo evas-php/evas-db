@@ -40,7 +40,7 @@ class Table extends TableSchemaCache implements TableInterface
     }
 
     /**
-     * Начало сборки INSERT-запроса.
+     * Вставка записи или начало сборки sql-запроса на вставку.
      * @param array|object|null значения записи/записей для сохранения с автосборкой
      * @return InsertBuilderInterface|QueryResultInterface
      */
