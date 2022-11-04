@@ -38,7 +38,7 @@ trait GrammarQueryTrait
         if ($builder->getRowCount() > 1) {
             $quotes = implode(', ', array_fill(0, $builder->getRowCount(), $quotes));
         }
-        $sql = "INSERT INTO {$this->wrapTable($builder->table)} $columns VALUES $quotes";
+        $sql = "INSERT INTO {$this->wrap($builder->table)} $columns VALUES $quotes";
         return $sql;
     }
 

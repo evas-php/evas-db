@@ -47,7 +47,7 @@ class BaseDatabase implements BaseDatabaseInterface
      */
     public function lastInsertId(string $table = null): int
     {
-        return intval($this->getPdo()->lastInsertId($tbl));
+        return intval($this->getPdo()->lastInsertId($table));
     }
 
 
