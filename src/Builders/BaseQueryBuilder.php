@@ -68,7 +68,7 @@ class BaseQueryBuilder extends AbstractQueryBuilder
      */
     public function get($columns = null): array
     {
-        if ($columns) $this->addSelect(...func_get_args());
+        if ($columns) $this->select(...func_get_args());
         return $this->query()->assocArrayAll();
     }
 
@@ -79,7 +79,7 @@ class BaseQueryBuilder extends AbstractQueryBuilder
      */
     public function one($columns = null)
     {
-        if ($columns) $this->addSelect(...func_get_args());
+        if ($columns) $this->select(...func_get_args());
         return $this->limit(1)->query()->assocArray();
     }
 
