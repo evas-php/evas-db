@@ -19,7 +19,7 @@ trait FromTrait
     {
         $this->from = [];
         $this->bindings['from'] = [];
-        return $this;
+        return func_num_args() > 0 ? $this->from(...func_get_args()) : $this;
     }
 
     /**
