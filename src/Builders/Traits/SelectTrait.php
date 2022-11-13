@@ -15,6 +15,17 @@ trait SelectTrait
     public $distinct;
 
     /**
+     * Сбросить select.
+     * @return self
+     */
+    public function resetSelect()
+    {
+        $this->columns = [];
+        $this->bindings['columns'] = [];
+        return func_num_args() > 0 ? $this->select(...func_get_args()) : $this;
+    }
+
+    /**
      * Добавление запрашиваемых стобцов sql-строкой с экранированием.
      * @param string столбцы sql-строкой
      * @param array|null экранируемые значения
