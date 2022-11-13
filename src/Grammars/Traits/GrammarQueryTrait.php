@@ -98,8 +98,9 @@ trait GrammarQueryTrait
      */
     protected function buildColumns(QueryBuilderInterface &$builder): string
     {
-        $cols = $builder->aggregates ?? null;
-        if (empty($cols)) $cols = $builder->columns;
+        // $cols = $builder->aggregates ?? null;
+        // if (empty($cols)) $cols = $builder->columns;
+        $cols = array_merge($builder->aggregates ?? [], $builder->columns ?? []);
         if (empty($cols)) $cols = ['*'];
         // $cols = $this->wrapColumns($cols);
         $cols = implode(', ', $cols);
