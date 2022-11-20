@@ -56,8 +56,8 @@ trait DatabaseQuoteQueryPropsTrait
     public function quoteArrayOrObject($value)
     {
         if (is_array($value) || is_object($value)) {
-            return empty($this->quoteArrayOrObjectCallback) ? null
-            : $this->quoteArrayOrObjectCallback($value);
+            $cb = $this->quoteArrayOrObjectCallback;
+            return empty($cb) ? $value : $cb($value);
         }
         return $value;
     }

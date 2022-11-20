@@ -62,6 +62,7 @@ trait DatabaseBaseQueryTrait
     public function execute(\PDOStatement $stmt, array $props = null): QueryResultInterface
     {
         try {
+            $props = array_map([$this, 'quote'], $props);
             $this->debugSql($stmt->queryString, $props);
             if (false === $stmt->execute($props)) {
                 throw DatabaseQueryException::fromStmt($stmt, $props);

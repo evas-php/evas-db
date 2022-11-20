@@ -156,7 +156,7 @@ class BaseQueryBuilder extends AbstractQueryBuilder
         $sql = [];
         foreach ($data as $key => $val) {
             $sql[] = $this->wrap($key) . ' = ?';
-            $vals[] = $this->db->quoteArrayOrObject($val);
+            $vals[] = $val;
         }
         $sql = implode(', ', $sql);
         return $this->updateRaw($sql, $vals);
