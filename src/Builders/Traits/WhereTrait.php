@@ -6,6 +6,9 @@
  */
 namespace Evas\Db\Builders\Traits;
 
+use Evas\Base\Help\PhpHelp;
+use Evas\Db\Interfaces\QueryBuilderInterface;
+
 trait WhereTrait
 {
     /** @var array WHERE часть */
@@ -228,15 +231,42 @@ trait WhereTrait
     // ----------
 
     /**
+     * Получение собранной WHERE части sql-запроса.
+     * @return string
+     */
+    protected function getWhereSql(): string
+    {
+        return $this->db->grammar()->buildWheres($this->wheres);
+    }
+
+    /**
      * Добавление and where подзароса.
      * @param string|\Closure|self подзапрос
      * @param array|null экранируемые значения для string-подзароса
      * @param bool|null использовать ли OR для склейки
      * @return self
+     * @throws \InvalidArgumentException
      */
     public function whereNested($query, array $bindings = null, bool $isOr = false)
     {
-        [$sql, $bindings] = $this->createSub($query, $bindings);
+        // [$sql, $bindings] = $this->createSub($query, $bindings);
+
+        if ($query instanceof \Closure) {
+            call_user_func($query, $query = $this->newQuery());
+        }
+
+        if ($query instanceof QueryBuilderInterface) {
+            $sql = '(' . $query->getWhereSql() . ')';
+            $bindings = $query->getBindings('wheres');
+        } else if (is_string($query)) {
+            $sql = $query;
+        } else throw new \InvalidArgumentException(sprintf(
+            'Argument 1 passed to %s() must be an instance of %s,
+             a Closure, or a string, %s given',
+            __METHOD__, QueryBuilderInterface::class,
+            PhpHelp::getType($query)
+        ));
+
         return $this->whereRaw($sql, $bindings, $isOr);
     }
 
