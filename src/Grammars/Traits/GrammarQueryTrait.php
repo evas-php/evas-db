@@ -155,7 +155,7 @@ trait GrammarQueryTrait
      * @param array части where или having
      * @return string готовый sql-where или sql-having
      */
-    protected function buildWheres(array &$wheres): string
+    public function buildWheres(array &$wheres): string
     {
         $sql = '';
         foreach ($wheres as $i => &$where) {
