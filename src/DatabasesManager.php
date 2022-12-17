@@ -127,7 +127,17 @@ class DatabasesManager
     {
         $default = null;
         if ($dbs) foreach ($dbs as $name => $db) {
+            if ('default' === $name) {
+                $default = $name;
+                if (is_string($db)) {
+                    $default = $db;
+                    continue;
+                }
+            }
             $this->set($name, $db);
+        }
+        if (null !== $default && $this->has($default)) {
+            $this->setLast($default);
         }
     }
 
