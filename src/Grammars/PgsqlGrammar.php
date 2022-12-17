@@ -20,7 +20,7 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
      */
     public function unwrap(string $key): string
     {
-        return str_replace('"', '', trim($value, '"'));
+        return str_replace('"', '', trim($key, '"'));
     }
 
     /**
@@ -30,8 +30,8 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
      */
     public function wrapOne(string $key): string
     {
-        $value = $this->unwrap($value);
-        return '*' === $value ? $value : "\"$value\"";
+        $key = $this->unwrap($key);
+        return '*' === $key ? $key : "\"$key\"";
     }
 
 
