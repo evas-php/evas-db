@@ -1,7 +1,7 @@
 <?php
 namespace Evas\Db\Traits;
 
-use \InvalidArgumentException
+use \InvalidArgumentException;
 
 /**
  * Константы для трейта по умолчанию.

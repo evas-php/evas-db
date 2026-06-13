@@ -52,6 +52,9 @@ class QueryBuilder implements QueryBuilderInterface
     /** @var string класс модели */
     public $model;
 
+    /** @var string класс таблицы для поиска модели, если она не задана */
+    public $tbl;
+
     /**
      * Конструктор.
      * @param DatabaseInterface
