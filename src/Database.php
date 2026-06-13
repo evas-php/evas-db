@@ -1,25 +1,23 @@
 <?php
 /**
- * Класс соединения с базой данных.
+ * Расширенный класс соединения с базой данных.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
 namespace Evas\Db;
 
-use Evas\Db\Base\BaseDatabase;
-use Evas\Db\Traits\DatabaseBuildersTrait;
-use Evas\Db\Traits\DatabaseIdentityMapTrait;
-use Evas\Db\Traits\DatabaseTableTrait;
+use Evas\Db\BaseDatabase;
+use Evas\Db\Interfaces\DatabaseInterface;
+use Evas\Db\Traits\DatabaseQueryTrait;
 use Evas\Db\Traits\DatabaseSchemaCacheTrait;
-use Evas\Db\Interfaces\DatabaseQueryBuildersInterface;
+use Evas\Db\Traits\DatabaseTablesTrait;
 
-class Database extends BaseDatabase implements DatabaseQueryBuildersInterface
+class Database extends BaseDatabase implements DatabaseInterface
 {
-    /**
-     * Подключаем поддержку: 
-     * сборщиков запросов, классов таблиц, маппинга идентичности сущностей,
-     * кэша схемы базы данных.
-     */
-    use DatabaseBuildersTrait, DatabaseTableTrait, DatabaseIdentityMapTrait;
+    // расширенные запросы БД
+    use DatabaseQueryTrait;
+    // кэш схемы БД
     use DatabaseSchemaCacheTrait;
+    // таблицы БД
+    use DatabaseTablesTrait;
 }

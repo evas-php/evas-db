@@ -1,31 +1,33 @@
 <?php
 /**
- * Интерфейс сборщика запроса SELECT/UPDATE/DELETE.
+ * Интерфейс результата запроса.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
 namespace Evas\Db\Interfaces;
 
-use \PDOStatement;
 use Evas\Db\Interfaces\DatabaseInterface;
 
 interface QueryResultInterface
 {
     /**
      * Конструктор.
-     * @param PDOStatement
+     * @param \PDOStatement
      * @param DatabaseInterface
      */
-    public function __construct(PDOStatement &$stmt, DatabaseInterface &$database);
+    public function __construct(\PDOStatement &$stmt, DatabaseInterface &$db);
+
+    
+    // Мета-информация
 
     /**
      * Получение statement ответа базы.
-     * @return PDOStatement
+     * @return \PDOStatement
      */
-    public function stmt(): PDOStatement;
+    public function stmt(): \PDOStatement;
 
     /**
-     * Получение имени таблицы для select-запроса.
+     * Получение имени таблицы select-запроса.
      * @return string|null
      */
     public function tableName(): ?string;
@@ -37,7 +39,7 @@ interface QueryResultInterface
     public function rowCount(): int;
 
 
-    // Получение записи/записей в разном виде.
+    // Получение записи/записей в разном виде
 
     /**
      * Получение записи в виде нумерованного массива.
@@ -64,30 +66,18 @@ interface QueryResultInterface
     public function assocArrayAll(): array;
 
     /**
-     * Получение записи в виде анонимного объекта.
+     * Получение записи в виде объекта.
+     * @param string|null имя класса, если он должен отличаться от stdClass
      * @return stdClass|null
      */
-    public function anonymObject(): ?object;
+    public function object(string $className = null): ?object;
 
     /**
-     * Получение всех записей в виде массива анонимных объектов.
+     * Получение всех записей в виде массива объектов.
+     * @param string|null имя класса, если он должен отличаться от stdClass
      * @return array
      */
-    public function anonymObjectAll(): array;
-
-    /**
-     * Получение записи в виде объекта класса.
-     * @param string имя класса
-     * @return object|null
-     */
-    public function classObject(string $className): ?object;
-
-    /**
-     * Получение всех записей в виде массива объектов класса.
-     * @param string имя класса
-     * @return array
-     */
-    public function classObjectAll(string $className): array;
+    public function objectAll(string $className = null): array;
 
     /**
      * Добавление параметров записи в объект.
@@ -96,20 +86,8 @@ interface QueryResultInterface
      */
     public function intoObject(object &$object): object;
 
-
+    
     // Хуки
 
-    /**
-     * Хук для постобработки полученного объекта записи.
-     * @param object|null запись
-     * @return object|null постобработанная запись
-     */
-    public function objectHook(object &$row = null): ?object;
-
-    /**
-     * Хук для постобработки полученных объектов записей.
-     * @param array|null записи
-     * @return array|null постобработанные записи
-     */
-    public function objectsHook(array &$rows = null): ?array;
+    // 
 }

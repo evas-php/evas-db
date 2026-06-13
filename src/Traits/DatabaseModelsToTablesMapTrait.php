@@ -66,3 +66,4 @@ trait DatabaseModelsToTablesMapTrait
         return array_search($model, $this->map) ?? null;
     }
 }
+

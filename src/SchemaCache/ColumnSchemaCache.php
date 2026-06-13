@@ -1,28 +1,23 @@
 <?php
 /**
- * Класс схемы колонки.
+ * Кэш схемы колонки.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
-namespace Evas\Db\Schema;
+namespace Evas\Db\SchemaCache;
 
-class ColumnSchema
+class ColumnSchemaCache
 {
     /** @var string имя */
     public $name;
-
     /** @var string тип */
     public $type;
-
     /** @var bool разрешен ли NULL */
     public $null;
-
     /** @var string|null ключ */
     public $key;
-
     /** @var string|null значение по умолчанию */
     public $default;
-
     /** @var string|null extra */
     public $extra;
 

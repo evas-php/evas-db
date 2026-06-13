@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключений модуля evas-db.
+ * Исключение модуля evas-db.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

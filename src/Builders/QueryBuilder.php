@@ -6,362 +6,88 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Db\Exceptions\QueryBuilderException;
-use Evas\Db\Builders\JoinBuilder;
-use Evas\Db\Builders\QueryValuesTrait;
-use Evas\Db\Interfaces\DatabaseInterface;
-use Evas\Db\Interfaces\JoinBuilderInterface;
+
+use Evas\Db\Builders\BaseQueryBuilder;
+
+use Evas\Db\Builders\Traits\AggregatesTrait;
+use Evas\Db\Builders\Traits\SelectTrait;
+
+use Evas\Db\Builders\Traits\JoinsTrait;
+use Evas\Db\Builders\Traits\JoinsWhereTrait;
+use Evas\Db\Builders\Traits\JoinsUsingTrait;
+
+use Evas\Db\Builders\Traits\WhereTrait;
+use Evas\Db\Builders\Traits\WhereBetweenColumnsTrait;
+use Evas\Db\Builders\Traits\WhereBetweenTrait;
+use Evas\Db\Builders\Traits\WhereDateBasedBetweenTrait;
+use Evas\Db\Builders\Traits\WhereDateBasedTrait;
+use Evas\Db\Builders\Traits\WhereExistsTrait;
+// use Evas\Db\Builders\Traits\WhereJsonTrait;
+use Evas\Db\Builders\Traits\WhereRowTrait;
+
+use Evas\Db\Builders\Traits\GroupByTrait;
+use Evas\Db\Builders\Traits\HavingTrait;
+use Evas\Db\Builders\Traits\HavingBetweenTrait;
+use Evas\Db\Builders\Traits\HavingBetweenColumnsTrait;
+use Evas\Db\Builders\Traits\UnionsTrait;
+use Evas\Db\Builders\Traits\OrderByTrait;
+
 use Evas\Db\Interfaces\QueryBuilderInterface;
-use Evas\Db\Interfaces\QueryResultInterface;
 
-class QueryBuilder implements QueryBuilderInterface
+class QueryBuilder extends BaseQueryBuilder implements QueryBuilderInterface
 {
-    /** Подключаем поддержку работы со значениями запроса. */
-    use QueryValuesTrait;
+    use AggregatesTrait;
+    use SelectTrait;
 
-    /** @var DatabaseInterface соединение с базой данных */
-    public $db;
+    use JoinsTrait;
+    use JoinsWhereTrait;
+    use JoinsUsingTrait;
+    
+    use WhereTrait;
+    use WhereBetweenColumnsTrait;
+    use WhereBetweenTrait;
+    use WhereDateBasedBetweenTrait;
+    use WhereDateBasedTrait;
+    use WhereExistsTrait;
+    // use WhereJsonTrait;
+    use WhereRowTrait;
 
-    /** @var string начало запроса и from */
-    public $from;
+    use GroupByTrait;
+    use HavingTrait;
+    use HavingBetweenTrait;
+    use HavingBetweenColumnsTrait;
+    use UnionsTrait;
+    use OrderByTrait;
 
-    /** @var array джоины */
-    public $join = [];
 
-    /** @var string where часть */
-    public $where;
-
-    /** @var string поля группировки */
-    public $groupBy;
-
-    /** @var string having часть (условие для данных агрегированных group by) */
-    public $having;
-
-    /** @var string поля сортировки */
-    public $orderBy;
-
-    /** @var bool сортировать по убыванию */
-    public $orderDesc = false;
-
-    /** @var int сдвиг поиска */
+    /** @var string тип сборки (select/update/delete) */
+    public $type = 'select';
+    
+    /** @var int|null лимит выборки */
+    public $limit;
+    /** @var int|null сдвиг */
     public $offset;
 
-    /** @var int лимит выдачи */
-    public $limit;
-
-    /** @var string класс модели */
-    public $model;
-
-    /** @var string класс таблицы для поиска модели, если она не задана */
-    public $tbl;
-
     /**
-     * Конструктор.
-     * @param DatabaseInterface
-     */
-    public function __construct(DatabaseInterface &$db, string $model = null)
-    {
-        $this->db = $db;
-        $this->model = $model;
-    }
-
-    /**
-     * Начало SELECT запроса.
-     * @param string имя таблицы
-     * @param string поля
+     * Установка лимита.
+     * @param int|null лимит или null для сброса
+     * @param int|null сдвиг или null для сброса
      * @return self
      */
-    public function select(string $tbl, string $columns = null): QueryBuilderInterface
+    public function limit(int $limit = null, int $offset = null)
     {
-        if (empty($columns)) $columns = '*';
-        $this->tbl = trim($tbl, '`');
-        return $this->from("SELECT $columns FROM `$this->tbl`");
+        $this->limit = $limit < 1 ? null : $limit;
+        return func_num_args() > 1 ? $this->offset($offset) : $this;
     }
 
     /**
-     * Начало DELETE запроса.
-     * @param string имя таблицы
+     * Установка сдвига.
+     * @param int|null сдвиг или null для сброса
      * @return self
      */
-    public function delete(string $tbl): QueryBuilderInterface
+    public function offset(int $offset = null)
     {
-        $tbl = trim($tbl, '`');
-        return $this->from("DELETE FROM `$tbl`");
-    }
-
-    /**
-     * Начало UPDATE запроса.
-     * @param string имя таблицы
-     * @param string|array|object значения записи или sql-запрос
-     * @param array|null значения для экранирования используемые в sql-запросе
-     * @return self
-     */
-    public function update(string $tbl, $row, array $vals = []): QueryBuilderInterface
-    {
-        assert(is_array($row) || is_object($row) || is_string($row));
-        if (is_array($row) || is_object($row)) { 
-            $upd = [];
-            foreach ($row as $key => $val) {
-                $upd[] = "`$key` = ?";
-                $vals[] = $val;
-            }
-            $upd = implode(', ', $upd);
-        } else {
-            $upd = $row;
-        }
-        $this->tbl = trim($tbl, '`');
-        return $this->from("UPDATE `$this->tbl` SET $upd", $vals);
-    }
-
-
-    /**
-     * Установка части FROM.
-     * @param string часть from
-     * @param array|null параметры для экранирования
-     * @return self
-     */
-    public function from(string $from, array $values = []): QueryBuilderInterface
-    {
-        $this->from = $from;
-        return $this->bindValues($values);
-    }
-
-    /**
-     * Запуск сборщика INNER JOIN.
-     * @param string|null имя таблицы
-     * @return JoinBuilder
-     */
-    public function innerJoin(string $tbl = null): JoinBuilderInterface
-    {
-        $this->tbl = null;
-        return new JoinBuilder($this, 'INNER', $tbl);
-    }
-
-    /**
-     * Запуск сборщика LEFT JOIN.
-     * @param string|null имя таблицы
-     * @return JoinBuilder
-     */
-    public function leftJoin(string $tbl = null): JoinBuilderInterface
-    {
-        $this->tbl = null;
-        return new JoinBuilder($this, 'LEFT', $tbl);
-    }
-
-    /**
-     * Запуск сборщика RIGHT JOIN.
-     * @param string|null имя таблицы
-     * @return JoinBuilder
-     */
-    public function rightJoin(string $tbl = null): JoinBuilderInterface
-    {
-        $this->tbl = null;
-        return new JoinBuilder($this, 'RIGHT', $tbl);
-    }
-
-    /**
-     * Запуск сборщика OUTER JOIN.
-     * @param string|null имя таблицы
-     * @return JoinBuilder
-     */
-    public function outerJoin(string $tbl = null): JoinBuilderInterface
-    {
-        $this->tbl = null;
-        return new JoinBuilder($this, 'OUTER', $tbl);
-    }
-
-    /**
-     * Запуск сборщика INNER JOIN (алиас для innerJoin).
-     * @param string|null имя таблицы
-     * @return JoinBuilder
-     */
-    public function join(string $tbl = null): JoinBuilderInterface
-    {
-        return $this->innerJoin($tbl);
-    }
-
-    /**
-     * Добавление JOIN с помощью sql.
-     * @param string join sql
-     * @param array параметры для экранирования
-     * @return self
-     */
-    public function setJoin(string $join, array $values = []): QueryBuilderInterface
-    {
-        $this->join[] = $join;
-        return $this->bindValues($values);
-    }
-
-
-    /**
-     * Установка WHERE.
-     * @param string where часть
-     * @param array параметры для экранирования
-     * @return self
-     */
-    public function where(string $where, array $values = []): QueryBuilderInterface
-    {
-        if (!empty($this->where)) $this->where .= ' ';
-        $this->where .= $where;
-        return $this->bindValues($values);
-    }
-
-    /**
-     * Установка WHERE IN.
-     * @param string имя поля
-     * @param array массив значений сопоставления
-     * @return self
-     */
-    public function whereIn(string $key, array $values): QueryBuilderInterface
-    {
-        if (!empty($this->where)) $this->where .= ' ';
-        $quote = implode(',', array_fill(0, count($values), '?'));
-        $this->where .= "$key IN ($quote)";
-        return $this->bindValues($values);
-    }
-
-
-    /**
-     * Установка GROUP BY.
-     * @param string столбцы группировки
-     * @param string|null having условие
-     * @param array|null параметра having для экранирования
-     * @return self
-     */
-    public function groupBy(string $columns, string $having = null, array $havingValues = []): QueryBuilderInterface
-    {
-        $this->groupBy = $columns;
-        return !empty($having) ? $this->having($having, $havingValues) : $this;
-    }
-
-    /**
-     * Установка HAVING.
-     * @param string having условие
-     * @param array параметры для экранирования
-     * @return self
-     */
-    public function having(string $having, array $values = []): QueryBuilderInterface
-    {
-        $this->having = $having;
-        return $this->bindValues($values);
-    }
-
-    /**
-     * Установка ORDER BY.
-     * @param string столбцы сортировки
-     * @param bool|null сортировать по убыванию
-     * @return self
-     */
-    public function orderBy(string $columns, bool $desc = false): QueryBuilderInterface
-    {
-        $this->orderBy = $columns;
-        $this->orderDesc = $desc;
+        $this->offset = $offset < 1 ? null : $offset;
         return $this;
-    }
-
-    /**
-     * Установка OFFSET.
-     * @param int сдвиг
-     * @return self
-     * @throws QueryBuilderException
-     */
-    public function offset(int $offset): QueryBuilderInterface
-    {
-        $this->offset = $offset;
-        if ($offset < 1) {
-            throw new QueryBuilderException('Query offset must be more than 0');
-        }
-        return $this;
-    }
-
-    /**
-     * Установка LIMIT.
-     * @param int лимит
-     * @param int|null сдвиг
-     * @return self
-     * @throws QueryBuilderException
-     */
-    public function limit(int $limit, int $offset = null): QueryBuilderInterface
-    {
-        $this->limit = $limit;
-        if ($limit < 1) {
-            throw new QueryBuilderException('Query limit must be more than 0');
-        }
-        return $offset !== null ? $this->offset($offset) : $this;
-    }
-
-
-    /**
-     * Получение sql.
-     * @return string
-     * @throws QueryBuilderException
-     */
-    public function getSql(): string
-    {
-        $sql = $this->from;
-        if (!empty($this->join)) {
-            $sql .= ' ' . implode(' ', $this->join);
-        }
-        if (!empty($this->where)) {
-            $sql .= ' WHERE ' . $this->where;
-        }
-        if (!empty($this->groupBy)) {
-            $sql .= ' GROUP BY ' . $this->groupBy;
-            if (!empty($this->having)) {
-                $sql .= ' HAVING ' . $this->having;
-            }
-        }
-        if (!empty($this->orderBy)) {
-            $sql .= ' ORDER BY ' . $this->orderBy;
-            if (true === $this->orderDesc) {
-                $sql .= ' DESC';
-            }
-        }
-        if (!empty($this->limit)) {
-            $sql .= ' LIMIT ' . $this->limit; 
-        }
-        if (!empty($this->offset)) {
-            if (empty($this->limit)) {
-                throw new QueryBuilderException('Query offset must be used with limit');
-            }
-            $sql .= ' OFFSET ' . $this->offset;
-        }
-        return $sql;
-    }
-
-    /**
-     * Получение одной записи.
-     * @return QueryResultInterface|object
-     */
-    public function one(): object
-    {
-        return $this->query(1);
-    }
-
-    /**
-     * Выполнение запроса.
-     * @param int|null limit
-     * @param int|null offset
-     * @return QueryResultInterface|object|array of objects
-     */
-    public function query(int $limit = null, int $offset = null): object
-    {
-        if ($limit > 0) $this->limit($limit);
-        if ($offset > 0) $this->offset($offset);
-        $result = $this->db->query($this->getSql(), $this->getValues());
-
-        // пытаемся достать класс модели
-        if ($this->model) {
-            $model = $this->model;
-        } elseif (method_exists($this->db, 'isModelsInResultUsed') && 
-            $this->db->isModelsInResultUsed() && !empty($this->tbl)) {
-            $model = $this->db->findTableModel($this->tbl);
-        }
-        // если класс модели найден, возвращаем объект модели вместо результата
-        if (!empty($model)) {
-            return 1 === $limit ? $result->classObject($model)
-                : $result->classObjectAll($model);
-        }
-        return $result;
     }
 }

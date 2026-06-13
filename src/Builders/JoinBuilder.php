@@ -6,120 +6,149 @@
  */
 namespace Evas\Db\Builders;
 
-use Evas\Db\Builders\QueryBuilder;
-use Evas\Db\Builders\QueryValuesTrait;
-use Evas\Db\Interfaces\JoinBuilderInterface;
-use Evas\Db\Interfaces\QueryBuilderInterface;
+use Evas\Db\Builders\AbstractQueryBuilder;
+// use Evas\Db\Interfaces\JoinBuilderInterface;
+use Evas\Db\Interfaces\DatabaseInterface;
 
-class JoinBuilder implements JoinBuilderInterface
+class JoinBuilder extends AbstractQueryBuilder// implements JoinBuilderInterface
 {
-    /** Подключаем поддержку работы со значениями запроса. */
-    use QueryValuesTrait;
+    /** @static array поддерживаемые типы джоинов */
+    protected static $types = [
+        '', 'INNER', 'LEFT', 'RIGHT',
+        'LEFT OUTER', 'RIGHT OUTER',
+    ];
 
-    /** @var QueryBuilder */
-    public $queryBuilder;
+    /** @var array доступные операторы */
+    public static $operators = [
+        '=', '<', '>', '<=', '>=', '<>', '!=', '<=>',
+    ];
+
+    /** @var DatabaseInterface соединение с базой данных */
+    protected $db;
 
     /** @var string тип склейки */
     public $type;
 
-    /** @var string склеиваемая таблица или запрос записей склеиваемой таблицы */
-    public $from;
-
-    /** @var string псевдоним склеиваемой таблицы */
-    public $as;
-
-    /** @var string условие склеивания */
-    public $on;
+    /** @var array условие склеивания */
+    public $on = [];
 
     /** @var string столбец склеивания */
     public $using;
 
     /**
      * Конструктор.
-     * @param QueryBuilderInterface
-     * @param string|null тип склейки INNER | LEFT | RIGHT | OUTER
+     * @param DatabaseInterface
+     * @param string|null тип склейки INNER | LEFT | RIGHT | LEFT OUTER | RIGHT OUTER
      * @param string|null таблица склейки
+     * @throws InvalidArgumentException
      */
-    public function __construct(QueryBuilderInterface $queryBuilder, string $type = null, string $tbl = null)
-    {
-        $this->queryBuilder = $queryBuilder;
+    public function __construct(
+        DatabaseInterface $db, string $type = null, $tbl = null, string $as = null
+    ) {
+        $type = strtoupper(trim($type));
+        if (!in_array($type, static::$types)) {
+            throw new \InvalidArgumentException(sprintf('Not supported JOIN type: %s', $type));
+        }
         $this->type = $type;
-        $this->from = $tbl;
+        $this->db = $db;
+        if ($tbl) $this->from($tbl, $as);
     }
 
     /**
-     * Установка склеиваемой таблицы.
-     * @param string склеиваемая таблица или запрос записей склеиваемой таблицы
-     * @param array|null значения для экранирования\
+     * Добавление On условия в сборку.
+     * @param string тип сборки
+     * @param array данные условия
      * @return self
      */
-    public function from(string $from, array $values = []): JoinBuilderInterface
+    protected function pushOn(string $type, array $on)
     {
-        $this->from = $from;
-        return $this->bindValues($values);
-    }
-
-    /**
-     * Установка псевдонима для склеиваемой таблицы.
-     * @param string псевдоним
-     * @return self
-     */
-    public function as(string $as): JoinBuilderInterface
-    {
-        $this->as = $as;
+        $on['type'] = $type;
+        $this->on[] = $on;
+        if (!empty($on['bindings'])) {
+            $this->addBindings('wheres', $on['bindings']);
+        }
         return $this;
+    }
+
+    protected function pushSingleOn(
+        bool $isOr, string $first, string $operator, string $second = null
+    ) {
+        $this->prepareValueAndOperator($second, $operator, !$second);
+        return $this->pushOn('SingleColumn', compact('first', 'operator', 'second', 'isOr'));
+    }
+
+    /**
+     * Установка условия склеивания sql-строкой.
+     * @param string sql-условие
+     * @param array|null значения для экранирования
+     * @param bool|null использовать ли OR для склейки
+     * @return self
+     */
+    public function onRaw(string $sql, array $bindings = [], bool $isOr = false)
+    {
+        return $this->pushOn('Raw', compact('sql', 'bindings', 'isOr'));
+    }
+
+    /**
+     * Установка условия склеивания sql-строкой через OR.
+     * @param string sql-условие
+     * @param array|null значения для экранирования
+     * @return self
+     */
+    public function orOnRaw(string $sql, array $bindings = [])
+    {
+        return $this->onRaw($sql, $bindings, true);
     }
 
     /**
      * Установка условия склеивания.
+     * @param string столбец первой таблицы
+     * @param string оператор|столбец второй таблицы
+     * @param string|null столбец второй таблицы или null
+     * @return self
+     */
+    public function on(string $first, string $operator, string $second = null)
+    {
+        return $this->pushSingleOn(false, ...func_get_args());
+    }
+
+    /**
+     * Установка условия склеивания через OR.
      * @param string условие
      * @param string значения для экранирования
-     * @return QueryBuilder
+     * @return self
      */
-    public function on(string $on, array $values = []): QueryBuilderInterface
+    public function orOn(string $first, string $operator, string $second = null)
     {
-        $this->on = $on;
-        return $this->bindValues($values)->endJoin();
+        return $this->pushSingleOn(true, ...func_get_args());
     }
 
     /**
      * Установка столбца связывания.
      * @param string столбец
-     * @return QueryBuilder
+     * @return self
      */
-    public function using(string $column): QueryBuilderInterface
+    public function using(string $column)
     {
-        $this->using = $column;
-        return $this->endJoin();
+        $this->using = $this->wrap($column);
+        return $this;
     }
 
     /**
-     * Получение sql.
+     * Получение sql-запроса.
      * @return string
      */
     public function getSql(): string
     {
-        $sql = "$this->type JOIN";
-        if (!empty($this->as)) {
-            $sql .= " ($this->from) AS $this->as";
-        } else {
-            $sql .= " $this->from";
-        }
-        if (!empty($this->on)) {
-            $sql .= " ON $this->on";
-        }
-        if (!empty($this->using)) {
-            $sql .= " USING ($this->using)";
-        }
-        return $sql;
+        return $this->db->grammar()->buildJoin($this);
     }
 
     /**
-     * Сборка join-части запроса и его установка в сборщик запроса.
-     * @return QueryBuilder
+     * Получение всех экранируемых значений.
+     * @return array
      */
-    public function endJoin(): QueryBuilderInterface
+    public function getBindingsAll(): array
     {
-        return $this->queryBuilder->setJoin($this->getSql(), $this->getValues());
+        return $this->getBindings(['from', 'on']);
     }
 }

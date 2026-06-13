@@ -1,92 +1,84 @@
 <?php
 /**
- * Интерфейс соединения с базой данных.
+ * Расширенный интерфейс соединения с базой данных.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
 namespace Evas\Db\Interfaces;
 
-use \PDO;
-use \PDOStatement;
+use Evas\Db\Interfaces\BaseDatabaseInterface;
+use Evas\Db\Interfaces\InsertBuilderInterface;
+use Evas\Db\Interfaces\QueryBuilderInterface;
 use Evas\Db\Interfaces\QueryResultInterface;
+use Evas\Db\Interfaces\SchemaCacheInterface;
+use Evas\Db\Interfaces\TableInterface;
 
-interface DatabaseInterface
+interface DatabaseInterface extends BaseDatabaseInterface
 {
-    /**
-     * Открытие соединения.
-     * @throws DatabaseConnectionException
-     */
-    public function open();
+    // Работа с кэшем схемы БД
 
     /**
-     * Закрытие соединения.
+     * Получение кэша схемы БД.
+     * @return SchemaCacheInterface
      */
-    public function close();
+    public function schemaCache(): SchemaCacheInterface;
+
+
+    // Работа с таблицами
 
     /**
-     * Проверка открытости соединения.
-     * @return bool
+     * Получение списка таблиц базы данных.
+     * @param bool перезапросить список таблиц
+     * @return array
      */
-    public function isOpen(): bool;
+    public function tablesList(bool $reload = false): array;
 
     /**
-     * Получение PDO.
-     * @return \PDO
-     * @throws DatabaseConnectionException
+     * Получение объекта таблицы.
+     * @param string имя таблицы
+     * @return TableInterface
      */
-    public function getPdo(): PDO;
+    public function table(string $table): TableInterface;
+
+    // Запросы через сборщики заросов.
 
     /**
-     * Проверка открытости транзакции.
-     * @return bool
+     * Начало сборки sql-запроса на вставку.
+     * @param string имя таблицы
+     * @return InsertBuilderInterface
      */
-    public function inTransaction(): bool;
+    public function buildInsert(string $table): InsertBuilderInterface;
 
     /**
-     * Создание транзакции.
+     * Вставка записи или начало сборки sql-запроса на вставку.
+     * @param string имя таблицы
+     * @param array|object|null запись, если нужно вставить одну строку
+     * @return InsertBuilderInterface|QueryResultInterface
      */
-    public function beginTransaction();
+    public function insert(string $table, $row = null): object;
 
     /**
-     * Отмена транзакции.
-     */
-    public function rollBack();
-
-    /**
-     * Коммит транзакции.
-     */
-    public function commit();
-
-    /**
-     * Получение подготовленного запроса.
-     * @param string sql-запрос
-     * @return PDOStatement подготовленный запрос
-     * @throws DatabasePrepareQueryException
-     */
-    public function prepare(string $sql): PDOStatement;
-
-    /**
-     * Выполнение подготовленного запроса.
-     * @param PDOStatement подготовленный запрос
-     * @param array|null экранируемые параметры запроса
+     * Вставка нескольких записей.
+     * @param string имя таблицы
+     * @param array записи
+     * @param array|null столбцы записей
      * @return QueryResultInterface
-     * @throws DatabaseQueryException
      */
-    public function execute(PDOStatement &$stmt, array $props = null): QueryResultInterface;
+    public function batchInsert(string $table, array $rows, array $columns = null)
+    : QueryResultInterface;
 
     /**
-     * Выполнение запроса с автоподготовкой.
-     * @param string sql-запрос
-     * @param array|null экранируемые параметры запроса
-     * @return QueryResultInterface
-     * @throws DatabaseQueryException
+     * Начало сборки sql-зароса select/update/delete через сборщик запроса.
+     * @param string имя таблицы
+     * @return QueryBuilderInterface
      */
-    public function query(string $sql, array $props = null): QueryResultInterface;
+    public function buildQuery(string $table = null): QueryBuilderInterface;
 
     /**
-     * Получение id последней вставленной записи.
-     * @param string|null имя таблицы
-     * @return int|null
+     * Начало сборки sql-запроса select через сборщик запроса.
+     * @param string имя таблицы
+     * @param array|string|null столбцы
+     * @return QueryBuilderInterface
      */
-    public function lastInsertId(string $tbl = null): ?int;
+    public function select(string $table, $columns = null): QueryBuilderInterface;
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения sql-запроса.
+ * Исключение sql-запроса.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
@@ -24,6 +24,17 @@ class DatabaseQueryException extends DbException
             'query' => $sql,
             'props' => $props ?? [],
         ];
-        return new static(json_encode($data), $code);
+        return new static(json_encode($data, JSON_UNESCAPED_UNICODE), $code);
+    }
+
+    /**
+     * Выбрасывание исключения sql-запроса с информацией.
+     * @param array информация о падении запроса
+     * @param string sql-запрос
+     * @param array|null параметры sql-запроса для экранирования
+     */
+    public static function fromStmt(\PDOStatement $stmt, array $props = null)
+    {
+        return static::fromErrorInfo($stmt->errorInfo(), $stmt->queryString, $props);
     }
 }

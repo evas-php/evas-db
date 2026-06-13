@@ -1,6 +1,6 @@
 <?php
 /**
- * Класс исключения соединения с базой данных.
+ * Исключение соединения с базой данных.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */

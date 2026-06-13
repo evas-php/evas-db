@@ -1,76 +1,27 @@
 <?php
 /**
- * Трейт расширения базы данных подддержкой кэширования схемы.
+ * Трейт для кэша схемы базы данных.
  * @package evas-php\evas-db
  * @author Egor Vasyakin <egor@evas-php.com>
  */
 namespace Evas\Db\Traits;
 
-use Evas\Db\Schema\SchemaCache;
+use Evas\Db\SchemaCache\SchemaCache;
 
 trait DatabaseSchemaCacheTrait
 {
-    /** @var bool используется ли кэш схемы */
-    protected $useSchemaCache = true;
-
-    /** @var SchemaCache объект кэша схемы */
+    /** @var SchemaCache кэш схемы БД */
     protected $schemaCache;
 
     /**
-     * Использовать кэш схемы.
-     * @return object
+     * Получение кэша схемы БД.
+     * @return SchemaCache
      */
-    public function useSchemaCache(): object
+    public function schemaCache(): SchemaCache
     {
-        $this->useSchemaCache = true;
-        return $this;
-    }
-
-    /**
-     * Не использовать кэш схемы.
-     * @return object
-     */
-    public function notUseSchemaCache(): object
-    {
-        $this->useSchemaCache = false;
-        return $this;
-    }
-
-    /**
-     * Используется ли кэш схемы.
-     * @return bool
-     */
-    public function isSchemaCacheUsed(): bool
-    {
-        return $this->useSchemaCache;
-    }
-
-    /**
-     * Получение объекта кэша схемы, если кэш используется.
-     * @return SchemaCache|null
-     */
-    public function schemaCache(): ?SchemaCache
-    {
-        if ($this->isSchemaCacheUsed()) {
-            if (empty($this->schemaCache)) {
-                $this->schemaCache = new SchemaCache($this);
-            }
-            return $this->schemaCache;
+        if (null === $this->schemaCache) {
+            $this->schemaCache = new SchemaCache($this);
         }
-        return null;
-    }
-
-    /**
-     * Получение схемы таблицы из кэша, если кэш используется.
-     * @param string имя таблицы
-     * @return array|null
-     */
-    public function tableSchemaFromCache(string $table): ?array
-    {
-        $schemaCache = $this->schemaCache();
-        if (!empty($schemaCache)) {
-            return $schemaCache->tableSchema($table);
-        }
-        return null;
+        return $this->schemaCache;
     }
 }
