@@ -81,12 +81,14 @@ class QueryResult implements QueryResultInterface
      */
     protected function realFetch(bool $all = false, int $mode = null, $modeMore = null)
     {
+        $method = $all ? 'fetchAll' : 'fetch';
         if (!empty($modeMore) && !empty($mode)) {
             $this->stmt->setFetchMode($mode, $modeMore);
             $mode = null;
+            $result = $this->stmt->$method();
+        } else {
+            $result = $this->stmt->$method($mode);
         }
-        $method = $all ? 'fetchAll' : 'fetch';
-        $result = $this->stmt->$method($mode);
         if ($all && empty($result) || false === $result) {
             throw new DbException(
                 strpos($this->stmt->queryString, 'INSERT') !== false
