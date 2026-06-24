@@ -69,8 +69,8 @@ class BaseDatabase implements BaseDatabaseInterface
      */
     public function debugSql(string $sql, array $props = null)
     {
-        evasDebug([
-            "query to `$this->host`:`$this->dbname`" => compact('sql', 'props')
-        ]);
+        // evasDebug([
+        //     "query to `$this->host`:`$this->dbname`" => compact('sql', 'props')
+        // ]);
     }
 }
