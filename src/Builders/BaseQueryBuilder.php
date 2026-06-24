@@ -14,6 +14,9 @@ class BaseQueryBuilder extends AbstractQueryBuilder
     /** @var DatabaseInterface соединение с базой данных */
     protected $db;
 
+    /** @var string $updateSql sql-запрос на обновление*/
+    public $updateSql;
+
     /**
      * Конструктор.
      * @param DatabaseInterface соединение с базой данных
@@ -105,7 +108,7 @@ class BaseQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * Выолнение delete-запроса удаления записи/записей.
+     * Выполнение delete-запроса удаления записи/записей.
      * @param mixed|null id записи/записей, если нужно удалить конкретные
      * @return QueryResultInterface
      * @throws \InvalidArgumentException
@@ -132,7 +135,7 @@ class BaseQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * Выолнение update-запроса обновления записи/записей sql-строкой.
+     * Выполнение update-запроса обновления записи/записей sql-строкой.
      * @param string sql-запрос
      * @param array обновлённые данные
      * @return QueryResultInterface
@@ -146,7 +149,7 @@ class BaseQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
-     * Выолнение update-запроса обновления записи/записей.
+     * Выполнение update-запроса обновления записи/записей.
      * @param array обновлённые данные
      * @return QueryResultInterface
      */

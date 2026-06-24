@@ -14,6 +14,9 @@ use Evas\Db\QueryResult;
 
 class InsertBuilder implements InsertBuilderInterface
 {
+    /** @var string имя базы */
+    public $db;
+    
     /** @var string имя таблицы */
     public $table;
 
