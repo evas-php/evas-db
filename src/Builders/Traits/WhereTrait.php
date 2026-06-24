@@ -138,7 +138,34 @@ trait WhereTrait
     {
         return $this->pushSingleWhere(true, ...func_get_args());
     }
+    
 
+    // ----------
+    // Несколько Or/And Where с оператором равенства
+    // ----------
+
+    /**
+     * Добавление нескольких and where с оператором равенства.
+     * @param array $wheres ассоциативный массив and where в формате столбец => значение
+     * @return self
+     */
+    public function whereExtract(array $wheres)
+    {
+        foreach ($wheres as $column => $value) $this->where($column, $value);
+        return $this;
+    }
+
+    /**
+     * Добавление нескольких and where с оператором равенства.
+     * @param array $wheres ассоциативный массив and where в формате столбец => значение
+     * @return self
+     */
+    public function orWhereExtract(array $wheres)
+    {
+        foreach ($wheres as $column => $value) $this->orWhere($column, $value);
+        return $this;
+    }
+    
 
     // ----------
     // Or/And Where Column
