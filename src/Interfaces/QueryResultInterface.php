@@ -36,7 +36,7 @@ interface QueryResultInterface
      * Получение количества возвращённых строк.
      * @return int
      */
-    public function rowsCount(): int;
+    public function rowCount(): int;
 
 
     // Получение записи/записей в разном виде

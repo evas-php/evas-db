@@ -63,9 +63,9 @@ class QueryResult implements QueryResultInterface
      * Получение количества возвращённых строк.
      * @return int
      */
-    public function rowsCount(): int
+    public function rowCount(): int
     {
-        return $this->stmt->rowsCount();
+        return $this->stmt->rowCount();
     }
 
 
@@ -108,7 +108,7 @@ class QueryResult implements QueryResultInterface
      */
     protected function fetch(int $mode = null, $modeMore = null)
     {
-        return $this->rowsCount() < 1 ? null
+        return $this->rowCount() < 1 ? null
         : $this->realFetch(false, $mode, $modeMore);
     }
 
@@ -121,7 +121,7 @@ class QueryResult implements QueryResultInterface
      */
     protected function fetchAll(int $mode = null, $modeMore = null): array
     {
-        return $this->rowsCount() < 1 ? []
+        return $this->rowCount() < 1 ? []
         : $this->realFetch(true, $mode, $modeMore);
     }
 
@@ -171,7 +171,7 @@ class QueryResult implements QueryResultInterface
      */
     public function object(string $className = null): ?object
     {
-        return 1 > $this->rowsCount() ? null
+        return 1 > $this->rowCount() ? null
         : (!empty($className) 
             ? $this->objectHook($this->fetch(\PDO::FETCH_CLASS, $className))
             : $this->fetch(\PDO::FETCH_OBJ) // \stdClass
@@ -185,7 +185,7 @@ class QueryResult implements QueryResultInterface
      */
     public function objectAll(string $className = null): array
     {
-        return 1 > $this->rowsCount() ? []
+        return 1 > $this->rowCount() ? []
         : (!empty($className) 
             ? $this->objectsHook($this->fetchAll(\PDO::FETCH_CLASS, $className))
             : $this->fetchAll(\PDO::FETCH_OBJ) // \stdClass
@@ -199,7 +199,7 @@ class QueryResult implements QueryResultInterface
      */
     public function intoObject(object &$object): object
     {
-        if (1 > $this->rowsCount()) return $object;
+        if (1 > $this->rowCount()) return $object;
         $this->fetch(\PDO::FETCH_INTO, $object);
         return $this->objectHook($object);
     }

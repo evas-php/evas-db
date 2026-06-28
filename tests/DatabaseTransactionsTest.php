@@ -64,7 +64,7 @@ class DatabaseTransactionsTest extends DatabaseTestUnit
         $this->isInsertUserData();
 
         // удаляем запись и устанавливаем auto_increment = 1
-        $this->assertEquals(1, $this->db()->delete('users')->where('id = ?', [1])->one()->rowsCount());
+        $this->assertEquals(1, $this->db()->delete('users')->where('id = ?', [1])->one()->rowCount());
         $this->db()->query('ALTER TABLE users AUTO_INCREMENT=1');
     }
 
@@ -86,7 +86,7 @@ class DatabaseTransactionsTest extends DatabaseTestUnit
         // откатываем транзакцию
         $this->db()->rollback();
         $this->assertFalse($this->db()->inTransaction());
-        $this->assertEquals(0, $this->db()->select('users')->query()->rowsCount());
+        $this->assertEquals(0, $this->db()->select('users')->query()->rowCount());
         $this->db()->query('ALTER TABLE users AUTO_INCREMENT=1');
     }
 
@@ -108,7 +108,7 @@ class DatabaseTransactionsTest extends DatabaseTestUnit
         // запускаем новую транзакцию, предыдущая откатывается
         $this->db()->beginTransaction();
         $this->assertTrue($this->db()->inTransaction());
-        $this->assertEquals(0, $this->db()->select('users')->query()->rowsCount());
+        $this->assertEquals(0, $this->db()->select('users')->query()->rowCount());
 
         // откатываем транзакцию
         $this->db()->rollback();

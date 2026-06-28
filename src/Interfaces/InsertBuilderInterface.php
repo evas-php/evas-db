@@ -32,7 +32,7 @@ interface InsertBuilderInterface
      * Получение количества вставляемых записей.
      * @return int
      */
-    public function getRowsCount(): int;
+    public function getRowCount(): int;
 
     /**
      * Получение экранируемых значений собранного запроса.

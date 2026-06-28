@@ -123,7 +123,7 @@ class InsertBuilder implements InsertBuilderInterface
      * Получение количества вставляемых записей.
      * @return int
      */
-    public function getRowsCount(): int
+    public function getRowCount(): int
     {
         return $this->rowCount;
     }
