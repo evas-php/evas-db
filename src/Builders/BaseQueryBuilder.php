@@ -65,6 +65,15 @@ class BaseQueryBuilder extends AbstractQueryBuilder
     }
 
     /**
+     * Получение количества найденных строк.
+     * @return int
+     */
+    public function rowCount(): int
+    {
+        return $this->query()->rowCount();
+    }
+
+    /**
      * Выполнение select-запроса с получением нескольких записей.
      * @param array|null столбцы для получения
      * @return array найденные записи

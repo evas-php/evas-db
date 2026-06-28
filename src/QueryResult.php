@@ -60,7 +60,7 @@ class QueryResult implements QueryResultInterface
     }
 
     /**
-     * Получение количества возвращённых строк.
+     * Получение количества найденных строк.
      * @return int
      */
     public function rowCount(): int
