@@ -54,10 +54,10 @@ class QueryResultTest extends DatabaseTestUnit
     /**
      * Тест получения количества возвращённых строк.
      */
-    public function testRowCount()
+    public function testRowsCount()
     {
-        $this->assertEquals(1, $this->qr_insert->rowCount());
-        $this->assertEquals(1, $this->qr_select->rowCount());
+        $this->assertEquals(1, $this->qr_insert->rowsCount());
+        $this->assertEquals(1, $this->qr_select->rowsCount());
     }
 
     /**

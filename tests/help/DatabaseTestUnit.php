@@ -84,7 +84,7 @@ class DatabaseTestUnit extends \Codeception\Test\Unit
     protected function insertUserData()
     {
         $qr = $this->db()->insert('users', static::TEST_USER_DATA);
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
         // $this->lastInsertId = $this->db()->lastInsertId();
     }
 

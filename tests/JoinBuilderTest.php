@@ -123,7 +123,7 @@ class JoinBuilderTest extends DatabaseTestUnit
         $this->beginTransaction();
         $qr = $this->db()->select('users')->leftJoin('auths')->on('users.id = auths.user_id')->query();
         $this->assertTrue($qr instanceof QueryResult);
-        $this->assertEquals(0, $qr->rowCount());
+        $this->assertEquals(0, $qr->rowsCount());
 
         $this->insertUserData();
         $user_id = $this->db()->lastInsertId('users');
@@ -131,7 +131,7 @@ class JoinBuilderTest extends DatabaseTestUnit
 
         $qr = $this->db()->select('users')->leftJoin('auths')->on('users.id = auths.user_id')->query();
         $this->assertTrue($qr instanceof QueryResult);
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
         $this->assertEquals($user_id, $qr->assocArray()['user_id']);
         $this->rollback();
     }

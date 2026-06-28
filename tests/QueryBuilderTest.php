@@ -58,7 +58,7 @@ class QueryBuilderTest extends DatabaseTestUnit
         $qr = $qb->query();
         $this->assertTrue($qr instanceof QueryResult);
         // убеждаемся в верности найденной записи
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
         $this->assertEquals(static::TEST_USER_DATA, $qr->assocArray());
     }
 
@@ -68,7 +68,7 @@ class QueryBuilderTest extends DatabaseTestUnit
     public function testDelete()
     {
         // запрашиваем запись, их 1 - запись есть
-        $this->assertEquals(1, $this->db()->select('users')->one()->rowCount());
+        $this->assertEquals(1, $this->db()->select('users')->one()->rowsCount());
         // начинаем сборку запроса
         $qb = $this->db()->delete('users');
         $this->assertTrue($qb instanceof QueryBuilder);
@@ -79,9 +79,9 @@ class QueryBuilderTest extends DatabaseTestUnit
         $this->assertTrue($qr instanceof QueryResult);
         // убеждаемся в верности удаления записи
         // затронута 1 строка
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
         // запрашиваем запись, их 0 - запись удалена
-        $this->assertEquals(0, $this->db()->select('users')->one()->rowCount());
+        $this->assertEquals(0, $this->db()->select('users')->one()->rowsCount());
     }
 
     /**
@@ -101,7 +101,7 @@ class QueryBuilderTest extends DatabaseTestUnit
         $this->assertTrue($qr instanceof QueryResult);
         // убеждаемся в верности обновления записи
         // затронута 1 строка
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
         // запрашиваем запись - запись обновлена
         $qr = $this->db()->select('users', 'name, email')->where('id = ?', [1])->one();
         $this->assertTrue($qr instanceof QueryResult);
@@ -247,13 +247,13 @@ class QueryBuilderTest extends DatabaseTestUnit
         $qb = $this->db()->select('users', 'name, email')->limit(1)->offset(1);
         $this->assertTrue($qb instanceof QueryBuilder);
         $this->assertEquals(1, $qb->offset);
-        $this->assertEquals(0, $qb->query()->rowCount());
+        $this->assertEquals(0, $qb->query()->rowsCount());
 
         // использование offset вместе с limit через 2 аргумент метода limit()
         $qb = $this->db()->select('users', 'name, email')->limit(1, 1);
         $this->assertTrue($qb instanceof QueryBuilder);
         $this->assertEquals(1, $qb->offset);
-        $this->assertEquals(0, $qb->query()->rowCount());
+        $this->assertEquals(0, $qb->query()->rowsCount());
 
     }
 
@@ -287,14 +287,14 @@ class QueryBuilderTest extends DatabaseTestUnit
         $qb = $this->db()->select('users', 'name, email')->limit(1);
         $this->assertTrue($qb instanceof QueryBuilder);
         $this->assertEquals(1, $qb->limit);
-        $this->assertEquals(1, $qb->query()->rowCount());
+        $this->assertEquals(1, $qb->query()->rowsCount());
         $this->assertEquals(static::TEST_USER_DATA, $qb->query()->assocArray());
         // установка LIMIT и OFFSET
         $qb = $this->db()->select('users', 'name, email')->limit(1, 2);
         $this->assertTrue($qb instanceof QueryBuilder);
         $this->assertEquals(1, $qb->limit);
         $this->assertEquals(2, $qb->offset);
-        $this->assertEquals(0, $qb->query()->rowCount());
+        $this->assertEquals(0, $qb->query()->rowsCount());
     }
 
 
@@ -360,8 +360,8 @@ class QueryBuilderTest extends DatabaseTestUnit
         $this->db()->insert('users', array_merge(static::TEST_USER_DATA, ['email' => 'sample']));
         $qr1 = $this->db()->select('users', 'name, email')->limit(1)->query();
         $qr2 = $this->db()->select('users', 'name, email')->one();
-        $this->assertEquals(1, $qr2->rowCount());
-        $this->assertEquals($qr1->rowCount(), $qr2->rowCount());
+        $this->assertEquals(1, $qr2->rowsCount());
+        $this->assertEquals($qr1->rowsCount(), $qr2->rowsCount());
         $this->assertEquals(static::TEST_USER_DATA, $qr2->assocArray());
     }
 
@@ -372,7 +372,7 @@ class QueryBuilderTest extends DatabaseTestUnit
     {
         $qr = $this->db()->select('users', 'name, email')->query();
         $this->assertTrue($qr instanceof QueryResult);
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
         $this->assertEquals(static::TEST_USER_DATA, $qr->assocArray());
     }
 }

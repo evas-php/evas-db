@@ -59,7 +59,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
     {
         $qr = $this->db()->query('SELECT * FROM users LIMIT 1');
         $this->assertTrue($qr instanceof QueryResult);
-        $this->assertEquals(0, $qr->rowCount());
+        $this->assertEquals(0, $qr->rowsCount());
         $this->assertEmpty($qr->assocArray());
 
         $keys = array_keys(static::TEST_USER_DATA);
@@ -67,7 +67,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
         $keys = implode('`, `', $keys);
         $vals = implode("', '", $vals);
         $qr = $this->db()->query("INSERT INTO users (`$keys`) VALUES ('$vals')");
-        $this->assertEquals(1, $qr->rowCount());
+        $this->assertEquals(1, $qr->rowsCount());
     }
 
     /**
@@ -133,7 +133,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
             ['name' => 'Egor', 'email' => 'e.vasyakin@itevas.ru'],
             ['name' => 'Ivan', 'email' => 'another@mail.ru'],
         ];
-        $this->assertEquals(2, $this->db()->batchInsert('users', $data)->rowCount());
+        $this->assertEquals(2, $this->db()->batchInsert('users', $data)->rowsCount());
 
         // проверяем наличие записей
         $ids = [1, 2];
@@ -141,7 +141,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
             $this->db()->select('users', 'name, email')
                 ->whereIn('id', $ids)->limit(2)->query()->assocArrayAll()
         );
-        $this->assertEquals(2, $this->db()->query('SELECT * FROM users')->rowCount());
+        $this->assertEquals(2, $this->db()->query('SELECT * FROM users')->rowsCount());
     }
 
     /**
@@ -150,9 +150,9 @@ class DatabaseQueryTest extends DatabaseTestUnit
     public function testSelect()
     {
         // записей нет
-        $this->assertEquals(0, $this->db()->select('users')->query()->rowCount());
+        $this->assertEquals(0, $this->db()->select('users')->query()->rowsCount());
         // запись выше эквивалентна этой
-        $this->assertEquals(0, $this->db()->query('SELECT * FROM users')->rowCount());
+        $this->assertEquals(0, $this->db()->query('SELECT * FROM users')->rowsCount());
 
         // вставляем запись
         $this->insertUserData();
@@ -166,7 +166,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
         // чтобы не потерять строки этого запроса, заносим их в переменную
         $users1 = $qr1->assocArrayAll(); // закидываем буфер в переменную
         $qr2 = $this->db()->select('users')->query();
-        $this->assertEquals($qr1->rowCount(), $qr2->rowCount());
+        $this->assertEquals($qr1->rowsCount(), $qr2->rowsCount());
         $this->assertEquals($users1, $qr2->assocArrayAll());
 
         // мы можем указать ключи выборки второым аргументом
@@ -174,7 +174,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
         $qr1 = $this->db()->query('SELECT name, email FROM users');
         $users1 = $qr1->assocArrayAll(); // закидываем буфер в переменную
         $qr2 = $this->db()->select('users', 'name, email')->query();
-        $this->assertEquals($qr1->rowCount(), $qr2->rowCount());
+        $this->assertEquals($qr1->rowsCount(), $qr2->rowsCount());
         $this->assertEquals($users1, $qr2->assocArrayAll());
 
         // select метод возвращет объект QueryBuilder, 
@@ -185,7 +185,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
         $qr1 = $this->db()->query('SELECT * FROM users WHERE id = ? LIMIT 1', [$id]);
         $users1 = $qr1->assocArray();
         $qr2 = $this->db()->select('users')->where('id = ?', [$id])->one();
-        $this->assertEquals($qr1->rowCount(), $qr2->rowCount());
+        $this->assertEquals($qr1->rowsCount(), $qr2->rowsCount());
         $this->assertEquals($users1, $qr2->assocArray());
     }
 
@@ -204,7 +204,7 @@ class DatabaseQueryTest extends DatabaseTestUnit
         // вносим изменение и проверяем сколько строк было затронуто
         // update возвращает созданный объект QueryBuilder
         $this->assertEquals(1,
-            $this->db()->update('users', $data)->where('id = ?', [$id])->one()->rowCount()
+            $this->db()->update('users', $data)->where('id = ?', [$id])->one()->rowsCount()
         );
         // проверяем изменилась ли запись
         $this->assertEquals(
@@ -224,14 +224,14 @@ class DatabaseQueryTest extends DatabaseTestUnit
         $this->isInsertUserData();
 
         // проверяем количество записей в базе = 1
-        $this->assertEquals(1, $this->db()->select('users')->query()->rowCount());
+        $this->assertEquals(1, $this->db()->select('users')->query()->rowsCount());
 
         // удаляем запись и проверяем сколько строк было затронуто
         $this->assertEquals(1,
-            $this->db()->delete('users')->where('id = ?', [1])->one()->rowCount()
+            $this->db()->delete('users')->where('id = ?', [1])->one()->rowsCount()
         );
 
         // проверяем количество записей в базе = 0
-        $this->assertEquals(0, $this->db()->select('users')->query()->rowCount());
+        $this->assertEquals(0, $this->db()->select('users')->query()->rowsCount());
     }
 }
