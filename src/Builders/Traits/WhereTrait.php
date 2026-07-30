@@ -58,6 +58,9 @@ trait WhereTrait
         // IS NULL условие
         if (is_null($value)) return $this->whereNull($column, $isOr, $operator !== '=');
 
+        // IN условие
+        if (is_array($value)) return $this->whereIn($column, $value, $isOr, $operator !== '=');
+
         // подзапрос значения
         if ($this->isQueryable($value)) {
             return $this->pushWhereSub($isOr, $column, $operator, $value);
