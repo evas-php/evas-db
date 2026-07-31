@@ -23,7 +23,7 @@ trait SubQueryTrait
     /**
      * Создание подзапроса с получением sql и экранируемых значений.
      * @param string|\Closure|self подзапрос
-     * @param array|null экранируемые значения для string-подзароса
+     * @param array|null экранируемые значения для string-подзапроса
      * @return array [sql, bindings]
      * @throws \InvalidArgumentException
      */

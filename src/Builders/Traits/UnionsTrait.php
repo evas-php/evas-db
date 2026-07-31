@@ -15,7 +15,7 @@ trait UnionsTrait
     /**
      * Добавление union.
      * @param string|\Closure|self подзапрос
-     * @param array|null экранируемые значения для string-подзароса
+     * @param array|null экранируемые значения для string-подзапроса
      * @param bool|null установить ли ALL
      * @return self
      */

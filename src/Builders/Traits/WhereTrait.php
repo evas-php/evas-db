@@ -46,7 +46,7 @@ trait WhereTrait
     {
         // массив where условий
         if (is_array($column)) {
-            return $this->eachSingle('pushSingleWhere', $column, $isOr);
+            return $this->whereNested(fn ($query) => $query->eachSingle('pushSingleWhere', $column, $isOr));
         }
 
         // Raw запрос через queryable
@@ -270,9 +270,9 @@ trait WhereTrait
     }
 
     /**
-     * Добавление and where подзароса.
+     * Добавление and where подзапроса.
      * @param string|\Closure|self подзапрос
-     * @param array|null экранируемые значения для string-подзароса
+     * @param array|null экранируемые значения для string-подзапроса
      * @param bool|null использовать ли OR для склейки
      * @return self
      * @throws \InvalidArgumentException
@@ -301,9 +301,9 @@ trait WhereTrait
     }
 
     /**
-     * Добавление or where подзароса.
+     * Добавление or where подзапроса.
      * @param string|\Closure|self подзапрос
-     * @param array|null экранируемые значения для string-подзароса
+     * @param array|null экранируемые значения для string-подзапроса
      * @return self
      */
     public function orWhereNested($query, array $bindings = null)
