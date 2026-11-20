@@ -23,6 +23,7 @@ if (!defined('EVAS_DB_OPTIONS')) {
 if (!defined('EVAS_DB_DRIVER')) define('EVAS_DB_DRIVER', 'mysql');
 if (!defined('EVAS_DB_HOST')) define('EVAS_DB_HOST', 'localhost');
 if (!defined('EVAS_DB_CHARSET')) define('EVAS_DB_CHARSET', 'utf8');
+if (!defined('EVAS_DB_TIMEZONE')) define('EVAS_DB_TIMEZONE', '+00:00');
 
 
 trait DatabaseConnectionTrait
@@ -43,6 +44,8 @@ trait DatabaseConnectionTrait
     public $options = EVAS_DB_OPTIONS;
     /** @var string кодировка */
     public $charset = EVAS_DB_CHARSET;
+    /** @var string таймзона */
+    public $timezone = EVAS_DB_TIMEZONE;
 
     /** @var \PDO */
     protected $pdo;
@@ -63,6 +66,7 @@ trait DatabaseConnectionTrait
             throw new DatabaseConnectionException($e->getMessage());
         }
         if ($this->charset) $this->setCharset($this->charset);
+        if ($this->timezone) $this->setTimezone($this->timezone);
         return $this;
     }
 

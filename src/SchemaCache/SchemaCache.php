@@ -180,15 +180,17 @@ class SchemaCache implements SchemaCacheInterface
     protected function getTableSchema(string $table): array
     {
         $columns = [];
+        $columnKeys = [];
         foreach ($this->db->grammar()->getTableColumns($table) as $column) {
-            // $columns[$column['Field']] = new ColumnSchemaCache($column);
-            $columns[] = $column['Field'];
+            $columns[$column['name']] = new ColumnSchemaCache($column);
+            $columnKeys[] = $column['name'];
         }
         return [
             'primaryKey' => $this->db->grammar()->getTablePrimaryKey($table), 
-            'columns' => $columns, 
             // 'foreignKeys' => $this->db->grammar()->getForeignKeys($table),
             'foreignKeys' => [],
+            'columnKeys' => $columnKeys, 
+            'columns' => $columns, 
         ];
     }
 

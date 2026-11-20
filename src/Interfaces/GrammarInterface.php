@@ -14,62 +14,55 @@ interface GrammarInterface
 {
     /**
      * Конструктор.
-     * @param DatabaseInterface
+     * @param DatabaseInterface $db
      */
     public function __construct(DatabaseInterface &$db);
 
     /**
-     * Раскрытие оборачивания ключа (таблица/столбец).
-     * @param string обернутый ключ
-     * @return string ключ
+     * Убирает оборачивание ключа (таблица/столбец).
+     * @param string $key обернутый ключ
+     * @return string
      */
     public function unwrap(string $key): string;
 
     /**
-     * Оборачивание ключа (таблица/столбец).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает ключ (таблица/столбец).
+     * @param string $key ключ
+     * @return string
      */
     public function wrap(string $key): string;
 
     /**
-     * Оборачивание сегмента ключа (таблица/столбец).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает сегмент ключа (таблица/столбец).
+     * @param string $key ключ
+     * @return string
      */
     public function wrapOne(string $key): string;
 
     /**
-     * Оборачивание столбцов в готовые sql-столбцы.
-     * @param array столбцы
-     * @return string готовые sql-столбцами
+     * Оборачивает столбцы в готовые для sql столбцы в виде строки.
+     * @param array|string $columns столбцы
+     * @return string
      */
-    public function wrapColumns(array $columns): string;
-
-    /**
-     * Оборачивание столбцов переданных строкой в готовые sql-столбцы.
-     * @param array столбцы в виде строки
-     * @return string готовые sql-столбцами
-     */
-    public function wrapStringColumns(string $value): string;
+    public function wrapColumns(array|string $columns): string;
 
     // Настройка соединения
 
     /**
-     * Установка кодировки.
-     * @param string кодировка
+     * Установливает кодировку.
+     * @param string $charset кодировка
      */
     public function setCharset(string $charset);
 
     /**
-     * Установка таймзоны.
-     * @param string кодировка
+     * Установливает таймзону.
+     * @param string $timezone таймзона
      */
     public function setTimezone(string $timezone);
 
     /**
-     * Переключение базы данных.
-     * @param string имя базы данных
+     * Переключает базу данных.
+     * @param string $dbname имя базы данных
      */
     public function changeDbName(string $dbname);
 
@@ -77,29 +70,54 @@ interface GrammarInterface
     // Кэш схемы
 
     /**
-     * Получение списка таблиц.
-     * @return array таблицы
+     * Возвращает спискок таблиц.
+     * @return array
      */
     public function getTablesList(): array;
 
     /**
-     * Получение первичного ключа таблицы.
-     * @param string имя таблицы
-     * @return string первичный ключ
+     * Возвращает первичный ключ таблицы.
+     * @param string $table имя таблицы
+     * @return string
      */
     public function getTablePrimaryKey(string $table): string;
 
     /**
-     * Получение столбцов таблицы.
-     * @param string имя таблицы
-     * @return array столбцы
+     * Возвращает столбцы таблицы в едином формате.
+     * @param string $table имя таблицы
+     * @return array<string, array{
+     *     name: string, 
+     *     type: string, 
+     *     length: string, 
+     *     dbType: string, 
+     *     null: bool, 
+     *     default: string,
+     *     key: string, 
+     *     indexes: array{schema: string, table: string, column: string}, 
+     *     extra: array<string, bool>,
+     *     dbExtra: string
+     * }>
      */
     public function getTableColumns(string $table): array;
 
     /**
-     * Получение внешних ключей таблицы.
-     * @param string имя таблицы
-     * @return array внешние ключи
+     * Возвращает список индексов таблицы в едином формате.
+     * @param string $table имя таблицы
+     * @return array<string, array{type: string, columns: string[]}>
+     */
+    public function getTableIndexes(string $table): array;
+
+    /**
+     * Возвращает индексы по колонкам и определяет их позиции в составных ключах.
+     * @param string|array<string, array{type: string, columns: string[]}> $tableOrIndexes
+     * @return array<string, array<string, array{type: string, columns: string[], position: int}>>
+     */
+    public function getIndexesByColumns(string|array $tableOrIndexes): array;
+
+    /**
+     * Возвращает внешние ключи таблицы.
+     * @param string $table имя таблицы
+     * @return array<string, array{schema: string, table: string, column: string}>
      */
     public function getForeignKeys(string $table): array;
 
@@ -107,16 +125,16 @@ interface GrammarInterface
     // Сборка запросов
 
     /**
-     * Сборка insert запроса.
-     * @param InsertBuilderInterface
-     * @return string готовый insert запрос
+     * Сборирает insert запрос.
+     * @param InsertBuilderInterface $builder
+     * @return string
      */
     public function buildInsert(InsertBuilderInterface &$builder): string;
 
     /**
-     * Сборка select/update/delete запроса.
-     * @param QueryBuilderInterface
-     * @return string готовый select запрос
+     * Сборирает select/update/delete запрос.
+     * @param QueryBuilderInterface $builder
+     * @return string
      */
     public function buildQuery(QueryBuilderInterface &$builder): string;
 }

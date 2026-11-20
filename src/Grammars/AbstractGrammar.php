@@ -20,13 +20,12 @@ abstract class AbstractGrammar
     // Сборка запросов
     use GrammarQueryTrait;
     
-
     /** @var DatabaseInterface соединение с базой данных */
     protected $db;
 
     /**
      * Конструктор.
-     * @param DatabaseInterface
+     * @param DatabaseInterface $db
      */
     public function __construct(DatabaseInterface &$db)
     {
@@ -34,8 +33,8 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Раскрытие оборачивания ключа (таблица/столбец).
-     * @param string обернутый ключ
+     * Убирает оборачивание ключа (таблица/столбец).
+     * @param string $key обернутый ключ
      * @return string ключ
      */
     public function unwrap(string $key): string
@@ -44,9 +43,9 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Оборачивание ключа (таблица/столбец).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает ключ (таблица/столбец).
+     * @param string $key ключ
+     * @return string
      */
     public function wrap(string $key): string
     {
@@ -60,9 +59,9 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Оборачивание сегмента ключа (таблица/столбец).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает сегмент ключа (таблица/столбец).
+     * @param string $key ключ
+     * @return string
      */
     public function wrapOne(string $key): string
     {
@@ -71,11 +70,11 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Оборачивание ключа (таблица/столбец) с алиасом (AS).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает ключ (таблица/столбец) с алиасом (AS).
+     * @param string $key ключ
+     * @return string
      */
-    public function wrapAliased(string $key): string
+    protected function wrapAliased(string $key): string
     {
         $parts = preg_split('/\s+AS\s+/i', $key);
         return $this->wrap($parts[0]) . ' AS ' . $this->wrapOne($parts[1]);
@@ -83,7 +82,7 @@ abstract class AbstractGrammar
 
     /**
      * Проверка ключа (таблица/столбец) на то, является ли он json-ключом.
-     * @param string ключ
+     * @param string $key ключ
      * @return bool
      */
     protected function isJsonSelector(string $key): bool
@@ -92,9 +91,9 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Оборачивание json-ключа (столбец).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает json-ключ (столбец).
+     * @param string $key ключ
+     * @return string
      */
     public function wrapJsonSelector(string $key): string
     {
@@ -102,23 +101,68 @@ abstract class AbstractGrammar
     }
 
     /**
-     * Оборачивание столбцов в готовые sql-столбцы.
-     * @param array столбцы
-     * @return string готовые sql-столбцами
+     * Оборачивает столбцы в готовые для sql столбцы в виде строки.
+     * @param array|string $columns столбцы
+     * @return string
      */
-    public function wrapColumns(array $columns): string
+    public function wrapColumns(array|string $columns): string
     {
+        if (is_string($columns)) {
+            $columns = explode(',', str_replace(', ', ',', $columns));
+        }
         return implode(', ', array_map([$this, 'wrap'], $columns));
     }
 
     /**
-     * Оборачивание столбцов переданных строкой в готовые sql-столбцы.
-     * @param array столбцы в виде строки
-     * @return string готовые sql-столбцами
+     * Возвращает список индексов таблицы в едином формате.
+     * @param string $table имя таблицы
+     * @return array<string, array{type: string, columns: string[]}>
      */
-    public function wrapStringColumns(string $value): string
+    abstract public function getTableIndexes(string $table): array;
+
+    /**
+     * Возвращает индексы по колонкам и определяет их позиции в составных ключах.
+     * @param string|array<string, array{type: string, columns: string[]}> $tableOrIndexes
+     * @return array<string, array<string, array{type: string, columns: string[], position: int}>>
+     */
+    public function getIndexesByColumns(string|array $tableOrIndexes): array
     {
-        $columns = explode(',', str_replace(', ', ',', $value));
-        return $this->wrapColumns($columns);
+        $indexes = is_string($tableOrIndexes) ? $this->getTableIndexes($tableOrIndexes) : $tableOrIndexes;
+        $columnIndexes = [];
+        foreach ($indexes as $indexName => $indexData) {
+            foreach ($indexData['columns'] as $pos => $colName) {
+                $columnIndexes[$colName][$indexName] = [
+                    'type'     => $indexData['type'],
+                    'columns'  => $indexData['columns'],
+                    'position' => $pos,
+                ];
+            }
+        }
+        return $columnIndexes;
     }
+
+    /**
+     * Возвращает мапу типов ключей колонки, отсортированную по приоритету (PRIMARY -> UNIQUE -> INDEX).
+     * @param array<string, array{type: string, columns: string[], position: int}> $colIndexes
+     * @return array<string, true>
+     */
+    protected function resolveColumnIndexTypes(array $colIndexes): array
+    {
+        if (empty($colIndexes)) return [];
+
+        // Задаем эталонный порядок приоритетов
+        $found = [];
+        foreach ($colIndexes as $idxInfo) {
+            $found[$idxInfo['type']] = true;
+        }
+
+        $orderedKeys = [];
+        foreach (['PRIMARY', 'UNIQUE', 'INDEX'] as $priorityType) {
+            if (isset($found[$priorityType])) {
+                $orderedKeys[$priorityType] = true;
+            }
+        }
+        return $orderedKeys;
+    }
+
 }

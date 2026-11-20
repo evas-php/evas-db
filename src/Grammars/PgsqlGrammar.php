@@ -14,9 +14,9 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
     // Оборачивание
 
     /**
-     * Раскрытие оборачивания ключа (таблица/столбец).
-     * @param string обернутый ключ
-     * @return string ключ
+     * Убирает оборачивание ключа (таблица/столбец).
+     * @param string $key обернутый ключ
+     * @return string
      */
     public function unwrap(string $key): string
     {
@@ -24,9 +24,9 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
     }
 
     /**
-     * Оборачивание сегмента ключа (таблица/столбец).
-     * @param string ключ
-     * @return string обернутый ключ
+     * Оборачивает сегмент ключа (таблица/столбец).
+     * @param string $key ключ
+     * @return string
      */
     public function wrapOne(string $key): string
     {
@@ -39,19 +39,19 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
 
     /**
      * Установка таймзоны.
-     * @param string кодировка
+     * @param string $timezone кодировка
      */
     public function setTimezone(string $timezone)
     {
-        return $this->query("set time zone '{$timezone}'");
+        return $this->db->query("set time zone '{$timezone}'");
     }
 
 
     // Кэш схемы
 
     /**
-     * Получение списка таблиц.
-     * @return array таблицы
+     * Возвращает спискок таблиц.
+     * @return array
      */
     public function getTablesList(): array
     {
@@ -67,9 +67,9 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
     }
 
     /**
-     * Получение первичного ключа таблицы.
-     * @param string имя таблицы
-     * @return string первичный ключ
+     * Возвращает первичный ключ таблицы.
+     * @param string $table имя таблицы
+     * @return string
      */
     public function getTablePrimaryKey(string $table): string
     {
@@ -83,34 +83,198 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
     }
 
     /**
-     * Получение столбцов таблицы.
-     * @param string имя таблицы
-     * @return array столбцы
+     * Возвращает столбцы таблицы в едином формате.
+     * @param string $table имя таблицы
+     * @return array<string, array{
+     *     name: string, 
+     *     type: string, 
+     *     length: string, 
+     *     dbType: string, 
+     *     null: bool, 
+     *     default: string,
+     *     key: string, 
+     *     indexes: array{schema: string, table: string, column: string}, 
+     *     extra: array<string, bool>,
+     *     dbExtra: string
+     * }>
      */
     public function getTableColumns(string $table): array
     {
         $rows = $this->db->query(
-            'SELECT * FROM information_schema.columns
-             WHERE table_schema = ? AND table_name = ?',
+            'SELECT column_name, data_type, udt_name, is_nullable, column_default,
+                    character_maximum_length, numeric_precision, numeric_scale, datetime_precision,
+                    is_identity, is_generated
+            FROM information_schema.columns
+            WHERE table_schema = ? AND table_name = ?
+            ORDER BY ordinal_position',
             ['public', $table]
         )->assocArrayAll();
 
+        $indexesByColumns = $this->getIndexesByColumns($table);
+        $unsignedColumns = $this->getUnsignedColumns($table);
         $columns = [];
-        foreach ($rows as &$row) {
+
+        foreach ($rows as $row) {
+            $name = $row['column_name'];
+            $dbType = $row['data_type'];
+            $rawType = strtolower($dbType);
+
+            $type = match ($rawType) {
+                'timestamp without time zone', 'timestamp with time zone' => 'timestamp',
+                'time without time zone', 'time with time zone'           => 'time',
+                'character varying', 'character'                          => 'varchar',
+                'boolean'                                                 => 'bool',
+                'integer'                                                 => 'int',
+                'jsonb'                                                   => 'json',
+                'double precision'                                        => 'double',
+                default                                                   => $rawType,
+            };
+
+            $length = $this->resolveColumnLength($row, $type);
+
+            $default = $row['column_default'];
+            $isSerial = is_string($default) && str_starts_with($default, 'nextval(');
+            $isIdentity = strtoupper($row['is_identity'] ?? 'NO') === 'YES';
+            $isGenerated = strtoupper($row['is_generated'] ?? 'NEVER') !== 'NEVER';
+            
+            $extra = [];
+            $dbExtraParts = [];
+            
+            if ($isSerial || $isIdentity) {
+                $extra['auto_increment'] = true;
+                $dbExtraParts[] = $isIdentity ? 'IDENTITY' : 'SERIAL';
+            }
+            if ($isGenerated) {
+                $extra['generated'] = true;
+                $dbExtraParts[] = 'GENERATED';
+            }
+            if (isset($unsignedColumns[$name])) {
+                $extra['unsigned'] = true;
+            }
+
+            $colIndexes = $indexesByColumns[$name] ?? [];
             $columns[] = [
-                'Field' => $row['column_name'],
-                'Null' => $row['is_nullable'],
-                'Type' => $row['data_type'],
-                'Default' => $row['column_default'],
+                'name'       => $name,
+                'type'       => $type,
+                'dbType'     => $dbType,
+                'length'     => $length !== null ? (string) $length : null,
+                'null'       => strtoupper($row['is_nullable']) === 'YES',
+                'default'    => ($isSerial || $isIdentity) ? null : $default,
+                'indexTypes' => $this->resolveColumnIndexTypes($colIndexes),
+                'indexes'    => $colIndexes,
+                'extra'      => $extra,
+                'dbExtra'    => implode(' ', $dbExtraParts),
             ];
         }
+
         return $columns;
     }
 
     /**
-     * Получение внешних ключей таблицы.
-     * @param string имя таблицы
-     * @return array внешние ключи
+     * Извлекает длину или точность столбца из строки information_schema.columns.
+     * @param array<string, mixed> $row
+     * @param string $type Нормализованный тип столбца.
+     * @return string|null
+     */
+    private function resolveColumnLength(array $row, string $type): ?string
+    {
+        $dtPrecision = $row['datetime_precision'] !== null ? (int) $row['datetime_precision'] : null;
+        $numPrecision = $row['numeric_precision'];
+        $numScale = $row['numeric_scale'];
+        return match (true) {
+            $row['character_maximum_length'] !== null => (string) $row['character_maximum_length'],
+            $dtPrecision !== null && $type !== 'date' && $dtPrecision !== 6 => (string) $dtPrecision,
+            $numPrecision !== null => $numScale ? "{$numPrecision},{$numScale}" : (string) $numPrecision,
+            default => null,
+        };
+    }
+
+    /**
+     * Возвращает мапу колонок PostgreSQL, имеющих CHECK-ограничение на неотрицательность (>= 0 или > 0).
+     * @param string $table
+     * @return array<string, true>
+     */
+    private function getUnsignedColumns(string $table): array
+    {
+        $rows = $this->db->query(
+            'SELECT
+                a.attname AS column_name,
+                pg_get_constraintdef(c.oid) AS definition
+            FROM pg_constraint c
+            JOIN pg_class t ON t.oid = c.conrelid
+            JOIN pg_namespace n ON n.oid = t.relnamespace
+            JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = c.conkey
+            WHERE n.nspname = ?
+            AND t.relname = ?
+            AND c.contype = \'c\'
+            AND array_length(c.conkey, 1) = 1',
+            ['public', $table]
+        )->assocArrayAll();
+
+        $unsigned = [];
+        foreach ($rows as $row) {
+            $col = $row['column_name'];
+            $def = strtolower($row['definition']);
+            // Проверяем типовые выражения PostgreSQL: CHECK ((age >= 0)) или CHECK ((age > 0))
+            $pattern = '/\(\s*"?' . preg_quote($col, '/') . '"?\s*>=?\s*0\s*\)/';
+            if (preg_match($pattern, $def)) {
+                $unsigned[$col] = true;
+            }
+        }
+        return $unsigned;
+    }
+
+
+    /**
+     * Возвращает список индексов таблицы в едином формате.
+     * @param string $table имя таблицы
+     * @return array<string, array{type: string, columns: string[]}>
+     */
+    public function getTableIndexes(string $table): array
+    {
+        $indexRows = $this->db->query(
+            'SELECT
+                i.relname AS index_name,
+                ix.indisprimary AS is_primary,
+                ix.indisunique AS is_unique,
+                a.attname AS column_name,
+                array_position(ix.indkey, a.attnum) AS column_pos
+            FROM pg_class t
+            JOIN pg_namespace n ON n.oid = t.relnamespace
+            JOIN pg_index ix ON t.oid = ix.indrelid
+            JOIN pg_class i ON i.oid = ix.indexrelid
+            JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)
+            WHERE n.nspname = ? AND t.relname = ? AND t.relkind = \'r\'
+            ORDER BY i.relname, column_pos',
+            ['public', $table]
+        )->assocArrayAll();
+
+        $indexes = [];
+        foreach ($indexRows as $idx) {
+            $indexName = $idx['index_name'];
+            if (!isset($indexes[$indexName])) {
+                $type = match (true) {
+                    (bool) $idx['is_primary'] => 'PRIMARY',
+                    (bool) $idx['is_unique']  => 'UNIQUE',
+                    default                   => 'INDEX',
+                };
+                $indexes[$indexName] = [
+                    'type'    => $type,
+                    'columns' => [],
+                ];
+            }
+            $indexes[$indexName]['columns'][] = $idx['column_name'];
+        }
+
+        return $indexes;
+    }
+
+
+
+    /**
+     * Возвращает внешние ключи таблицы.
+     * @param string $table имя таблицы
+     * @return array<string, array{schema: string, table: string, column: string}>
      */
     public function getForeignKeys(string $table): array
     {
@@ -134,9 +298,9 @@ class PgsqlGrammar extends AbstractGrammar implements GrammarInterface
         $foreignKeys = [];
         foreach ($rows as &$row) {
             $foreignKeys[$row['column_name']] = [
-                $row['foreign_table_schema'], 
-                $row['foreign_table_name'], 
-                $row['foreign_column_name']
+                'schema' => $row['foreign_table_schema'], 
+                'table'  => $row['foreign_table_name'], 
+                'column' => $row['foreign_column_name']
             ];
         }
         return $foreignKeys;
